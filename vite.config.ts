@@ -1,4 +1,5 @@
 import {vitePlugin as remix} from '@remix-run/dev'
+import {vercelPreset} from '@vercel/remix/vite'
 import {installGlobals} from '@remix-run/node'
 import {defineConfig} from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -6,5 +7,11 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 installGlobals()
 
 export default defineConfig({
-  plugins: [remix({appDirectory: './src/app'}), tsconfigPaths()],
+  plugins: [
+    remix({
+      appDirectory: './src/app',
+      presets: [vercelPreset()],
+    }),
+    tsconfigPaths(),
+  ],
 })
