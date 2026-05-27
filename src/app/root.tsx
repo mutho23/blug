@@ -68,7 +68,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                   <div className="w-11 h-11 bg-100 rounded-full" />
                 )}
                 <span className="font-display text-xl text-950 hidden sm:inline">
-                  hailey<span className="text-600">.</span>
+                  mutho<span className="text-600">.</span>
                 </span>
               </a>
               <nav className="flex items-center gap-1 sm:gap-2">
@@ -79,11 +79,11 @@ export function Layout({children}: {children: React.ReactNode}) {
                   About
                 </NavLink>
                 <NavLink
-                  href="https://bsky.app/profile/haileyok.com"
+                  href="https://bsky.app/profile/mutho.my.id"
                   selected={false}>
                   Bluesky
                 </NavLink>
-                <NavLink href="https://github.com/haileyok" selected={false}>
+                <NavLink href="https://github.com/mutho23" selected={false}>
                   GitHub
                 </NavLink>
               </nav>

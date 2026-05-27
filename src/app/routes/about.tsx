@@ -2,11 +2,11 @@ import {MetaFunction} from '@remix-run/node'
 
 export const meta: MetaFunction = () => {
   return [
-    {title: "About | Hailey's Cool Site"},
+    {title: "About | Mutho's Cool Site"},
     {
       name: 'description',
       content:
-        'About Hailey — software engineer focused on online safety and better social',
+        'About Mutho — hanya seorang guru dan murid abadi',
     },
   ]
 }
@@ -16,76 +16,42 @@ export default function About() {
     <div className="container mx-auto pt-12 md:pt-20 pb-24">
       <section className="mb-16 md:mb-20 flex flex-col gap-5">
         <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
-          About<span className="text-600">.</span>
+          About Me<span className="text-600">.</span>
         </h1>
         <p className="text-lg leading-relaxed text-900 max-w-prose">
-          Just a person interested in engineering, safety tooling, AT Protocol,
-          and agentic systems. Sometimes I write about it here.
+          hanya seorang guru yang tertarik untuk mempelajari banyak hal untuk menjadi pribadi yang lebih baik
+          dan untuk mengajarkannya kembali.
         </p>
       </section>
 
       <Section label="Work">
         <WorkItem
-          company="Discord"
-          href="https://discord.com"
-          role="Safety Engineering"
-          period="Feb 2026 — Present"
+          company="Guru Sd"
+
+          role="Guru Bahasa Arab"
+          period="August 2024 — Present"
         />
-        <WorkItem
-          company="Attie.ai (Bluesky)"
-          href="https://attie.ai"
-          role="Exploration, Agentic Product Engineering"
-          period="Jan 2026 — Feb 2026"
-        />
-        <WorkItem
-          company="Bluesky"
-          href="https://bsky.social"
-          role="Safety Engineering, Product (React Native)"
-          period="Jan 2024 — Dec 2025"
-        />
+      
       </Section>
 
       <Section label="Community">
         <WorkItem
-          company="ROOST"
-          href="https://roost.tools"
-          role="Technical Design Committee"
+          company="ASHINA"
+          href="https://discord.gg/dndVwwGhEa"
+          role="Server's Owner"
           period="Dec 2025 — Present"
         />
       </Section>
 
-      <Section label="Projects">
-        <ProjectItem
-          name="Osprey"
-          description="High-performance safety rules engine for real-time event processing at scale."
-          href="https://github.com/roostorg/osprey"
-        />
-        <ProjectItem
-          name="victrola"
-          description="A self-modifying, TUI and Discord-facing, AI agent harness with parallel tool calling"
-          href="https://github.com/haileyok/victrola"
-        />
-        <ProjectItem
-          name="cocoon"
-          description="ATProto PDS, written in Go"
-          href="https://github.com/haileyok/cocoon"
-        />
-        <ProjectItem
-          name="react-native-uitextview"
-          description="UITextView for React Native with full text selection"
-          href="https://github.com/bluesky-social/react-native-uitextview"
-        />
-      </Section>
-
       <Section label="Elsewhere">
-        <LinkItem name="GitHub" href="https://github.com/haileyok" />
-        <LinkItem name="Bluesky" href="https://bsky.app/profile/hailey.at" />
+        <LinkItem name="GitHub" href="https://github.com/mutho23" />
+        <LinkItem name="Bluesky" href="https://bsky.app/profile/mutho.my.id" />
       </Section>
 
       <Section label="Contact">
-        <ContactItem label="Email" value="me@haileyok.com" />
-        <ContactItem label="Discord" value="haileyok" />
-        <ContactItem label="Signal" value="haileyok.01" />
+        <ContactItem label="Email" value="amuthohhari@gmail.com"href="mailto:me@haileyok.com"/>
+        <ContactItem label="Discord" value="moebatsu" href="https://bsky.app/profile/mutho.my.id" />
+        <ContactItem label="Signal" value="haileyok.01" href="https://bsky.app/profile/mutho.my.id"/>
       </Section>
     </div>
   )

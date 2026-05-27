@@ -14,10 +14,10 @@ export const loader = async () => {
 
 export const meta: MetaFunction = () => {
   return [
-    {title: "Hailey's Cool Site"},
+    {title: "Mutho's Cool Site"},
     {
       name: 'description',
-      content: 'thoughts and vibes from hailey',
+      content: 'thoughts and vibes from mutho',
     },
   ]
 }
@@ -31,11 +31,11 @@ export default function Index() {
     <div className="container mx-auto pt-12 md:pt-20 pb-24">
       <section className="mb-16 md:mb-20 flex flex-col gap-5">
         <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
-          It's Hailey<span className="text-600">.</span>
+          It's Mutho<span className="text-600">.</span>
         </h1>
         <p className="text-lg leading-relaxed text-900 max-w-prose">
-          Just a person interested in engineering, safety tooling, AT Protocol,
-          and agentic systems. Sometimes I write about it here.
+          hanya seorang guru yang tertarik untuk mempelajari banyak hal untuk menjadi pribadi yang lebih baik
+          dan untuk mengajarkannya kembali.
         </p>
       </section>
 
