@@ -2,9 +2,8 @@ import Redis from 'ioredis'
 import {AppBskyActorDefs} from '@atproto/api'
 import {LeafletDocument} from '../types'
 
-export const REDIS_CLIENT = new Redis({
-  port: 6379,
-  host: '127.0.0.1',
+export const REDIS_CLIENT = new Redis(process.env.REDIS_URL!, {
+  tls: {},
 })
 
 export const getCachedPosts = async () => {
