@@ -27,10 +27,10 @@ export default function About() {
 
       <Section label="Work">
         <WorkItem
-          company="Guru Sd"
+          company="Learner"
 
-          role="Guru Bahasa Arab"
-          period="August 2024 — Present"
+          role="Since i was born"
+          period="1993 — Present"
         />
       
       </Section>
@@ -39,7 +39,7 @@ export default function About() {
         <WorkItem
           company="ASHINA"
           href="https://discord.gg/dndVwwGhEa"
-          role="Server's Owner"
+          role="Discord Server"
           period="Dec 2025 — Present"
         />
       </Section>
