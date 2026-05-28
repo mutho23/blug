@@ -2,7 +2,7 @@ import {MetaFunction} from '@remix-run/node'
 
 export const meta: MetaFunction = () => {
   return [
-    {title: "About | Mutho's Cool Site"},
+    {title: "About | Mutho's Blog"},
     {
       name: 'description',
       content:
