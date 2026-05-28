@@ -51,12 +51,6 @@ export default function About() {
         <LinkItem name="Instagram" href="https://instagram.com/amuthohari" />
 
       </Section>
-
-      <Section label="Contact">
-        <ContactItem label="Email" value="me@haileyok.com" />
-        <ContactItem label="Discord" value="haileyok" />
-        <ContactItem label="Signal" value="haileyok.01" />
-      </Section>
     </div>
   )
 }
