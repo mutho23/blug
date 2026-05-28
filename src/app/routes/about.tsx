@@ -45,14 +45,11 @@ export default function About() {
       </Section>
 
       <Section label="Elsewhere">
-        <LinkItem name="GitHub" href="https://github.com/mutho23" />
-        <LinkItem name="Bluesky" href="https://bsky.app/profile/mutho.my.id" />
-      </Section>
-
-      <Section label="Contact">
-        <ContactItem label="Email" value="amuthohhari@gmail.com"href="mailto:me@haileyok.com"/>
-        <ContactItem label="Discord" value="moebatsu" href="https://bsky.app/profile/mutho.my.id" />
-        <ContactItem label="Signal" value="haileyok.01" href="https://bsky.app/profile/mutho.my.id"/>
+        <LinkItem name="Email" href="mailto:amuthohhari@gmail.com" />
+        <LinkItem name="Discord" href="discord.com/users/1134329616501309540" />
+        <LinkItem name="Steam" href="steamcommunity.com/id/moebatsu" />
+        <LinkItem name="Spotify" href="open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8?si=95240bc3a0ad4de8" />
+        <LinkItem name="Instagram" href="instagram.com/amuthohari" />
       </Section>
     </div>
   )
