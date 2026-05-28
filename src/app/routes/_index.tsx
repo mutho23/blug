@@ -34,7 +34,7 @@ export default function Index() {
           It's Mutho<span className="text-600">.</span>
         </h1>
         <p className="text-lg leading-relaxed text-900 max-w-prose">
-          Just writing random stuff here . (Usually in Indonesian).
+          Just writing random stuff here.<br> (Usually in Indonesian).
         </p>
       </section>
 
