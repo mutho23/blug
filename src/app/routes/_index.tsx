@@ -14,7 +14,7 @@ export const loader = async () => {
 
 export const meta: MetaFunction = () => {
   return [
-    {title: "Mutho's Cool Site"},
+    {title: "Mutho's Blog"},
     {
       name: 'description',
       content: 'thoughts and vibes from mutho',
