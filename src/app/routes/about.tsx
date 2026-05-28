@@ -19,7 +19,7 @@ export default function About() {
           About Me<span className="text-600">.</span>
         </h1>
         <p className="text-lg leading-relaxed text-900 max-w-prose">
-          Mutho (Ahmad Muthohhar) is a coffee addict who loves to ramble about manga, 
+          Mutho (Muthohhar) is a coffee addict who loves to ramble about manga, 
           anime, movies, books, JRPGs, philosophy, and psychology.  
           This site is his personal space to write about whatever else is on his mind.
         </p>
