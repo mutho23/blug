@@ -27,10 +27,10 @@ export default function About() {
 
       <Section label="Work">
         <WorkItem
-          company="Learner"
+          company="Teacher"
 
-          role="Since i was born"
-          period="1993 — Present"
+          role="I love to learn & teach"
+          period="2013 — Present"
         />
       
       </Section>
