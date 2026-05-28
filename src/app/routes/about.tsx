@@ -47,6 +47,8 @@ export default function About() {
       <Section label="Elsewhere">
         <LinkItem name="GitHub" href="https://github.com/haileyok" />
         <LinkItem name="Bluesky" href="https://bsky.app/profile/hailey.at" />
+        <LinkItem name="Discord" href="https://discord.com/users/1134329616501309540" />
+
       </Section>
 
       <Section label="Contact">
