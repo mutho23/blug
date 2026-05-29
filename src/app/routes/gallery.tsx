@@ -275,15 +275,11 @@ export default function Gallery() {
       )}
 
       <header className="flex flex-col gap-5 mb-12 md:mb-16 max-w-prose">
-        <a href="/" className="label hover:text-600 transition-colors w-fit">
-          back to writing
-        </a>
         <h1 className="font-display text-950 text-4xl md:text-6xl leading-[1.02]">
           Gallery
         </h1>
         <p className="font-sans text-500 text-lg">
-          Koleksi tempat dari grain.social
-        </p>
+          Sometimes you see me. Mostly, you see what I see        </p>
       </header>
 
       {galleries.length === 0 ? (
