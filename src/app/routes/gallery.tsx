@@ -3,7 +3,7 @@ import {json, LoaderFunctionArgs} from '@remix-run/node'
 import {getDid} from 'src/atproto/getDid'
 
 // Ganti dengan handle atproto kamu
-const HANDLE = 'username.bsky.social'
+const HANDLE = 'mutho.my.id'
 
 export const loader = async () => {
   // 1. Resolve handle → DID
