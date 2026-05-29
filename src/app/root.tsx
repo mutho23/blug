@@ -1,3 +1,20 @@
+Ketemu masalahnya! Di file kamu ada **dua tempat** yang hilang tag `<a` — bukan karakter `↗` lagi. Lihat bagian ini:
+
+**Baris footer** — ada yang hilang `<a`:
+```
+            
+              href="https://github.com/haileyok/blug"
+```
+
+**Baris ErrorBoundary** — sama juga:
+```
+          
+            href="/"
+```
+
+Ini kode yang sudah diperbaiki, tinggal copy-paste:
+
+```tsx
 import React from 'react'
 import {
   Links,
@@ -179,3 +196,4 @@ export function ErrorBoundary() {
     </html>
   )
 }
+```
