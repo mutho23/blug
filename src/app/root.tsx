@@ -99,11 +99,11 @@ export function Layout({children}: {children: React.ReactNode}) {
         <footer className="mx-auto max-w-7xl w-full px-6 pb-6 pt-12">
           <div className="border-t border-100 pt-5 flex items-center justify-between text-sm">
             <span className="label">Made on AT Protocol</span>
-            
-             <a href="https://github.com/mutho23/blug"
+            <a
+              href="https://github.com/mutho23/blug"
               className="text-500 hover:text-600 transition-colors font-mono text-xs">
               source
-            />
+            </a>
           </div>
         </footer>
         <ScrollRestoration />
@@ -168,7 +168,7 @@ export function ErrorBoundary() {
               className="rounded-lg shadow-2xl shadow-black/40 max-w-sm"
             />
           </div>
-          
+          <a
             href="/"
             className="inline-block font-mono text-xs text-600 hover:text-700 transition-colors">
             back to writing
