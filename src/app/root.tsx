@@ -72,7 +72,9 @@ export function Layout({children}: {children: React.ReactNode}) {
                 </span>
               </a>
               <nav className="flex items-center gap-1 sm:gap-2">
-                <NavLink href="/" selected={isOn('/') && location.pathname === '/'}>
+                <NavLink
+                  href="/"
+                  selected={isOn('/') && location.pathname === '/'}>
                   Writing
                 </NavLink>
                 <NavLink href="/about" selected={isOn('/about')}>
@@ -100,7 +102,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             
               href="https://github.com/haileyok/blug"
               className="text-500 hover:text-600 transition-colors font-mono text-xs">
-              source &#x2197;
+              source
             </a>
           </div>
         </footer>
@@ -134,7 +136,9 @@ function NavLink({
       <span className={`font-sans text-sm transition-colors ${textClass}`}>
         {children}
       </span>
-      <span className={`mt-1 h-px w-full transition-colors ${underlineClass}`} />
+      <span
+        className={`mt-1 h-px w-full transition-colors ${underlineClass}`}
+      />
     </a>
   )
 }
@@ -167,7 +171,7 @@ export function ErrorBoundary() {
           
             href="/"
             className="inline-block font-mono text-xs text-600 hover:text-700 transition-colors">
-            &#x2190; back to writing
+            back to writing
           </a>
         </div>
         <Scripts />
