@@ -59,20 +59,3 @@ export default function Gallery() {
                   <p className="font-sans text-sm text-500">
                     {value.address.locality}
                     {value.address.region ? ', ' + value.address.region : ''}
-                  </p>
-                ) : null}
-                <p className="font-mono text-xs text-300 mt-auto pt-2">
-                  {new Date(value.createdAt).toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
-              </a>
-            )
-          })}
-        </div>
-      )}
-    </article>
-  )
-}
