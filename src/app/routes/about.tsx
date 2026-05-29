@@ -47,9 +47,7 @@ export default function About() {
       <Section label="Elsewhere">
         <LinkItem name="Discord" href="https://discord.com/users/1134329616501309540" />
         <LinkItem name="Spotify" href="https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8?si=95240bc3a0ad4de8" />
-        <LinkItem name="Steam" href="https://steamcommunity.com/id/moebatsu" />
-        <LinkItem name="Instagram" href="https://instagram.com/amuthohari" />
-
+        <LinkItem name="Steam" href="https://steamcommunity.com/id/moebatsu" />   
       </Section>
     </div>
   )
