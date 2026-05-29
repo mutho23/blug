@@ -18,7 +18,7 @@ export const loader = async () => {
 }
 
 export default function Gallery() {
-  const {galleries, did} = useLoaderData<typeof loader>()
+  const {galleries} = useLoaderData<typeof loader>()
 
   return (
     <article className="container mx-auto pt-12 md:pt-20 pb-24 px-6">
@@ -30,7 +30,7 @@ export default function Gallery() {
           Gallery
         </h1>
         <p className="font-sans text-500 text-lg">
-          Foto-foto dari grain.social
+          Koleksi tempat dari grain.social
         </p>
       </header>
 
@@ -39,11 +39,10 @@ export default function Gallery() {
           <p className="font-sans text-500 text-lg">Belum ada gallery.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {galleries.map((gallery: any) => {
             const value = gallery.value
             const rkey = gallery.uri.split('/').pop()
-            const firstImage = value.images?.[0]?.image
 
             return (
               
@@ -51,25 +50,29 @@ export default function Gallery() {
                 href={`https://grain.social/gallery/${rkey}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex flex-col gap-2">
-                {firstImage ? (
-                  <img
-                    src={`https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${firstImage.ref.$link}@jpeg`}
-                    alt={value.title ?? 'Gallery'}
-                    className="w-full aspect-square object-cover rounded-md shadow-md group-hover:opacity-80 transition-opacity"
-                  />
-                ) : (
-                  <div className="w-full aspect-square bg-100 rounded-md flex items-center justify-center">
-                    <span className="text-400 text-xs font-mono">
-                      No image
-                    </span>
-                  </div>
-                )}
-                {value.title ? (
-                  <p className="font-mono text-xs uppercase tracking-wider text-500 truncate">
-                    {value.title}
+                className="group border border-100 rounded-md p-5 bg-50 hover:bg-100 hover:border-300 transition-colors flex flex-col gap-2">
+                <h2 className="font-display text-xl text-950 group-hover:text-600 transition-colors">
+                  {value.title ?? 'Untitled'}
+                </h2>
+                {value.address ? (
+                  <p className="font-sans text-sm text-500">
+                    {value.address.street && `${value.address.street}, `}
+                    {value.address.locality && `${value.address.locality}, `}
+                    {value.address.region}
                   </p>
                 ) : null}
+                {value.location?.name ? (
+                  <p className="font-mono text-xs uppercase tracking-wider text-400 mt-1">
+                    {value.location.name}
+                  </p>
+                ) : null}
+                <p className="font-mono text-xs text-300 mt-auto pt-2">
+                  {new Date(value.createdAt).toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
               </a>
             )
           })}
