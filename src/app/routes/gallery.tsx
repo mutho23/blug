@@ -26,19 +26,30 @@ export const loader = async () => {
   const galleries = (galleriesData.records ?? [])
     .map((gallery: any) => {
       const galleryTime = gallery.value.createdAt
+      
+      // Pastikan record foto memiliki data gambar referensi ($link) yang valid
       const matchedPhotos = photos.filter(
-        (photo: any) => photo.value.createdAt === galleryTime,
+        (photo: any) => 
+          photo.value.createdAt === galleryTime && 
+          photo.value.photo?.ref?.$link
       )
-      const images = matchedPhotos.map((photo: any) => ({
-        url: `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`,
-        width: photo.value.aspectRatio?.width ?? 1,
-        height: photo.value.aspectRatio?.height ?? 1,
-      }))
+      
+      const images = matchedPhotos.map((photo: any) => {
+        // Menggunakan || untuk mengantisipasi jika nilainya adalah angka 0
+        const width = photo.value.aspectRatio?.width || 1
+        const height = photo.value.aspectRatio?.height || 1
+        
+        return {
+          url: `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`,
+          width: width,
+          height: height,
+        }
+      })
+      
       return {...gallery, images}
     })
-    // --- PERBAIKAN DI SINI ---
-    // Menyaring galeri agar HANYA mengirim data yang memiliki foto minimal 1
-    .filter((gallery: any) => gallery.images.length > 0)
+    // Filter super ketat: HANYA meloloskan galeri yang memiliki susunan gambar valid
+    .filter((gallery: any) => gallery.images && gallery.images.length > 0)
 
   return json({galleries, did})
 }
@@ -77,21 +88,18 @@ function Lightbox({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
       onClick={onClose}>
-      {/* Close button */}
       <button
         className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light z-10"
         onClick={onClose}>
         ✕
       </button>
 
-      {/* Counter */}
       {images.length > 1 && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 font-mono text-xs text-white/50">
           {index + 1} / {images.length}
         </div>
       )}
 
-      {/* Prev button */}
       {images.length > 1 && (
         <button
           className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl z-10 px-2"
@@ -100,7 +108,6 @@ function Lightbox({
         </button>
       )}
 
-      {/* Image */}
       <img
         src={images[index].url}
         alt={`Photo ${index + 1}`}
@@ -109,7 +116,6 @@ function Lightbox({
         style={{maxHeight: '90vh', maxWidth: '90vw'}}
       />
 
-      {/* Next button */}
       {images.length > 1 && (
         <button
           className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl z-10 px-2"
@@ -118,7 +124,6 @@ function Lightbox({
         </button>
       )}
 
-      {/* Dot indicators */}
       {images.length > 1 && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
           {images.map((_, i) => (
@@ -143,26 +148,25 @@ function MasonryGrid({
   title: string
   onPhotoClick: (index: number) => void
 }) {
-  if (images.length === 0) {
-    return (
-      <div className="w-full h-48 bg-100 flex items-center justify-center">
-        <span className="font-mono text-xs text-300">no photo</span>
-      </div>
-    )
+  if (!images || images.length === 0) {
+    return null; // Langsung hilangkan elemen jika kosong tanpa menyisakan container box
   }
 
   if (images.length === 1) {
     const {url, width, height} = images[0]
-    const paddingTop = `${(height / width) * 100}%`
+    // Mengamankan kalkulasi rasio agar tidak menghasilkan NaN / Infinity
+    const ratio = width > 0 ? (height / width) * 100 : 100
+    const paddingTop = `${ratio}%`
+    
     return (
       <div
-        className="w-full relative overflow-hidden cursor-zoom-in"
+        className="w-full relative overflow-hidden cursor-zoom-in bg-black"
         style={{paddingTop}}
         onClick={e => { e.preventDefault(); onPhotoClick(0) }}>
         <img
           src={url}
           alt={title}
-          className="absolute inset-0 w-full h-full object-contain bg-black"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       </div>
     )
@@ -172,17 +176,18 @@ function MasonryGrid({
     return (
       <div className="grid grid-cols-2 gap-px bg-200 overflow-hidden">
         {images.map((img, i) => {
-          const paddingTop = `${(img.height / img.width) * 100}%`
+          const ratio = img.width > 0 ? (img.height / img.width) * 100 : 100
+          const paddingTop = `${ratio}%`
           return (
             <div
               key={i}
-              className="relative overflow-hidden cursor-zoom-in"
+              className="relative overflow-hidden cursor-zoom-in bg-black"
               style={{paddingTop}}
               onClick={e => { e.preventDefault(); onPhotoClick(i) }}>
               <img
                 src={img.url}
                 alt={`${title} ${i + 1}`}
-                className="absolute inset-0 w-full h-full object-contain bg-black"
+                className="absolute inset-0 w-full h-full object-contain"
               />
             </div>
           )
@@ -202,17 +207,18 @@ function MasonryGrid({
     <div className="grid grid-cols-2 gap-px bg-200 overflow-hidden">
       <div className="flex flex-col gap-px">
         {col1.map((img: any, i) => {
-          const paddingTop = `${(img.height / img.width) * 100}%`
+          const ratio = img.width > 0 ? (img.height / img.width) * 100 : 100
+          const paddingTop = `${ratio}%`
           return (
             <div
               key={i}
-              className="relative overflow-hidden cursor-zoom-in"
+              className="relative overflow-hidden cursor-zoom-in bg-black"
               style={{paddingTop}}
               onClick={e => { e.preventDefault(); onPhotoClick(img.origIndex) }}>
               <img
                 src={img.url}
                 alt={`${title} ${img.origIndex + 1}`}
-                className="absolute inset-0 w-full h-full object-contain bg-black"
+                className="absolute inset-0 w-full h-full object-contain"
               />
             </div>
           )
@@ -220,17 +226,18 @@ function MasonryGrid({
       </div>
       <div className="flex flex-col gap-px">
         {col2.map((img: any, i) => {
-          const paddingTop = `${(img.height / img.width) * 100}%`
+          const ratio = img.width > 0 ? (img.height / img.width) * 100 : 100
+          const paddingTop = `${ratio}%`
           return (
             <div
               key={i}
-              className="relative overflow-hidden cursor-zoom-in"
+              className="relative overflow-hidden cursor-zoom-in bg-black"
               style={{paddingTop}}
               onClick={e => { e.preventDefault(); onPhotoClick(img.origIndex) }}>
               <img
                 src={img.url}
                 alt={`${title} ${img.origIndex + 1}`}
-                className="absolute inset-0 w-full h-full object-contain bg-black"
+                className="absolute inset-0 w-full h-full object-contain"
               />
             </div>
           )
@@ -243,6 +250,9 @@ function MasonryGrid({
 export default function Gallery() {
   const {galleries, did} = useLoaderData<typeof loader>()
   const [lightbox, setLightbox] = useState<{images: {url: string}[]; index: number} | null>(null)
+
+  // Double check penyaringan di sisi klien
+  const validGalleries = (galleries ?? []).filter((g: any) => g.images && g.images.length > 0)
 
   return (
     <article className="container mx-auto pt-12 md:pt-20 pb-24 px-6">
@@ -266,13 +276,13 @@ export default function Gallery() {
         </p>
       </header>
 
-      {galleries.length === 0 ? (
+      {validGalleries.length === 0 ? (
         <div className="max-w-prose">
           <p className="font-sans text-500 text-lg">Belum ada gallery.</p>
         </div>
       ) : (
         <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
-          {galleries.map((gallery: any) => {
+          {validGalleries.map((gallery: any) => {
             const value = gallery.value
             const uriParts = gallery.uri.split('/')
             const rkey = uriParts[uriParts.length - 1]
@@ -310,11 +320,9 @@ export default function Gallery() {
                         day: 'numeric',
                       })}
                     </p>
-                    {gallery.images.length > 0 ? (
-                      <p className="font-mono text-xs text-300">
-                        {gallery.images.length} foto
-                      </p>
-                    ) : null}
+                    <p className="font-mono text-xs text-300">
+                      {gallery.images.length} foto
+                    </p>
                   </div>
                 </a>
               </div>
