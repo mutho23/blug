@@ -23,18 +23,22 @@ export const loader = async () => {
   const photosData = await photosRes.json()
   const photos: any[] = photosData.records ?? []
 
-  const galleries = (galleriesData.records ?? []).map((gallery: any) => {
-    const galleryTime = gallery.value.createdAt
-    const matchedPhotos = photos.filter(
-      (photo: any) => photo.value.createdAt === galleryTime,
-    )
-    const images = matchedPhotos.map((photo: any) => ({
-      url: `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`,
-      width: photo.value.aspectRatio?.width ?? 1,
-      height: photo.value.aspectRatio?.height ?? 1,
-    }))
-    return {...gallery, images}
-  })
+  const galleries = (galleriesData.records ?? [])
+    .map((gallery: any) => {
+      const galleryTime = gallery.value.createdAt
+      const matchedPhotos = photos.filter(
+        (photo: any) => photo.value.createdAt === galleryTime,
+      )
+      const images = matchedPhotos.map((photo: any) => ({
+        url: `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`,
+        width: photo.value.aspectRatio?.width ?? 1,
+        height: photo.value.aspectRatio?.height ?? 1,
+      }))
+      return {...gallery, images}
+    })
+    // --- PERBAIKAN DI SINI ---
+    // Menyaring galeri agar HANYA mengirim data yang memiliki foto minimal 1
+    .filter((gallery: any) => gallery.images.length > 0)
 
   return json({galleries, did})
 }
