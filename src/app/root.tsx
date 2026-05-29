@@ -100,7 +100,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             
               href="https://github.com/haileyok/blug"
               className="text-500 hover:text-600 transition-colors font-mono text-xs">
-              source ↗
+              source &#x2197;
             </a>
           </div>
         </footer>
@@ -167,7 +167,7 @@ export function ErrorBoundary() {
           
             href="/"
             className="inline-block font-mono text-xs text-600 hover:text-700 transition-colors">
-            ← back to writing
+            &#x2190; back to writing
           </a>
         </div>
         <Scripts />
