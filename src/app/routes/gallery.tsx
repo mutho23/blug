@@ -134,7 +134,7 @@ export default function Gallery() {
           Gallery
         </h1>
         <p className="font-sans text-500 text-lg">
-          Koleksi tempat dari grain.social
+          Sometimes you see me. Mostly, you just see what i see.
         </p>
       </header>
 
