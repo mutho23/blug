@@ -1,6 +1,3 @@
-Kode `root.tsx` ini, copy-paste semua:
-
-```tsx
 import React from 'react'
 import {
   Links,
@@ -182,6 +179,3 @@ export function ErrorBoundary() {
     </html>
   )
 }
-```
-
-Paste di VSCode browser (github.dev), **Ctrl+A dulu** sebelum paste, lalu **Ctrl+S**, lalu commit and push.
