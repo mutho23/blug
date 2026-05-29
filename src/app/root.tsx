@@ -88,9 +88,6 @@ export function Layout({children}: {children: React.ReactNode}) {
                   selected={false}>
                   Bluesky
                 </NavLink>
-                <NavLink href="https://github.com/mutho23" selected={false}>
-                  GitHub
-                </NavLink>
               </nav>
             </div>
           </header>
