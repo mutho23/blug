@@ -100,10 +100,10 @@ export function Layout({children}: {children: React.ReactNode}) {
           <div className="border-t border-100 pt-5 flex items-center justify-between text-sm">
             <span className="label">Made on AT Protocol</span>
             
-              href="https://github.com/mutho23/blug"
+             <a href="https://github.com/mutho23/blug"
               className="text-500 hover:text-600 transition-colors font-mono text-xs">
               source
-            </a>
+            />
           </div>
         </footer>
         <ScrollRestoration />
