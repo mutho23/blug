@@ -78,6 +78,9 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <NavLink href="/about" selected={isOn('/about')}>
                   About
                 </NavLink>
+                <NavLink href="/gallery" selected={isOn('/gallery')}>
+                  Gallery
+                </NavLink>
                 <NavLink
                   href="https://bsky.app/profile/mutho.my.id"
                   selected={false}>
@@ -94,7 +97,7 @@ export function Layout({children}: {children: React.ReactNode}) {
         <footer className="mx-auto max-w-7xl w-full px-6 pb-6 pt-12">
           <div className="border-t border-100 pt-5 flex items-center justify-between text-sm">
             <span className="label">Made on AT Protocol</span>
-            <a
+            
               href="https://github.com/haileyok/blug"
               className="text-500 hover:text-600 transition-colors font-mono text-xs">
               source ↗
@@ -121,9 +124,7 @@ function NavLink({
   selected: boolean
   children: string
 }) {
-  const textClass = selected
-    ? 'text-950'
-    : 'text-500 hover:text-900'
+  const textClass = selected ? 'text-950' : 'text-500 hover:text-900'
   const underlineClass = selected
     ? 'bg-600'
     : 'bg-transparent group-hover:bg-300'
@@ -133,9 +134,7 @@ function NavLink({
       <span className={`font-sans text-sm transition-colors ${textClass}`}>
         {children}
       </span>
-      <span
-        className={`mt-1 h-px w-full transition-colors ${underlineClass}`}
-      />
+      <span className={`mt-1 h-px w-full transition-colors ${underlineClass}`} />
     </a>
   )
 }
@@ -165,7 +164,7 @@ export function ErrorBoundary() {
               className="rounded-lg shadow-2xl shadow-black/40 max-w-sm"
             />
           </div>
-          <a
+          
             href="/"
             className="inline-block font-mono text-xs text-600 hover:text-700 transition-colors">
             ← back to writing
