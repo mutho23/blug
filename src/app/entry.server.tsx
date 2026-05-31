@@ -15,6 +15,21 @@ import { renderToPipeableStream } from "react-dom/server";
 
 const ABORT_DELAY = 5_000;
 
+function setSecurityHeaders(responseHeaders: Headers) {
+  responseHeaders.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app https://embed.bsky.app",
+      "style-src 'self' 'unsafe-inline' https://giscus.app",
+      "frame-src https://giscus.app",
+      "connect-src 'self' https://giscus.app https://api.github.com https://public.api.bsky.app",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+    ].join("; ")
+  );
+}
+
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -61,6 +76,7 @@ function handleBotRequest(
           const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set("Content-Type", "text/html");
+          setSecurityHeaders(responseHeaders);
 
           resolve(
             new Response(stream, {
@@ -76,9 +92,6 @@ function handleBotRequest(
         },
         onError(error: unknown) {
           responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
             console.error(error);
           }
@@ -111,6 +124,7 @@ function handleBrowserRequest(
           const stream = createReadableStreamFromReadable(body);
 
           responseHeaders.set("Content-Type", "text/html");
+          setSecurityHeaders(responseHeaders);
 
           resolve(
             new Response(stream, {
@@ -126,9 +140,6 @@ function handleBrowserRequest(
         },
         onError(error: unknown) {
           responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
             console.error(error);
           }
