@@ -17,11 +17,12 @@ import {
 import {getDid} from 'src/atproto/getDid'
 import {useEffect, useRef} from 'react'
 import {Link} from '../components/link'
+import {GiscusComments} from '../../components/giscus-comments'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
   const {rkey} = params
   const [post, profile] = await Promise.all([getPost(rkey!), getProfile()])
-  return json({did: getDid(), post, profile})
+  return json({did: getDid(), post, profile, rkey})
 }
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
@@ -70,10 +71,11 @@ export const meta: MetaFunction<typeof loader> = ({data}) => {
 }
 
 export default function Posts() {
-  const {did, post, profile} = useLoaderData<{
+  const {did, post, profile, rkey} = useLoaderData<{
     did: string
     post: LeafletDocument
     profile: AppBskyActorDefs.ProfileViewDetailed
+    rkey: string
   }>()
 
   if (!post) {
@@ -116,6 +118,8 @@ export default function Posts() {
           </div>
         ))}
       </div>
+
+      <GiscusComments />
     </article>
   )
 }

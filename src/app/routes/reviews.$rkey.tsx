@@ -3,6 +3,7 @@ import {getPopfeedReviews, type PopfeedReview} from '../../popfeed'
 import {json, LoaderFunctionArgs, MetaFunction} from '@remix-run/node'
 import {getProfile} from '../../atproto'
 import {AppBskyActorDefs} from '@atproto/api'
+import {GiscusComments} from '../../components/giscus-comments'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
   const {rkey} = params
@@ -11,7 +12,7 @@ export const loader = async ({params}: LoaderFunctionArgs) => {
     getProfile(),
   ])
   const review = reviews.find(r => r.rkey === rkey) ?? null
-  return json({review, profile})
+  return json({review, profile, rkey})
 }
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
@@ -38,9 +39,10 @@ const MEDIA_TYPE_EMOJI: Record<string, string> = {
 }
 
 export default function ReviewPage() {
-  const {review, profile} = useLoaderData<{
+  const {review, profile, rkey} = useLoaderData<{
     review: PopfeedReview | null
     profile: AppBskyActorDefs.ProfileViewDetailed
+    rkey: string
   }>()
 
   if (!review) return <Error />
@@ -188,6 +190,8 @@ export default function ReviewPage() {
           </a>
         </div>
       </div>
+
+      <GiscusComments />
     </article>
   )
 }
