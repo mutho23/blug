@@ -1,21 +1,14 @@
 import {json, MetaFunction} from '@remix-run/node'
 import {getPosts} from '../../atproto'
-import {getPopfeedReviews, type PopfeedReview} from '../../popfeed'
 import {getDid} from 'src/atproto/getDid'
 import {useLoaderData} from '@remix-run/react'
 import {useMemo, useState} from 'react'
 import {LeafletDocument} from 'src/types'
 
-// Union type untuk item di feed
-type FeedItem =
-  | (LeafletDocument & {type: 'post'})
-  | PopfeedReview
+type FeedItem = LeafletDocument & {type: 'post'}
 
 export const loader = async () => {
-  const [rawPosts, reviews] = await Promise.all([
-    getPosts(undefined),
-    getPopfeedReviews(),
-  ])
+  const rawPosts = await getPosts(undefined)
 
   const posts: FeedItem[] = rawPosts.map(p => ({
     ...p,
@@ -23,15 +16,13 @@ export const loader = async () => {
     description: p.description?.slice(0, 180),
   }))
 
-  const allItems: FeedItem[] = [...posts, ...reviews]
-
-  allItems.sort(
+  posts.sort(
     (a, b) =>
       new Date(b.publishedAt).getTime() -
       new Date(a.publishedAt).getTime(),
   )
 
-  return json({items: allItems, did: getDid()})
+  return json({items: posts, did: getDid()})
 }
 
 export const meta: MetaFunction = () => {
@@ -127,13 +118,9 @@ export default function Index() {
         )}
 
         <ul className="divide-y divide-zinc-900">
-          {filteredItems.map(item =>
-            item.type === 'review' ? (
-              <ReviewItem review={item as PopfeedReview} key={`review-${item.rkey}`} />
-            ) : (
-              <PostItem post={item} did={did} key={`post-${item.rkey}`} />
-            ),
-          )}
+          {filteredItems.map(item => (
+            <PostItem post={item} did={did} key={`post-${item.rkey}`} />
+          ))}
         </ul>
       </section>
     </div>
@@ -202,75 +189,3 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
   )
 }
 
-// ── Review Popfeed ────────────────────────────────────────────────────────────
-
-const MEDIA_TYPE_EMOJI: Record<string, string> = {
-  movie: '🎬',
-  tv: '📺',
-  music: '🎵',
-  game: '🎮',
-  book: '📚',
-}
-
-function ReviewItem({review}: {review: PopfeedReview}) {
-  const date = new Date(review.publishedAt)
-  const emoji = review.mediaType ? MEDIA_TYPE_EMOJI[review.mediaType] ?? '⭐' : '⭐'
-  const stars = review.rating != null ? Math.round(review.rating / 2) : null
-
-  return (
-    <li>
-      <a
-        href={`/reviews/${review.rkey}`}
-        className="group flex gap-4 py-5 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
-
-        {review.posterUrl && (
-          <img
-            src={review.posterUrl}
-            alt={review.title}
-            className="w-12 h-[4.5rem] object-cover rounded flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
-          />
-        )}
-
-        <div className="flex flex-col gap-1.5 min-w-0">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-display text-3xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
-              {emoji} {review.title}
-            </h3>
-            <time
-              className="font-mono text-sm text-zinc-500 uppercase tracking-wider"
-              dateTime={date.toISOString()}>
-              {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
-            </time>
-          </div>
-
-          {stars != null && (
-            <p className="font-mono text-sm text-[#5EA2FF]">
-              {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
-              <span className="text-zinc-500 ml-1">{review.rating}/10</span>
-              {review.isRevisit && <span className="text-zinc-600 ml-2">· revisit</span>}
-            </p>
-          )}
-
-          {review.description && (
-            <p className="text-zinc-500 text-base leading-relaxed line-clamp-2">
-              {review.description}
-            </p>
-          )}
-
-          <div className="flex flex-wrap gap-2 mt-1">
-            {review.tags.map(tag => (
-              <span key={tag} className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
-                {tag}
-              </span>
-            ))}
-            {review.genres?.slice(0, 2).map(genre => (
-              <span key={genre} className="font-mono text-xs text-zinc-600 border border-zinc-800 px-3 py-1 rounded-full">
-                {genre}
-              </span>
-            ))}
-          </div>
-        </div>
-      </a>
-    </li>
-  )
-}
