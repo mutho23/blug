@@ -1,6 +1,6 @@
 import {json, type LoaderFunctionArgs} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
-import {getReview} from '../../atproto/getReviews.js'
+import {getReview} from '../../../atproto/getReviews.js'
 import {Link} from '../components/link.js'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
@@ -52,7 +52,7 @@ export default function ReviewPage() {
     ? new Date(review.releaseDate).getFullYear()
     : null
 
-  const reviewedDate = new Date(review.createdAt).toLocaleDateString('en-US', {
+  const reviewedDate = new Date(review.addedAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
