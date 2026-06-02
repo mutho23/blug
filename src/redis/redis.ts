@@ -2,44 +2,78 @@ import Redis from 'ioredis'
 import {AppBskyActorDefs} from '@atproto/api'
 import {LeafletDocument} from '../types'
 
-export const REDIS_CLIENT = new Redis(process.env.REDIS_URL!, {
-  tls: {},
-})
+// Lazy initialization - don't connect at module load time
+let _client: Redis | null = null
 
-export const getCachedPosts = async () => {
-  const res = await REDIS_CLIENT.get('posts')
-  if (!res) {
+function getClient(): Redis {
+  if (!_client) {
+    _client = new Redis(process.env.REDIS_URL!, {
+      maxRetriesPerRequest: 1,
+      connectTimeout: 5000,
+      lazyConnect: false,
+    })
+    _client.on('error', (err) => {
+      console.error('Redis error:', err.message)
+    })
+  }
+  return _client
+}
+
+export const getCachedPosts = async (): Promise<LeafletDocument[] | null> => {
+  try {
+    const res = await getClient().get('posts')
+    if (!res) return null
+    return JSON.parse(res) as LeafletDocument[]
+  } catch (err) {
+    console.error('getCachedPosts error:', err)
     return null
   }
-  return JSON.parse(res) as LeafletDocument[]
 }
 
-export const setCachedPosts = async (posts: LeafletDocument[]) => {
-  await REDIS_CLIENT.set('posts', JSON.stringify(posts), 'EX', 60)
+export const setCachedPosts = async (posts: LeafletDocument[]): Promise<void> => {
+  try {
+    await getClient().set('posts', JSON.stringify(posts), 'EX', 60)
+  } catch (err) {
+    console.error('setCachedPosts error:', err)
+  }
 }
 
-export const getCachedPost = async (rkey: string) => {
-  const res = await REDIS_CLIENT.get(rkey)
-  if (!res) {
+export const getCachedPost = async (rkey: string): Promise<LeafletDocument | null> => {
+  try {
+    const res = await getClient().get(rkey)
+    if (!res) return null
+    return JSON.parse(res) as LeafletDocument
+  } catch (err) {
+    console.error('getCachedPost error:', err)
     return null
   }
-  return JSON.parse(res) as LeafletDocument
 }
 
-export const setCachedPost = async (rkey: string, post: LeafletDocument) => {
-  await REDIS_CLIENT.set(rkey, JSON.stringify(post), 'EX', 60 * 10)
+export const setCachedPost = async (rkey: string, post: LeafletDocument): Promise<void> => {
+  try {
+    await getClient().set(rkey, JSON.stringify(post), 'EX', 60 * 10)
+  } catch (err) {
+    console.error('setCachedPost error:', err)
+  }
 }
 
-export const getCachedProfile = async () => {
-  const res = await REDIS_CLIENT.get('profile')
-  if (!res) {
+export const getCachedProfile = async (): Promise<AppBskyActorDefs.ProfileViewDetailed | null> => {
+  try {
+    const res = await getClient().get('profile')
+    if (!res) return null
+    return JSON.parse(res) as AppBskyActorDefs.ProfileViewDetailed
+  } catch (err) {
+    console.error('getCachedProfile error:', err)
     return null
   }
-  return JSON.parse(res) as AppBskyActorDefs.ProfileViewDetailed
 }
 
 export const setCachedProfile = async (
   profile: AppBskyActorDefs.ProfileViewDetailed,
-) => {
-  await REDIS_CLIENT.set('profile', JSON.stringify(profile), 'EX', 60 * 10)
+): Promise<void> => {
+  try {
+    await getClient().set('profile', JSON.stringify(profile), 'EX', 60 * 10)
+  } catch (err) {
+    console.error('setCachedProfile error:', err)
+  }
 }
