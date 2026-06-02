@@ -137,18 +137,21 @@ export default function ReviewPage() {
         </div>
 
         {review.rating && (
-          <div className="flex items-center gap-3 mb-8 py-4 border-y border-zinc-800">
-            <span className="font-display text-5xl text-zinc-100">
-              {review.rating}
-            </span>
-            <div className="flex flex-col">
-              <span className="font-mono text-xs text-zinc-500">/ 10</span>
-              {RATING_LABEL[review.rating] && (
-                <span className="text-zinc-300 text-sm">
-                  {RATING_LABEL[review.rating]}
+          <div className="flex items-center gap-2 mb-8 py-4 border-y border-zinc-800">
+            <div className="flex items-center gap-1">
+              {Array.from({length: 5}, (_, i) => (
+                <span
+                  key={i}
+                  className={`text-3xl ${i < Math.round(review.rating! / 2) ? 'text-[#5EA2FF]' : 'text-zinc-700'}`}>
+                  ★
                 </span>
-              )}
+              ))}
             </div>
+            {RATING_LABEL[review.rating] && (
+              <span className="text-zinc-300 text-sm ml-2">
+                {RATING_LABEL[review.rating]}
+              </span>
+            )}
           </div>
         )}
 

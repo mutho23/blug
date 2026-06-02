@@ -274,10 +274,16 @@ function ReviewItem({review}: {review: PopfeedReview}) {
             </p>
           )}
 
-          {review.text && (
-            <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">
-              {review.text.replace(/<[^>]*>/g, '')}
-            </p>
+          {review.rating && (
+            <div className="flex items-center gap-1">
+              {Array.from({length: 5}, (_, i) => (
+                <span
+                  key={i}
+                  className={`text-base ${i < Math.round(review.rating! / 2) ? 'text-[#5EA2FF]' : 'text-zinc-700'}`}>
+                  ★
+                </span>
+              ))}
+            </div>
           )}
 
           {review.genres && review.genres.length > 0 && (
