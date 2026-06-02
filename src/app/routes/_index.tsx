@@ -148,20 +148,7 @@ export default function Index() {
       </section>
 
       {reviews.length > 0 && (
-        <section className="mt-20">
-          <div className="flex items-baseline justify-between mb-5 border-b border-zinc-800 pb-3">
-            <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
-              Recently watched & read
-            </h2>
-            <span className="label text-zinc-500">{reviews.length} items</span>
-          </div>
-
-          <ul className="divide-y divide-zinc-900">
-            {reviews.map(review => (
-              <ReviewItem review={review} key={`review-${review.rkey}`} />
-            ))}
-          </ul>
-        </section>
+        <ReviewsSection reviews={reviews} />
       )}
     </div>
   )
@@ -223,6 +210,89 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
         </div>
       </a>
     </li>
+  )
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  movie: 'Movie',
+  tv: 'TV Show',
+  book: 'Book',
+  game: 'Game',
+}
+
+function ReviewsSection({reviews}: {reviews: PopfeedReview[]}) {
+  const [activeType, setActiveType] = useState<string | null>(null)
+  const [showTypes, setShowTypes] = useState(false)
+
+  const availableTypes = useMemo(() => {
+    const typeSet = new Set<string>()
+    reviews.forEach(r => { if (r.creativeWorkType) typeSet.add(r.creativeWorkType) })
+    return Array.from(typeSet).sort()
+  }, [reviews])
+
+  const filteredReviews = useMemo(() => {
+    if (!activeType) return reviews
+    return reviews.filter(r => r.creativeWorkType === activeType)
+  }, [reviews, activeType])
+
+  const activeLabel = activeType ? (CATEGORY_LABELS[activeType] ?? activeType) : 'All Reviews'
+
+  return (
+    <section className="mt-20">
+      <div className="flex items-baseline justify-between mb-5 border-b border-zinc-800 pb-3">
+        <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
+          Recently watched & read
+        </h2>
+        <span className="label text-zinc-500">{filteredReviews.length} items</span>
+      </div>
+
+      {availableTypes.length > 0 && (
+        <div className="relative inline-block mb-8">
+          <button
+            onClick={() => setShowTypes(!showTypes)}
+            className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
+            {activeLabel}
+            <span className={`transition-transform duration-200 ${showTypes ? 'rotate-180' : ''}`}>
+              ▼
+            </span>
+          </button>
+
+          {showTypes && (
+            <div className="absolute left-0 top-full mt-2 w-[180px] rounded-[18px] border border-zinc-800 bg-[#0A0A0A] p-2 shadow-2xl z-50">
+              <button
+                onClick={() => { setActiveType(null); setShowTypes(false) }}
+                className={`w-full text-left px-3 py-2 rounded-[14px] text-[13px] transition-all ${
+                  activeType === null
+                    ? 'bg-[#69A7F5] text-black'
+                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                }`}>
+                All Reviews
+              </button>
+              <div className="mt-2 flex flex-col">
+                {availableTypes.map(type => (
+                  <button
+                    key={type}
+                    onClick={() => { setActiveType(type); setShowTypes(false) }}
+                    className={`w-full text-left px-3 py-2 rounded-[14px] text-[13px] transition-all ${
+                      activeType === type
+                        ? 'bg-[#69A7F5] text-black'
+                        : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                    }`}>
+                    {CATEGORY_LABELS[type] ?? type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <ul className="divide-y divide-zinc-900">
+        {filteredReviews.map(review => (
+          <ReviewItem review={review} key={`review-${review.rkey}`} />
+        ))}
+      </ul>
+    </section>
   )
 }
 
