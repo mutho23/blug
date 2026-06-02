@@ -8,21 +8,27 @@ import {LeafletDocument} from 'src/types'
 type FeedItem = LeafletDocument & {type: 'post'}
 
 export const loader = async () => {
-  const rawPosts = await getPosts(undefined)
+  try {
+    const rawPosts = await getPosts(undefined)
 
-  const posts: FeedItem[] = rawPosts.map(p => ({
-    ...p,
-    type: 'post' as const,
-    description: p.description?.slice(0, 180),
-  }))
+    const posts: FeedItem[] = rawPosts.map(p => ({
+      ...p,
+      type: 'post' as const,
+      description: p.description?.slice(0, 180),
+    }))
 
-  posts.sort(
-    (a, b) =>
-      new Date(b.publishedAt).getTime() -
-      new Date(a.publishedAt).getTime(),
-  )
+    posts.sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() -
+        new Date(a.publishedAt).getTime(),
+    )
 
-  return json({items: posts, did: getDid()})
+    return json({items: posts, did: getDid()})
+  } catch (err) {
+    console.error('Index loader error:', err)
+    // Return empty list instead of crashing
+    return json({items: [], did: getDid()})
+  }
 }
 
 export const meta: MetaFunction = () => {
@@ -117,17 +123,19 @@ export default function Index() {
           </div>
         )}
 
-        <ul className="divide-y divide-zinc-900">
-          {filteredItems.map(item => (
-            <PostItem post={item} did={did} key={`post-${item.rkey}`} />
-          ))}
-        </ul>
+        {filteredItems.length === 0 ? (
+          <p className="text-zinc-600 font-mono text-sm pt-4">No posts yet.</p>
+        ) : (
+          <ul className="divide-y divide-zinc-900">
+            {filteredItems.map(item => (
+              <PostItem post={item} did={did} key={`post-${item.rkey}`} />
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   )
 }
-
-// ── Postingan Leaflet ─────────────────────────────────────────────────────────
 
 function PostItem({post, did}: {post: LeafletDocument; did: string}) {
   const date = new Date(post.publishedAt)
@@ -141,7 +149,6 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
         href={`/posts/${post.rkey}`}
         className="group flex gap-4 py-5 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
 
-        {/* Cover atau placeholder agar sejajar dengan review */}
         <div className="w-12 h-[4.5rem] flex-shrink-0">
           {coverUrl ? (
             <img
@@ -188,4 +195,3 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
     </li>
   )
 }
-
