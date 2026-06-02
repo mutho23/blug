@@ -324,6 +324,11 @@ function ReviewItem({review}: {review: PopfeedReview}) {
         <div className="flex flex-col gap-1.5 min-w-0">
           <div className="flex items-baseline gap-3 flex-wrap">
             <h3 className="font-display text-2xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
+              {review.creativeWorkType === 'book' ? '📚' :
+               review.creativeWorkType === 'movie' ? '🎬' :
+               review.creativeWorkType === 'tv' ? '📺' :
+               review.creativeWorkType === 'game' ? '🎮' :
+               review.creativeWorkType === 'music' ? '🎵' : '🎞️'}{' '}
               {review.title}
             </h3>
             {review.releaseDate && (
@@ -356,9 +361,19 @@ function ReviewItem({review}: {review: PopfeedReview}) {
             </div>
           )}
 
-          {review.genres && review.genres.length > 0 && (
+          {(review.genres && review.genres.length > 0 || review.creativeWorkType) && (
             <div className="flex flex-wrap gap-2 mt-1">
-              {review.genres.slice(0, 3).map(genre => (
+              {review.creativeWorkType && (
+                <span className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
+                  {review.creativeWorkType === 'book' ? '📚 Book' :
+                   review.creativeWorkType === 'movie' ? '🎬 Movie' :
+                   review.creativeWorkType === 'tv' ? '📺 TV Show' :
+                   review.creativeWorkType === 'game' ? '🎮 Game' :
+                   review.creativeWorkType === 'music' ? '🎵 Music' :
+                   review.creativeWorkType}
+                </span>
+              )}
+              {review.genres && review.genres.slice(0, 3).map(genre => (
                 <span key={genre} className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
                   {genre}
                 </span>
