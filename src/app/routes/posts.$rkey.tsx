@@ -41,7 +41,7 @@ export const meta: MetaFunction<typeof loader> = ({data}) => {
   }
 
   return [
-    {title: `${data?.post.title} | Hailey's Cool Site`},
+    {title: `${data?.post.title} | Mutho's Blog`}, // ✅ Fixed: was "Hailey's Cool Site"
     {
       name: 'description',
       content: data?.post.description
