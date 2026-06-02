@@ -3,15 +3,15 @@ import {ATP_AGENT} from './agent.js'
 export type PopfeedReview = {
   rkey: string
   uri: string
-  subject: {
-    title?: string
-    type?: string
-    poster?: string
-    year?: number
-  }
-  rating?: number
-  body?: string
-  createdAt: string
+  title: string
+  posterUrl?: string
+  creativeWorkType?: string
+  mainCredit?: string
+  mainCreditRole?: string
+  genres?: string[]
+  addedAt: string
+  releaseDate?: string
+  listType?: string
 }
 
 export const getReviews = async (): Promise<PopfeedReview[]> => {
@@ -19,8 +19,9 @@ export const getReviews = async (): Promise<PopfeedReview[]> => {
 
   try {
     const res = await ATP_AGENT.com.atproto.repo.listRecords({
-      collection: 'app.popsky.review',
+      collection: 'social.popfeed.feed.listItem',
       repo,
+      limit: 20,
     })
 
     if (!res.success) return []
@@ -31,10 +32,15 @@ export const getReviews = async (): Promise<PopfeedReview[]> => {
       return {
         rkey: uriPts[uriPts.length - 1],
         uri: data.uri,
-        subject: val.subject ?? {},
-        rating: val.rating,
-        body: val.body?.slice(0, 200),
-        createdAt: val.createdAt,
+        title: val.title ?? 'Untitled',
+        posterUrl: val.posterUrl,
+        creativeWorkType: val.creativeWorkType,
+        mainCredit: val.mainCredit,
+        mainCreditRole: val.mainCreditRole,
+        genres: val.genres ?? [],
+        addedAt: val.addedAt,
+        releaseDate: val.releaseDate,
+        listType: val.listType,
       }
     })
   } catch (err) {
