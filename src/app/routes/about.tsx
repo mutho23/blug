@@ -48,7 +48,8 @@ export default function About() {
         <LinkItem name="Discord" href="https://discord.com/users/1134329616501309540" />
         <LinkItem name="Spotify" href="https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8?si=95240bc3a0ad4de8" />
         <LinkItem name="Steam" href="https://steamcommunity.com/id/moebatsu" />   
-<LinkItem name="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />   
+<LinkItem name="Popfeed" href="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />   
+
 
 
       </Section>
