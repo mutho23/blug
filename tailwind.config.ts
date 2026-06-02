@@ -36,12 +36,10 @@ export default {
     extend: {
       fontFamily: {
         display: [
-          'Recursive',
-          'ui-sans-serif',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'sans-serif',
+          'Literata',  // ✅ Ganti Recursive -> Literata untuk judul
+          'Georgia',
+          'ui-serif',
+          'serif',
         ],
         sans: [
           'ui-sans-serif',
