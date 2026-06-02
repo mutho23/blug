@@ -1,6 +1,7 @@
 import {json, MetaFunction} from '@remix-run/node'
-import {getPosts} from '../../atproto'
-import {getDid} from 'src/atproto/getDid'
+import {getPosts} from '../../../atproto/index.js'
+import {getReviews, PopfeedReview} from '../../../atproto/getReviews.js'
+import {getDid} from '../../../atproto/getDid.js'
 import {useLoaderData} from '@remix-run/react'
 import {useMemo, useState} from 'react'
 import {LeafletDocument} from 'src/types'
@@ -9,7 +10,10 @@ type FeedItem = LeafletDocument & {type: 'post'}
 
 export const loader = async () => {
   try {
-    const rawPosts = await getPosts(undefined)
+    const [rawPosts, reviews] = await Promise.all([
+      getPosts(undefined),
+      getReviews(),
+    ])
 
     const posts: FeedItem[] = rawPosts.map(p => ({
       ...p,
@@ -23,11 +27,16 @@ export const loader = async () => {
         new Date(a.publishedAt).getTime(),
     )
 
-    return json({items: posts, did: getDid()})
+    reviews.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime(),
+    )
+
+    return json({items: posts, did: getDid(), reviews})
   } catch (err) {
     console.error('Index loader error:', err)
-    // Return empty list instead of crashing
-    return json({items: [], did: getDid()})
+    return json({items: [], did: getDid(), reviews: []})
   }
 }
 
@@ -42,7 +51,11 @@ export const meta: MetaFunction = () => {
 }
 
 export default function Index() {
-  const {items, did} = useLoaderData<{items: FeedItem[]; did: string}>()
+  const {items, did, reviews} = useLoaderData<{
+    items: FeedItem[]
+    did: string
+    reviews: PopfeedReview[]
+  }>()
 
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [showTags, setShowTags] = useState(false)
@@ -133,6 +146,23 @@ export default function Index() {
           </ul>
         )}
       </section>
+
+      {reviews.length > 0 && (
+        <section className="mt-20">
+          <div className="flex items-baseline justify-between mb-5 border-b border-zinc-800 pb-3">
+            <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
+              Reviews
+            </h2>
+            <span className="label text-zinc-500">{reviews.length} reviews</span>
+          </div>
+
+          <ul className="divide-y divide-zinc-900">
+            {reviews.map(review => (
+              <ReviewItem review={review} key={`review-${review.rkey}`} />
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   )
 }
@@ -188,6 +218,75 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
                   {tag}
                 </span>
               ))}
+            </div>
+          )}
+        </div>
+      </a>
+    </li>
+  )
+}
+
+function ReviewItem({review}: {review: PopfeedReview}) {
+  const date = new Date(review.createdAt)
+  const popfeedUrl = `https://popfeed.social/review/at:/${review.uri}`
+
+  return (
+    <li>
+      <a
+        href={popfeedUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex gap-4 py-5 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
+
+        <div className="w-12 h-[4.5rem] flex-shrink-0">
+          {review.subject.poster ? (
+            <img
+              src={review.subject.poster}
+              alt={review.subject.title}
+              className="w-full h-full object-cover rounded opacity-80 group-hover:opacity-100 transition-opacity"
+            />
+          ) : (
+            <div className="w-full h-full rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+              <span className="text-zinc-700 text-xs">
+                {review.subject.type === 'book' ? '📚' : '🎬'}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <h3 className="font-display text-2xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
+              {review.subject.title ?? 'Untitled'}
+            </h3>
+            {review.subject.year && (
+              <span className="font-mono text-sm text-zinc-600">
+                {review.subject.year}
+              </span>
+            )}
+            {review.rating != null && (
+              <span className="font-mono text-sm text-zinc-400">
+                {review.rating}/10
+              </span>
+            )}
+            <time
+              className="font-mono text-sm text-zinc-500 uppercase tracking-wider"
+              dateTime={date.toISOString()}>
+              {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
+            </time>
+          </div>
+
+          {review.body && (
+            <p className="text-zinc-500 text-base leading-relaxed line-clamp-2">
+              {review.body}
+            </p>
+          )}
+
+          {review.subject.type && (
+            <div className="flex flex-wrap gap-2 mt-1">
+              <span className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
+                {review.subject.type}
+              </span>
             </div>
           )}
         </div>
