@@ -27,7 +27,6 @@ const RATING_LABEL: Record<number, string> = {
 }
 
 function renderText(text: string) {
-  // Convert <blockquote> tags and line breaks to React-friendly HTML
   const cleaned = text
     .replace(/<blockquote>/g, '<blockquote class="bq">')
     .replace(/\r\n/g, '\n')
@@ -52,7 +51,7 @@ export default function ReviewPage() {
     ? new Date(review.releaseDate).getFullYear()
     : null
 
-  const reviewedDate = new Date(review.createdAt).toLocaleDateString('en-US', {
+  const reviewedDate = new Date(review.addedAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -69,7 +68,6 @@ export default function ReviewPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Backdrop */}
       {review.backdropUrl && (
         <div className="relative w-full h-64 md:h-80 overflow-hidden">
           <img
@@ -82,7 +80,6 @@ export default function ReviewPage() {
       )}
 
       <div className="max-w-2xl mx-auto px-6 py-10 -mt-20 relative">
-        {/* Back link */}
         <Link
           href="/"
           className="inline-flex items-center gap-2 font-mono text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-8 tracking-wider uppercase"
@@ -90,7 +87,6 @@ export default function ReviewPage() {
           ← Back
         </Link>
 
-        {/* Header */}
         <div className="flex gap-6 mb-8">
           {review.posterUrl && (
             <img
@@ -140,7 +136,6 @@ export default function ReviewPage() {
           </div>
         </div>
 
-        {/* Rating */}
         {review.rating && (
           <div className="flex items-center gap-3 mb-8 py-4 border-y border-zinc-800">
             <span className="font-display text-5xl text-zinc-100">
@@ -157,7 +152,6 @@ export default function ReviewPage() {
           </div>
         )}
 
-        {/* Review text */}
         {review.text && (
           <div
             className="prose prose-invert prose-zinc max-w-none text-zinc-300 leading-relaxed text-base [&_.bq]:border-l-2 [&_.bq]:border-zinc-600 [&_.bq]:pl-4 [&_.bq]:italic [&_.bq]:text-zinc-400 [&_.bq]:my-4"
@@ -165,7 +159,6 @@ export default function ReviewPage() {
           />
         )}
 
-        {/* Tags */}
         {review.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-8">
             {review.tags.map((tag) => (
@@ -179,7 +172,6 @@ export default function ReviewPage() {
           </div>
         )}
 
-        {/* External links */}
         <div className="flex gap-3 mt-8">
           {review.identifiers?.imdbId && (
             <a
@@ -213,7 +205,6 @@ export default function ReviewPage() {
           )}
         </div>
 
-        {/* Footer */}
         <p className="font-mono text-xs text-zinc-600 mt-10">
           Reviewed on {reviewedDate}
         </p>
