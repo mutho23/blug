@@ -65,7 +65,7 @@ export function Layout({children}: {children: React.ReactNode}) {
       </head>
       <body className="flex flex-col min-h-screen justify-between bg-0 text-900 antialiased font-sans">
         <div>
-          <header className="mx-auto max-w-7xl pt-6 px-6">
+          <header className="mx-auto w-full max-w-[1600px] px-8 pt-8">
             <div className="flex items-center justify-between gap-4 border-b border-100 pb-5">
               <a href="/" className="flex items-center gap-3 group">
                 {profile?.avatar ? (
@@ -103,7 +103,7 @@ export function Layout({children}: {children: React.ReactNode}) {
           </header>
           <main>{children}</main>
         </div>
-        <footer className="mx-auto max-w-7xl w-full px-6 pb-6 pt-12">
+        <footer className="mx-auto w-full max-w-[1600px] px-8 pb-8 pt-16">
           <div className="border-t border-100 pt-5 flex items-center justify-between text-sm">
             <span className="label">Made on AT Protocol</span>
             <a
