@@ -128,9 +128,9 @@ function ThreeColumnLayout({
 }) {
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 grid grid-cols-1 xl:grid-cols-[220px_1fr_220px] gap-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-[180px_1fr_180px] gap-6">
         {/* LEFT SIDEBAR */}
-        <aside className="hidden xl:block">
+        <aside className="hidden lg:block">
           <div className="sticky top-8">
             <ProfileCard />
           </div>
@@ -140,7 +140,7 @@ function ThreeColumnLayout({
         <main className="min-w-0 pb-12">{children}</main>
 
         {/* RIGHT SIDEBAR */}
-        <aside className="hidden xl:block">
+        <aside className="hidden lg:block">
           <div className="sticky top-8">{rightContent}</div>
         </aside>
       </div>
@@ -246,7 +246,7 @@ function MobileTagFilter({
 }) {
   const [showTags, setShowTags] = useState(false)
   return (
-    <div className="relative inline-block mb-5 xl:hidden">
+    <div className="relative inline-block mb-5 lg:hidden">
       <button
         onClick={() => setShowTags(!showTags)}
         className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">

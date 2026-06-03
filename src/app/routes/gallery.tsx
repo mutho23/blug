@@ -214,14 +214,14 @@ export default function Gallery() {
 function ThreeColumnLayout({children}: {children: React.ReactNode}) {
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 grid grid-cols-1 xl:grid-cols-[220px_1fr_220px] gap-8">
-        <aside className="hidden xl:block">
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-[180px_1fr_180px] gap-6">
+        <aside className="hidden lg:block">
           <div className="sticky top-8">
             <ProfileCard />
           </div>
         </aside>
         <main className="min-w-0 pb-12">{children}</main>
-        <aside className="hidden xl:block" />
+        <aside className="hidden lg:block" />
       </div>
     </div>
   )
