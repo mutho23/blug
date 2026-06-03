@@ -72,9 +72,9 @@ export default function Index() {
   }, [items, activeTag])
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-6 pt-8 md:pt-12 pb-12">
+    <div className="mx-auto w-full max-w-3xl px-16 pt-8 md:pt-12 pb-12">
       <section className="mb-8 md:mb-10 flex flex-col gap-3">
-        <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
+        <h1 className="font-display text-5xl md:text-6xl text-950 leading-[1.05]">
           It's Mutho<span className="text-[#5EA2FF]">.</span>
         </h1>
 
@@ -182,7 +182,7 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
 
         <div className="flex flex-col gap-1.5 min-w-0">
           <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-display text-3xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
+            <h3 className="font-display text-4xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
               {post.title}
             </h3>
             <time
