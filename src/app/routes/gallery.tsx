@@ -317,7 +317,7 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState<{images: ImageItem[]; index: number} | null>(null)
 
   return (
-    <article className="mx-auto w-full max-w-3xl px-6 pt-8 md:pt-12 pb-12">
+    <article className="container mx-auto max-w-4xl pt-8 md:pt-12 pb-12 px-6">
       {lightbox && (
         <Lightbox
           images={lightbox.images}
