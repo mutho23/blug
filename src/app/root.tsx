@@ -65,19 +65,19 @@ export function Layout({children}: {children: React.ReactNode}) {
       </head>
       <body className="flex flex-col min-h-screen justify-between bg-0 text-900 antialiased font-sans">
         <div>
-          <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-100">
-            <div className="mx-auto w-full max-w-[1600px] px-8 py-4 flex items-center justify-between gap-4">
+          <header className="sticky top-0 z-50 bg-black border-b border-zinc-900">
+            <div className="mx-auto w-full max-w-[1600px] px-8 py-3 flex items-center justify-between gap-4">
               <a href="/" className="flex items-center gap-3 group">
                 {profile?.avatar ? (
                   <img
-                    className="rounded-full w-11 h-11 ring-1 ring-200 group-hover:ring-600 transition-all"
+                    className="rounded-full w-8 h-8 ring-1 ring-200 group-hover:ring-600 transition-all"
                     src={profile.avatar}
                     alt="Mutho's avatar"
                   />
                 ) : (
-                  <div className="w-11 h-11 bg-100 rounded-full" />
+                  <div className="w-8 h-8 bg-100 rounded-full" />
                 )}
-                <span className="font-display text-xl text-950 hidden sm:inline">
+                <span className="font-display text-base text-950 hidden sm:inline">
                   mutho<span className="text-600">.</span>
                 </span>
               </a>
