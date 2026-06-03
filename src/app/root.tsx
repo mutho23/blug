@@ -65,8 +65,8 @@ export function Layout({children}: {children: React.ReactNode}) {
       </head>
       <body className="flex flex-col min-h-screen justify-between bg-0 text-900 antialiased font-sans">
         <div>
-          <header className="mx-auto w-full max-w-[1600px] px-8 pt-8">
-            <div className="flex items-center justify-between gap-4 border-b border-100 pb-5">
+          <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-100">
+            <div className="mx-auto w-full max-w-[1600px] px-8 py-4 flex items-center justify-between gap-4">
               <a href="/" className="flex items-center gap-3 group">
                 {profile?.avatar ? (
                   <img
