@@ -1,7 +1,7 @@
 import {useLoaderData} from '@remix-run/react'
 import {json} from '@remix-run/node'
 import {useState, useEffect, useCallback, useRef} from 'react'
-import {getNowPlaying, NowPlaying} from '~/spotify.server'
+import {getNowPlaying, NowPlaying} from '../spotify.server'
 
 const HANDLE = 'mutho.my.id'
 const THUMB_W = 480, THUMB_Q = 60, FULL_W = 1200, FULL_Q = 80
