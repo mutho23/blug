@@ -13,8 +13,8 @@ export const meta: MetaFunction = () => {
 
 export default function About() {
   return (
-    <div className="container mx-auto pt-12 md:pt-20 pb-24">
-      <section className="mb-16 md:mb-20 flex flex-col gap-5">
+    <div className="container mx-auto max-w-2xl pt-8 md:pt-12 pb-12">
+      <section className="mb-8 md:mb-10 flex flex-col gap-3">
         <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
           About Me<span className="text-600">.</span>
         </h1>
@@ -28,11 +28,9 @@ export default function About() {
       <Section label="Work">
         <WorkItem
           company="Teacher"
-
           role="I love to learn & teach"
           period="2013 — Present"
         />
-      
       </Section>
 
       <Section label="Community">
@@ -47,11 +45,8 @@ export default function About() {
       <Section label="Elsewhere">
         <LinkItem name="Discord" href="https://discord.com/users/1134329616501309540" />
         <LinkItem name="Spotify" href="https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8?si=95240bc3a0ad4de8" />
-        <LinkItem name="Steam" href="https://steamcommunity.com/id/moebatsu" />   
-<LinkItem name="Popfeed" href="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />   
-
-
-
+        <LinkItem name="Steam" href="https://steamcommunity.com/id/moebatsu" />
+        <LinkItem name="Popfeed" href="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />
       </Section>
     </div>
   )
@@ -65,9 +60,9 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="py-8 border-t border-100">
-      <h2 className="label mb-5">{label}</h2>
-      <ul className="flex flex-col gap-4">{children}</ul>
+    <section className="py-5 border-t border-100">
+      <h2 className="label mb-4">{label}</h2>
+      <ul className="flex flex-col gap-3">{children}</ul>
     </section>
   )
 }
@@ -79,7 +74,7 @@ function WorkItem({
   period,
 }: {
   company: string
-  href: string
+  href?: string
   role: string
   period: string
 }) {

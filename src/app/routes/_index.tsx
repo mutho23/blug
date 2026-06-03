@@ -72,8 +72,8 @@ export default function Index() {
   }, [items, activeTag])
 
   return (
-    <div className="container mx-auto pt-12 md:pt-20 pb-24">
-      <section className="mb-16 md:mb-20 flex flex-col gap-5">
+    <div className="container mx-auto max-w-2xl pt-8 md:pt-12 pb-12">
+      <section className="mb-8 md:mb-10 flex flex-col gap-3">
         <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
           It's Mutho<span className="text-[#5EA2FF]">.</span>
         </h1>
@@ -84,7 +84,7 @@ export default function Index() {
       </section>
 
       <section>
-        <div className="flex items-baseline justify-between mb-5 border-b border-zinc-800 pb-3">
+        <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
           <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
             Recent writing
           </h2>
@@ -95,7 +95,7 @@ export default function Index() {
         </div>
 
         {allTags.length > 0 && (
-          <div className="relative inline-block mb-8">
+          <div className="relative inline-block mb-5">
             <button
               onClick={() => setShowTags(!showTags)}
               className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
@@ -164,7 +164,7 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
     <li>
       <a
         href={`/posts/${post.rkey}`}
-        className="group flex gap-4 py-5 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
+        className="group flex gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
 
         <div className="w-12 h-[4.5rem] flex-shrink-0">
           {coverUrl ? (
@@ -238,8 +238,8 @@ function ReviewsSection({reviews}: {reviews: PopfeedReview[]}) {
   const activeLabel = activeType ? (CATEGORY_LABELS[activeType] ?? activeType) : 'All Reviews'
 
   return (
-    <section className="mt-20">
-      <div className="flex items-baseline justify-between mb-5 border-b border-zinc-800 pb-3">
+    <section className="mt-10">
+      <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
         <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
           Recently watched & read
         </h2>
@@ -247,7 +247,7 @@ function ReviewsSection({reviews}: {reviews: PopfeedReview[]}) {
       </div>
 
       {availableTypes.length > 0 && (
-        <div className="relative inline-block mb-8">
+        <div className="relative inline-block mb-5">
           <button
             onClick={() => setShowTypes(!showTypes)}
             className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
@@ -303,7 +303,7 @@ function ReviewItem({review}: {review: PopfeedReview}) {
     <li>
       <a
         href={`/reviews/${review.rkey}`}
-        className="group flex gap-4 py-5 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
+        className="group flex gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
 
         <div className="w-12 h-[4.5rem] flex-shrink-0">
           {review.posterUrl ? (

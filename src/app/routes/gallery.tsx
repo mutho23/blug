@@ -4,19 +4,15 @@ import {useState, useEffect, useCallback, useRef} from 'react'
 
 const HANDLE = 'mutho.my.id'
 
-// wsrv.nl: kompres gambar sebelum dikirim ke browser
-// Ubah angka ini untuk atur kualitas vs kecepatan
-const THUMB_W = 480   // lebar thumbnail di grid (px)
-const THUMB_Q = 60    // kualitas thumbnail (1-100)
-const FULL_W  = 1200  // lebar gambar di lightbox (px)
-const FULL_Q  = 80    // kualitas lightbox (1-100)
+const THUMB_W = 480
+const THUMB_Q = 60
+const FULL_W  = 1200
+const FULL_Q  = 80
 
 function wsrv(url: string, w: number, q: number) {
-  // encodeURIComponent agar URL Bluesky yang panjang tidak rusak
   return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${w}&q=${q}&output=webp&we=1`
 }
 
-// Cache DID di server memory — potong 1 round-trip per request
 let _did: string | null = null
 let _didAt = 0
 async function resolveDid() {
@@ -54,8 +50,8 @@ export const loader = async () => {
     const images = matchedPhotos.map((photo: any) => {
       const blobUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`
       return {
-        thumb: wsrv(blobUrl, THUMB_W, THUMB_Q), // untuk grid
-        full: wsrv(blobUrl, FULL_W, FULL_Q),    // untuk lightbox
+        thumb: wsrv(blobUrl, THUMB_W, THUMB_Q),
+        full: wsrv(blobUrl, FULL_W, FULL_Q),
         width: photo.value.aspectRatio?.width ?? 1,
         height: photo.value.aspectRatio?.height ?? 1,
       }
@@ -105,7 +101,6 @@ function Lightbox({
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  // Preload prev & next full-res
   useEffect(() => {
     if (images.length <= 1) return
     new Image().src = images[(index + 1) % images.length].full
@@ -148,10 +143,6 @@ function Lightbox({
         </button>
       )}
 
-      {/*
-        Progressive: thumbnail dari grid (sudah di-cache browser) langsung muncul
-        sebagai blur placeholder. Full-res load di belakangnya.
-      */}
       <div
         className="relative flex items-center justify-center"
         style={{maxHeight: '90vh', maxWidth: '90vw'}}
@@ -201,7 +192,6 @@ function Lightbox({
   )
 }
 
-// Tinggi fixed untuk semua foto di grid — pakai object-cover agar tidak ada ruang kosong
 const GRID_H = 'h-48'
 
 function MasonryGrid({
@@ -224,7 +214,6 @@ function MasonryGrid({
   }
 
   if (images.length === 1) {
-    // Foto tunggal: pertahankan aspect ratio asli dengan object-contain
     const {thumb, width, height} = images[0]
     const paddingTop = `${(height / width) * 100}%`
     return (
@@ -262,7 +251,6 @@ function MasonryGrid({
     )
   }
 
-  // 3+ foto: 2 kolom, foto ganjil terakhir full-width di bawah
   const isOdd = images.length % 2 !== 0
   const paired = isOdd ? images.slice(0, -1) : images
   const lastImg = isOdd ? images[images.length - 1] : null
@@ -329,7 +317,7 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState<{images: ImageItem[]; index: number} | null>(null)
 
   return (
-    <article className="container mx-auto pt-12 md:pt-20 pb-24 px-6">
+    <article className="container mx-auto max-w-4xl pt-8 md:pt-12 pb-12 px-6">
       {lightbox && (
         <Lightbox
           images={lightbox.images}
@@ -338,7 +326,7 @@ export default function Gallery() {
         />
       )}
 
-      <header className="flex flex-col gap-5 mb-12 md:mb-16 max-w-prose">
+      <header className="flex flex-col gap-3 mb-8 md:mb-10 max-w-prose">
         <h1 className="font-display text-950 text-4xl md:text-6xl leading-[1.02]">
           Gallery
         </h1>
@@ -374,7 +362,7 @@ export default function Gallery() {
                   href={`https://grain.social/profile/${did}/gallery/${rkey}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col gap-2 p-5 block">
+                  className="flex flex-col gap-2 p-4 block">
                   <h2 className="font-display text-xl text-950 group-hover:text-600 transition-colors">
                     {value.title ?? 'Untitled'}
                   </h2>
