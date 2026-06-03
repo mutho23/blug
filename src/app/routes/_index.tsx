@@ -5,7 +5,7 @@ import {getDid} from '../../atproto/getDid.js'
 import {useLoaderData} from '@remix-run/react'
 import {useMemo, useState} from 'react'
 import {LeafletDocument} from 'src/types'
-import {getNowPlaying, NowPlaying} from '../../spotify.server.js'
+import {getNowPlaying, NowPlaying} from '~/spotify.server'
 
 type FeedItem = LeafletDocument & {type: 'post'}
 

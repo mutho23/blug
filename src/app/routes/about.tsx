@@ -1,6 +1,6 @@
 import {json, MetaFunction} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
-import {getNowPlaying, NowPlaying} from '../../spotify.server.js'
+import {getNowPlaying, NowPlaying} from '~/spotify.server'
 
 // Re-export shared layout components — in your project these should live in
 // a shared file e.g. ~/components/ThreeColumnLayout.tsx and imported from there.
