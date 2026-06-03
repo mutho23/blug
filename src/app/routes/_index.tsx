@@ -72,7 +72,7 @@ export default function Index() {
   }, [items, activeTag])
 
   return (
-    <div className="container mx-auto max-w-5xl px-6 pt-12 pb-24 lg:grid lg:grid-cols-12 lg:gap-16">
+    <div className="container mx-auto max-w-[1600px] px-6 pt-12 pb-24 lg:grid lg:grid-cols-12 lg:gap-16">
       
       {/* BAGIAN KIRI: Sticky Header */}
       <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit mb-12 lg:mb-0 flex flex-col gap-4">
