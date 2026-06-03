@@ -72,30 +72,24 @@ export default function Index() {
   }, [items, activeTag])
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-16 pt-8 md:pt-12 pb-12">
-      <section className="mb-8 md:mb-10 flex flex-col gap-3">
-        <h1 className="font-display text-5xl md:text-6xl text-950 leading-[1.05]">
+    <div className="container mx-auto pt-12 md:pt-20 pb-24">
+      <section className="mb-16 md:mb-20 flex flex-col gap-5">
+        <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
           It's Mutho<span className="text-[#5EA2FF]">.</span>
         </h1>
-
-        <p className="text-lg leading-relaxed text-zinc-400 max-w-prose">
+        <p className="text-lg leading-relaxed text-900 max-w-prose">
           Just writing random stuff here.
         </p>
       </section>
 
       <section>
-        <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
-          <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
-            Recent writing
-          </h2>
-
-          <span className="label text-zinc-500">
-            {filteredItems.length} posts
-          </span>
+        <div className="flex items-baseline justify-between mb-5 border-b border-100 pb-3">
+          <h2 className="label">Recent writing</h2>
+          <span className="label">{filteredItems.length} posts</span>
         </div>
 
         {allTags.length > 0 && (
-          <div className="relative inline-block mb-5">
+          <div className="relative inline-block mb-6">
             <button
               onClick={() => setShowTags(!showTags)}
               className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
@@ -116,7 +110,6 @@ export default function Index() {
                   }`}>
                   All Posts
                 </button>
-
                 <div className="mt-2 flex flex-col">
                   {allTags.map(tag => (
                     <button
@@ -139,7 +132,7 @@ export default function Index() {
         {filteredItems.length === 0 ? (
           <p className="text-zinc-600 font-mono text-sm pt-4">No posts yet.</p>
         ) : (
-          <ul className="divide-y divide-zinc-900">
+          <ul className="divide-y divide-100">
             {filteredItems.map(item => (
               <PostItem post={item} did={did} key={`post-${item.rkey}`} />
             ))}
@@ -164,36 +157,37 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
     <li>
       <a
         href={`/posts/${post.rkey}`}
-        className="group flex gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
+        className="group flex items-center gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-50">
 
-        <div className="w-12 h-[4.5rem] flex-shrink-0">
-          {coverUrl ? (
+        {/* Thumbnail — hanya muncul kalau ada cover image */}
+        {coverUrl && (
+          <div className="w-14 h-14 flex-shrink-0">
             <img
               src={coverUrl}
               alt={post.title}
               className="w-full h-full object-cover rounded opacity-80 group-hover:opacity-100 transition-opacity"
             />
-          ) : (
-            <div className="w-full h-full rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-              <span className="text-zinc-700 text-xs">✏️</span>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="flex flex-col gap-1.5 min-w-0">
+        <div className="flex flex-col gap-1 min-w-0 flex-1">
           <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-display text-4xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
+            <h3 className="font-display text-xl md:text-2xl text-900 group-hover:text-600 transition-colors leading-tight">
               {post.title}
             </h3>
             <time
-              className="font-mono text-sm text-zinc-500 uppercase tracking-wider"
+              className="font-mono text-xs text-500 uppercase tracking-wider"
               dateTime={date.toISOString()}>
-              {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
+              {date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
             </time>
           </div>
 
           {post.description ? (
-            <p className="text-zinc-500 text-base leading-relaxed line-clamp-2">
+            <p className="text-500 text-base leading-relaxed line-clamp-2">
               {post.description}
             </p>
           ) : null}
@@ -238,16 +232,14 @@ function ReviewsSection({reviews}: {reviews: PopfeedReview[]}) {
   const activeLabel = activeType ? (CATEGORY_LABELS[activeType] ?? activeType) : 'All Reviews'
 
   return (
-    <section className="mt-10">
-      <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
-        <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
-          Recently watched & read
-        </h2>
-        <span className="label text-zinc-500">{filteredReviews.length} items</span>
+    <section className="mt-16 md:mt-20">
+      <div className="flex items-baseline justify-between mb-5 border-b border-100 pb-3">
+        <h2 className="label">Recently watched & read</h2>
+        <span className="label">{filteredReviews.length} items</span>
       </div>
 
       {availableTypes.length > 0 && (
-        <div className="relative inline-block mb-5">
+        <div className="relative inline-block mb-6">
           <button
             onClick={() => setShowTypes(!showTypes)}
             className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
@@ -287,7 +279,7 @@ function ReviewsSection({reviews}: {reviews: PopfeedReview[]}) {
         </div>
       )}
 
-      <ul className="divide-y divide-zinc-900">
+      <ul className="divide-y divide-100">
         {filteredReviews.map(review => (
           <ReviewItem review={review} key={`review-${review.rkey}`} />
         ))}
@@ -303,27 +295,22 @@ function ReviewItem({review}: {review: PopfeedReview}) {
     <li>
       <a
         href={`/reviews/${review.rkey}`}
-        className="group flex gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
+        className="group flex items-center gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-50">
 
-        <div className="w-12 h-[4.5rem] flex-shrink-0">
-          {review.posterUrl ? (
+        {/* Poster thumbnail */}
+        {review.posterUrl && (
+          <div className="w-10 h-14 flex-shrink-0">
             <img
               src={review.posterUrl}
               alt={review.title}
               className="w-full h-full object-cover rounded opacity-80 group-hover:opacity-100 transition-opacity"
             />
-          ) : (
-            <div className="w-full h-full rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-              <span className="text-zinc-700 text-xs">
-                {review.creativeWorkType === 'book' ? '📚' : '🎬'}
-              </span>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="flex flex-col gap-1.5 min-w-0">
+        <div className="flex flex-col gap-1 min-w-0 flex-1">
           <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-display text-2xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
+            <h3 className="font-display text-xl md:text-2xl text-900 group-hover:text-600 transition-colors leading-tight">
               {review.creativeWorkType === 'book' ? '📚' :
                review.creativeWorkType === 'movie' ? '🎬' :
                review.creativeWorkType === 'tv' ? '📺' :
@@ -332,19 +319,19 @@ function ReviewItem({review}: {review: PopfeedReview}) {
               {review.title}
             </h3>
             {review.releaseDate && (
-              <span className="font-mono text-sm text-zinc-600">
+              <span className="font-mono text-xs text-500">
                 {new Date(review.releaseDate).getFullYear()}
               </span>
             )}
             <time
-              className="font-mono text-sm text-zinc-500 uppercase tracking-wider"
+              className="font-mono text-xs text-500 uppercase tracking-wider"
               dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
             </time>
           </div>
 
           {review.mainCredit && (
-            <p className="text-zinc-500 text-sm">
+            <p className="text-500 text-sm">
               {review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}
             </p>
           )}
@@ -354,7 +341,7 @@ function ReviewItem({review}: {review: PopfeedReview}) {
               {Array.from({length: 5}, (_, i) => (
                 <span
                   key={i}
-                  className={`text-base ${i < Math.round(review.rating! / 2) ? 'text-[#5EA2FF]' : 'text-zinc-700'}`}>
+                  className={`text-sm ${i < Math.round(review.rating! / 2) ? 'text-[#5EA2FF]' : 'text-zinc-700'}`}>
                   ★
                 </span>
               ))}
