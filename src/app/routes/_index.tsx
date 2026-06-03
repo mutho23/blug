@@ -72,19 +72,22 @@ export default function Index() {
   }, [items, activeTag])
 
   return (
-    <div className="container mx-auto max-w-2xl pt-8 md:pt-12 pb-12">
-      <section className="mb-8 md:mb-10 flex flex-col gap-3">
+    <div className="container mx-auto max-w-5xl px-6 pt-12 pb-24 lg:grid lg:grid-cols-12 lg:gap-16">
+      
+      {/* BAGIAN KIRI: Sticky Header */}
+      <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit mb-12 lg:mb-0 flex flex-col gap-4">
         <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
           It's Mutho<span className="text-[#5EA2FF]">.</span>
         </h1>
-
-        <p className="text-lg leading-relaxed text-zinc-400 max-w-prose">
+        <p className="text-lg leading-relaxed text-zinc-400">
           Just writing random stuff here.
         </p>
-      </section>
+      </aside>
 
-      <section>
-        <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
+      {/* BAGIAN KANAN: Konten Posts & Reviews */}
+      <main className="lg:col-span-8 flex flex-col gap-16">
+        <section>
+          <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
           <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
             Recent writing
           </h2>
@@ -150,6 +153,7 @@ export default function Index() {
       {reviews.length > 0 && (
         <ReviewsSection reviews={reviews} />
       )}
+      </main>
     </div>
   )
 }

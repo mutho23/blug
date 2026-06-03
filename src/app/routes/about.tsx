@@ -13,19 +13,23 @@ export const meta: MetaFunction = () => {
 
 export default function About() {
   return (
-    <div className="container mx-auto max-w-2xl pt-8 md:pt-12 pb-12">
-      <section className="mb-8 md:mb-10 flex flex-col gap-3">
+    <div className="container mx-auto max-w-5xl px-6 pt-12 pb-24 lg:grid lg:grid-cols-12 lg:gap-16">
+      
+      {/* BAGIAN KIRI: Sticky Header */}
+      <aside className="lg:col-span-4 lg:sticky lg:top-32 h-fit mb-12 lg:mb-0 flex flex-col gap-4">
         <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
           About Me<span className="text-600">.</span>
         </h1>
-        <p className="text-lg leading-relaxed text-900 max-w-prose">
+        <p className="text-lg leading-relaxed text-900">
           Mutho (Muthohhar) is a coffee addict who loves to ramble about manga, 
           anime, movies, books, JRPGs, philosophy, and psychology.  
           This site is his personal space to write about whatever else is on his mind.
         </p>
-      </section>
+      </aside>
 
-      <Section label="Work">
+      {/* BAGIAN KANAN: Daftar Detail */}
+      <main className="lg:col-span-8 flex flex-col gap-10">
+        <Section label="Work">
         <WorkItem
           company="Teacher"
           role="I love to learn & teach"
@@ -48,6 +52,7 @@ export default function About() {
         <LinkItem name="Steam" href="https://steamcommunity.com/id/moebatsu" />
         <LinkItem name="Popfeed" href="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />
       </Section>
+      </main>
     </div>
   )
 }

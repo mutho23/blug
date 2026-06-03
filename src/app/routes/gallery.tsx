@@ -317,7 +317,7 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState<{images: ImageItem[]; index: number} | null>(null)
 
   return (
-    <article className="container mx-auto max-w-4xl pt-8 md:pt-12 pb-12 px-6">
+    <article className="container mx-auto max-w-6xl px-6 pt-12 pb-24 lg:grid lg:grid-cols-12 lg:gap-12">
       {lightbox && (
         <Lightbox
           images={lightbox.images}
@@ -326,8 +326,9 @@ export default function Gallery() {
         />
       )}
 
-      <header className="flex flex-col gap-3 mb-8 md:mb-10 max-w-prose">
-        <h1 className="font-display text-950 text-4xl md:text-6xl leading-[1.02]">
+      {/* BAGIAN KIRI: Sticky Header Galeri */}
+      <header className="lg:col-span-3 lg:sticky lg:top-32 h-fit mb-10 lg:mb-0 flex flex-col gap-3">
+        <h1 className="font-display text-950 text-4xl md:text-5xl leading-[1.02]">
           Gallery
         </h1>
         <p className="font-sans text-500 text-lg">
@@ -335,12 +336,12 @@ export default function Gallery() {
         </p>
       </header>
 
-      {galleries.length === 0 ? (
-        <div className="max-w-prose">
+      {/* BAGIAN KANAN: Grid Masonry Foto */}
+      <main className="lg:col-span-9">
+        {galleries.length === 0 ? (
           <p className="font-sans text-500 text-lg">Belum ada gallery.</p>
-        </div>
-      ) : (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+        ) : (
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
           {galleries.map((gallery: any, index: number) => {
             const value = gallery.value
             const uriParts = gallery.uri.split('/')
@@ -390,8 +391,9 @@ export default function Gallery() {
               </div>
             )
           })}
-        </div>
-      )}
+          </div>
+        )}
+      </main>
     </article>
   )
 }
