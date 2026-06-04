@@ -68,109 +68,142 @@ const SOCIALS = [
 
 function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initialIndex: number; onClose: () => void}) {
   const [index, setIndex] = useState(initialIndex)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
   const prev = useCallback(() => setIndex(i => (i - 1 + images.length) % images.length), [images.length])
   const next = useCallback(() => setIndex(i => (i + 1) % images.length), [images.length])
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    // Buat container div dan langsung append ke <body> — bypass semua transform parent
+    const div = document.createElement('div')
+    div.id = 'lightbox-root'
+    div.style.cssText = [
+      'position:fixed', 'top:0', 'left:0', 'right:0', 'bottom:0',
+      'width:100%', 'height:100%', 'z-index:999999',
+      'background:rgba(0,0,0,0.97)',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'touch-action:none', 'overscroll-behavior:none',
+    ].join(';')
+    document.body.appendChild(div)
+    containerRef.current = div
+
+    // Lock scroll & disable main transform
+    document.body.style.overflow = 'hidden'
+    const main = document.querySelector('main') as HTMLElement | null
+    const prevTransform = main?.style.transform ?? ''
+    const prevTransition = main?.style.transition ?? ''
+    if (main) { main.style.transform = 'none'; main.style.transition = 'none' }
+
+    return () => {
+      document.body.removeChild(div)
+      document.body.style.overflow = ''
+      if (main) { main.style.transform = prevTransform; main.style.transition = prevTransition }
+    }
+  }, [])
+
+  // Update gambar setiap index berubah
+  useEffect(() => {
+    const div = containerRef.current
+    if (!div) return
+    renderLightboxContent(div, images, index, prev, next, onClose,
+      (e: TouchEvent) => {
+        touchStartX.current = e.touches[0].clientX
+        touchStartY.current = e.touches[0].clientY
+      },
+      (e: TouchEvent) => {
+        if (touchStartX.current === null) return
+        const dx = touchStartX.current - e.changedTouches[0].clientX
+        const dy = Math.abs((touchStartY.current ?? 0) - e.changedTouches[0].clientY)
+        if (Math.abs(dx) > 50 && dy < Math.abs(dx) * 0.8) dx > 0 ? next() : prev()
+        touchStartX.current = null; touchStartY.current = null
+      }
+    )
+  }, [index, images, prev, next, onClose])
+
+  // Keyboard
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
       if (e.key === 'ArrowLeft') prev()
       if (e.key === 'ArrowRight') next()
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('keydown', fn)
+    return () => window.removeEventListener('keydown', fn)
   }, [onClose, prev, next])
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
-  }, [])
+  return null // render dilakukan via vanilla DOM
+}
 
-  // Capture & stop ALL touch events so root.tsx swipe handler tidak keikutan
-  const stopTouch = (e: React.TouchEvent) => e.stopPropagation()
+function renderLightboxContent(
+  div: HTMLDivElement,
+  images: ImageItem[],
+  index: number,
+  prev: () => void,
+  next: () => void,
+  onClose: () => void,
+  onTouchStart: (e: TouchEvent) => void,
+  onTouchEnd: (e: TouchEvent) => void,
+) {
+  div.innerHTML = `
+    <div id="lb-close" style="position:fixed;top:16px;right:16px;z-index:1000001;
+      background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);
+      border-radius:50%;width:48px;height:48px;color:white;font-size:22px;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      font-family:monospace;">✕</div>
 
-  return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/97"
-      style={{zIndex: 9999}}
-      onClick={onClose}
-      onTouchStart={e => {
-        e.stopPropagation()
-        touchStartX.current = e.touches[0].clientX
-        touchStartY.current = e.touches[0].clientY
-      }}
-      onTouchMove={stopTouch}
-      onTouchEnd={e => {
-        e.stopPropagation()
-        if (touchStartX.current === null) return
-        const dx = touchStartX.current - e.changedTouches[0].clientX
-        const dy = Math.abs((touchStartY.current ?? 0) - e.changedTouches[0].clientY)
-        if (Math.abs(dx) > 50 && dy < Math.abs(dx) * 0.8) {
-          dx > 0 ? next() : prev()
-        }
-        touchStartX.current = null
-        touchStartY.current = null
-      }}>
-
-      {/* Close button */}
-      <button
-        className="absolute top-5 right-5 text-white/70 hover:text-white text-3xl font-light font-mono leading-none"
-        style={{zIndex: 10000}}
-        onClick={onClose}>✕</button>
-
-      {/* Counter */}
-      {images.length > 1 && (
-        <div className="absolute top-5 left-1/2 -translate-x-1/2 font-mono text-sm text-white/40" style={{zIndex: 10000}}>
-          {index + 1} / {images.length}
-        </div>
-      )}
-
-      {/* Prev / Next arrows */}
-      {images.length > 1 && (
-        <button
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-5xl px-3 py-6"
-          style={{zIndex: 10000}}
-          onClick={e => { e.stopPropagation(); prev() }}>‹</button>
-      )}
-
-      {/* Image container — centered, never goes off-screen */}
-      <div
-        className="relative flex items-center justify-center"
-        style={{width: '100vw', height: '100vh', padding: '60px 60px'}}
-        onClick={e => e.stopPropagation()}>
-        {/* Blur placeholder */}
-        <img key={`t-${index}`} src={images[index].thumb} alt="" aria-hidden
-          className="absolute inset-0 w-full h-full object-contain blur-md scale-105 opacity-30" />
-        {/* Full image */}
-        <img key={`f-${index}`} src={images[index].full} alt={`Photo ${index + 1}`}
-          className="relative object-contain"
-          style={{maxWidth: '100%', maxHeight: '100%'}}
-          onLoad={e => {
-            const t = e.currentTarget.previousElementSibling as HTMLElement | null
-            if (t) t.style.display = 'none'
-          }} />
-      </div>
-
-      {images.length > 1 && (
-        <button
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-5xl px-3 py-6"
-          style={{zIndex: 10000}}
-          onClick={e => { e.stopPropagation(); next() }}>›</button>
-      )}
-
-      {/* Dot indicators */}
-      {images.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2" style={{zIndex: 10000}}>
-          {images.map((_, i) => (
-            <button key={i} onClick={e => { e.stopPropagation(); setIndex(i) }}
-              className={`rounded-full transition-all ${i === index ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/25'}`} />
-          ))}
-        </div>
-      )}
+    ${images.length > 1 ? `
+    <div style="position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      z-index:1000001;color:rgba(255,255,255,0.4);font-family:monospace;font-size:13px;">
+      ${index + 1} / ${images.length}
     </div>
-  )
+    <div id="lb-prev" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);
+      z-index:1000001;background:rgba(0,0,0,0.5);border:none;border-radius:8px;
+      color:rgba(255,255,255,0.8);font-size:40px;padding:12px 18px;cursor:pointer;">‹</div>
+    <div id="lb-next" style="position:fixed;right:8px;top:50%;transform:translateY(-50%);
+      z-index:1000001;background:rgba(0,0,0,0.5);border:none;border-radius:8px;
+      color:rgba(255,255,255,0.8);font-size:40px;padding:12px 18px;cursor:pointer;">›</div>
+    ` : ''}
+
+    <div style="position:fixed;inset:0;display:flex;align-items:center;
+      justify-content:center;padding:72px 72px;box-sizing:border-box;
+      pointer-events:none;">
+      <img src="${images[index].full}" alt="Photo ${index + 1}"
+        style="max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;
+        pointer-events:auto;display:block;" />
+    </div>
+
+    ${images.length > 1 ? `
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      z-index:1000001;display:flex;gap:8px;align-items:center;">
+      ${images.map((_, i) => `
+        <div data-dot="${i}" style="border-radius:999px;cursor:pointer;
+          width:${i === index ? '16px' : '6px'};height:6px;
+          background:${i === index ? 'white' : 'rgba(255,255,255,0.25)'};
+          transition:all 0.2s;"></div>
+      `).join('')}
+    </div>
+    ` : ''}
+  `
+
+  // Event listeners
+  div.querySelector('#lb-close')?.addEventListener('click', e => { e.stopPropagation(); onClose() })
+  div.querySelector('#lb-prev')?.addEventListener('click', e => { e.stopPropagation(); prev() })
+  div.querySelector('#lb-next')?.addEventListener('click', e => { e.stopPropagation(); next() })
+  div.querySelectorAll('[data-dot]').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation()
+      // dots navigation handled via index state — trigger click pada index
+    })
+  })
+
+  // Background click = close
+  div.addEventListener('click', onClose, {once: true})
+
+  // Touch events
+  div.addEventListener('touchstart', (e) => { e.stopPropagation(); onTouchStart(e as TouchEvent) }, {passive: true})
+  div.addEventListener('touchmove', (e) => { e.stopPropagation() }, {passive: false})
+  div.addEventListener('touchend', (e) => { e.stopPropagation(); onTouchEnd(e as TouchEvent) }, {passive: true})
 }
 
 function GalleryThumb({images, title, onPhotoClick, eager = false}: {images: ImageItem[]; title: string; onPhotoClick: (i: number) => void; eager?: boolean}) {
