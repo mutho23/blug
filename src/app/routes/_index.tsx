@@ -115,7 +115,7 @@ export default function Index() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
-      <div className="w-full max-w-3xl px-8 md:px-12 py-8">
+      <div className="w-full max-w-5xl px-8 md:px-14 py-8">
         {/* Hero */}
         <section className="mb-9">
           <h1 className="font-display text-[42px] md:text-[46px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
@@ -270,23 +270,23 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
     : null
   return (
     <li>
-      <a href={`/posts/${post.rkey}`} className="group flex gap-4 py-4 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
-        <div className="w-14 h-14 shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
+      <a href={`/posts/${post.rkey}`} className="group flex gap-5 py-6 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
+        <div className="w-24 h-24 shrink-0 rounded-md bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {coverUrl
             ? <img src={coverUrl} alt={post.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-            : <span className="text-[#444] text-sm">✏️</span>}
+            : <span className="text-[#444] text-2xl">✏️</span>}
         </div>
-        <div className="flex flex-col gap-1.5 min-w-0">
-          <h3 className="font-display text-[20px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{post.title}</h3>
-          <time className="font-mono text-[14px] text-[#aaaaaa]" dateTime={date.toISOString()}>
+        <div className="flex flex-col gap-2 min-w-0">
+          <h3 className="font-display text-[24px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{post.title}</h3>
+          <time className="font-mono text-[15px] text-[#aaaaaa]" dateTime={date.toISOString()}>
             {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
           </time>
           {post.description && (
-            <p className="font-sans text-[15px] text-[#888] leading-relaxed line-clamp-2">{post.description}</p>
+            <p className="font-sans text-[16px] text-[#888] leading-relaxed line-clamp-2">{post.description}</p>
           )}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-0.5">
-              {post.tags.map(tag => <span key={tag} className="font-mono text-[12px] text-[#4a9eff]">{tag}</span>)}
+            <div className="flex flex-wrap gap-2 mt-0.5">
+              {post.tags.map(tag => <span key={tag} className="font-mono text-[13px] text-[#4a9eff]">{tag}</span>)}
             </div>
           )}
         </div>
@@ -300,28 +300,28 @@ function ReviewItem({review}: {review: PopfeedReview}) {
   const emoji = TYPE_EMOJI[review.creativeWorkType ?? ''] ?? '🎞️'
   return (
     <li>
-      <a href={`/reviews/${review.rkey}`} className="group flex gap-4 py-4 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
-        <div className="w-14 h-[70px] shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
+      <a href={`/reviews/${review.rkey}`} className="group flex gap-5 py-6 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
+        <div className="w-[72px] h-[108px] shrink-0 rounded-md bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {review.posterUrl
             ? <img src={review.posterUrl} alt={review.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-            : <span className="text-[18px]">{emoji}</span>}
+            : <span className="text-[24px]">{emoji}</span>}
         </div>
-        <div className="flex flex-col gap-1.5 min-w-0">
-          <h3 className="font-display text-[20px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
+        <div className="flex flex-col gap-2 min-w-0">
+          <h3 className="font-display text-[24px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            {review.creativeWorkType && <span className="font-mono text-[14px] text-[#aaaaaa]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
-            <span className="font-mono text-[14px] text-[#777]">·</span>
-            <time className="font-mono text-[14px] text-[#aaaaaa]" dateTime={date.toISOString()}>
+            {review.creativeWorkType && <span className="font-mono text-[15px] text-[#aaaaaa]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
+            <span className="font-mono text-[15px] text-[#777]">·</span>
+            <time className="font-mono text-[15px] text-[#aaaaaa]" dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
             </time>
           </div>
           {review.mainCredit && (
-            <p className="font-mono text-[14px] text-[#aaaaaa]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
+            <p className="font-mono text-[15px] text-[#aaaaaa]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
           )}
           {review.rating && (
             <div className="flex items-center gap-0.5">
               {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[14px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
+                <span key={i} className={`text-[16px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
               ))}
             </div>
           )}

@@ -204,7 +204,7 @@ export default function Gallery() {
       </aside>
 
       {/* ── Main Content ── */}
-      <div className="flex-1 px-6 md:px-10 py-8 min-w-0 max-w-4xl">
+      <div className="flex-1 px-6 md:px-14 py-8 min-w-0">
         {lightbox && (
           <Lightbox images={lightbox.images} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
         )}

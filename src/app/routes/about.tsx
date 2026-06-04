@@ -41,7 +41,7 @@ export default function About() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
-      <div className="w-full max-w-3xl px-8 md:px-12 py-10">
+      <div className="w-full max-w-5xl px-8 md:px-14 py-10">
         <section className="mb-10">
           <h1 className="font-display text-[42px] text-[#f0f0f0] tracking-[-0.02em]">
             About Me<span className="text-[#4a9eff]">.</span>
