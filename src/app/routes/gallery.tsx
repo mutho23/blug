@@ -81,9 +81,9 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
     div.style.cssText = [
       'position:fixed', 'top:0', 'left:0', 'right:0', 'bottom:0',
       'width:100%', 'height:100%', 'z-index:999999',
-      'background:rgba(0,0,0,0.97)',
+      'background:#000',
       'display:flex', 'align-items:center', 'justify-content:center',
-      'touch-action:none', 'overscroll-behavior:none',
+      'touch-action:none', 'overscroll-behavior:none', 'overflow:hidden',
     ].join(';')
     document.body.appendChild(div)
     containerRef.current = div
@@ -148,29 +148,33 @@ function renderLightboxContent(
   div.innerHTML = `
     <div id="lb-close" style="position:fixed;top:16px;right:16px;z-index:1000001;
       background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);
-      border-radius:50%;width:48px;height:48px;color:white;font-size:22px;
+      border-radius:50%;width:44px;height:44px;color:white;font-size:20px;
       display:flex;align-items:center;justify-content:center;cursor:pointer;
-      font-family:monospace;">✕</div>
+      font-family:monospace;-webkit-tap-highlight-color:transparent;">✕</div>
 
     ${images.length > 1 ? `
-    <div style="position:fixed;top:20px;left:50%;transform:translateX(-50%);
-      z-index:1000001;color:rgba(255,255,255,0.4);font-family:monospace;font-size:13px;">
+    <div style="position:fixed;top:18px;left:50%;transform:translateX(-50%);
+      z-index:1000001;color:rgba(255,255,255,0.5);font-family:monospace;font-size:13px;
+      background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:99px;">
       ${index + 1} / ${images.length}
     </div>
-    <div id="lb-prev" style="position:fixed;left:8px;top:50%;transform:translateY(-50%);
-      z-index:1000001;background:rgba(0,0,0,0.5);border:none;border-radius:8px;
-      color:rgba(255,255,255,0.8);font-size:40px;padding:12px 18px;cursor:pointer;">‹</div>
-    <div id="lb-next" style="position:fixed;right:8px;top:50%;transform:translateY(-50%);
-      z-index:1000001;background:rgba(0,0,0,0.5);border:none;border-radius:8px;
-      color:rgba(255,255,255,0.8);font-size:40px;padding:12px 18px;cursor:pointer;">›</div>
+    <div id="lb-prev" style="position:fixed;left:4px;top:50%;transform:translateY(-50%);
+      z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
+      color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;">‹</div>
+    <div id="lb-next" style="position:fixed;right:4px;top:50%;transform:translateY(-50%);
+      z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
+      color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;">›</div>
     ` : ''}
 
-    <div style="position:fixed;inset:0;display:flex;align-items:center;
-      justify-content:center;padding:72px 72px;box-sizing:border-box;
-      pointer-events:none;">
+    <div style="position:fixed;top:0;left:0;right:0;bottom:0;
+      width:100vw;height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      padding:0;margin:0;box-sizing:border-box;pointer-events:none;">
       <img src="${images[index].full}" alt="Photo ${index + 1}"
-        style="max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;
-        pointer-events:auto;display:block;" />
+        style="max-width:100vw;max-height:100vh;width:auto;height:auto;object-fit:contain;display:block;
+        pointer-events:auto;-webkit-user-select:none;user-select:none;" />
     </div>
 
     ${images.length > 1 ? `
