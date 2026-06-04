@@ -43,7 +43,6 @@ const SOCIALS = [
   {icon: '✉️', label: 'Email',    href: 'mailto:hello@mutho.site'},
 ]
 
-// Urutan halaman untuk swipe
 const PAGE_ORDER = ['/', '/about', '/gallery']
 
 export function Layout({children}: {children: React.ReactNode}) {
@@ -55,23 +54,45 @@ export function Layout({children}: {children: React.ReactNode}) {
   const isOn = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
 
-  // Swipe handler — hanya aktif di halaman utama (bukan post/review detail)
   const isMainPage = PAGE_ORDER.includes(location.pathname)
   const currentIndex = PAGE_ORDER.indexOf(location.pathname)
 
+  // Swipe state — live drag offset tracked in a ref, committed to state only for re-render
+  const touchStartX = React.useRef(0)
+  const touchStartY = React.useRef(0)
+  const dragging = React.useRef(false)
+  const [dragOffset, setDragOffset] = React.useState(0)
+
   React.useEffect(() => {
     if (!isMainPage) return
-    let startX = 0
-    let startY = 0
 
     const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX
-      startY = e.touches[0].clientY
+      touchStartX.current = e.touches[0].clientX
+      touchStartY.current = e.touches[0].clientY
+      dragging.current = false
+      setDragOffset(0)
     }
+
+    const onTouchMove = (e: TouchEvent) => {
+      const dx = e.touches[0].clientX - touchStartX.current
+      const dy = Math.abs(e.touches[0].clientY - touchStartY.current)
+      // Only hijack if mostly horizontal
+      if (!dragging.current && Math.abs(dx) < 8) return
+      if (!dragging.current && dy > Math.abs(dx) * 0.8) return
+      dragging.current = true
+      // Resist at edges
+      if ((dx > 0 && currentIndex === 0) || (dx < 0 && currentIndex === PAGE_ORDER.length - 1)) {
+        setDragOffset(dx * 0.2) // rubber-band
+      } else {
+        setDragOffset(dx)
+      }
+    }
+
     const onTouchEnd = (e: TouchEvent) => {
-      const dx = startX - e.changedTouches[0].clientX
-      const dy = Math.abs(startY - e.changedTouches[0].clientY)
-      // Swipe horizontal minimal 60px, lebih horizontal dari vertikal
+      const dx = touchStartX.current - e.changedTouches[0].clientX
+      const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY)
+      setDragOffset(0)
+      dragging.current = false
       if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.6) return
       if (dx > 0 && currentIndex < PAGE_ORDER.length - 1) {
         navigate(PAGE_ORDER[currentIndex + 1])
@@ -79,10 +100,13 @@ export function Layout({children}: {children: React.ReactNode}) {
         navigate(PAGE_ORDER[currentIndex - 1])
       }
     }
+
     document.addEventListener('touchstart', onTouchStart, {passive: true})
+    document.addEventListener('touchmove', onTouchMove, {passive: true})
     document.addEventListener('touchend', onTouchEnd, {passive: true})
     return () => {
       document.removeEventListener('touchstart', onTouchStart)
+      document.removeEventListener('touchmove', onTouchMove)
       document.removeEventListener('touchend', onTouchEnd)
     }
   }, [isMainPage, currentIndex, navigate])
@@ -108,7 +132,7 @@ export function Layout({children}: {children: React.ReactNode}) {
 
             <div className="mx-auto w-full max-w-[1600px] px-4 h-[52px] flex items-center justify-between">
 
-              {/* ── Mobile kiri: Avatar/Brand ── */}
+              {/* ── Kiri: Avatar ── */}
               <a href="/" className="flex items-center gap-2 group sm:gap-2.5">
                 {profile?.avatar ? (
                   <img
@@ -128,7 +152,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                 </span>
               </a>
 
-              {/* ── Mobile tengah: Nav links langsung ── */}
+              {/* ── Mobile tengah: nav links ── */}
               <nav className="sm:hidden flex items-center gap-5">
                 <MobileNavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</MobileNavLink>
                 <MobileNavLink href="/about" selected={isOn('/about')}>About</MobileNavLink>
@@ -142,7 +166,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <NavLink href="/gallery" selected={isOn('/gallery')}>Gallery</NavLink>
               </nav>
 
-              {/* ── Mobile kanan: tombol Contact ── */}
+              {/* ── Kanan: burger Contact (mobile) / spacer (desktop) ── */}
               <button
                 className="sm:hidden flex flex-col justify-center gap-[5px] w-9 h-9 shrink-0"
                 aria-label="Contact"
@@ -153,8 +177,6 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
                 <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
               </button>
-
-              {/* Desktop kanan: kosong / placeholder jika perlu */}
               <div className="hidden sm:block w-9" />
             </div>
 
@@ -176,18 +198,27 @@ export function Layout({children}: {children: React.ReactNode}) {
               ))}
             </div>
 
-            {/* ── Mobile: swipe indicator dots ── */}
+            {/* ── Dot indicator (mobile, halaman utama) ── */}
             {isMainPage && (
               <div className="sm:hidden flex justify-center gap-1.5 py-1.5">
                 {PAGE_ORDER.map((path, i) => (
                   <a key={path} href={path}
-                    className={`block rounded-full transition-all ${i === currentIndex ? 'w-4 h-1.5 bg-[#4a9eff]' : 'w-1.5 h-1.5 bg-[#333]'}`} />
+                    className={`block rounded-full transition-all duration-300 ${i === currentIndex ? 'w-4 h-1.5 bg-[#4a9eff]' : 'w-1.5 h-1.5 bg-[#333]'}`} />
                 ))}
               </div>
             )}
           </header>
 
-          <main className="flex-1">{children}</main>
+          {/* Konten — live drag transform saat swipe */}
+          <main
+            className="flex-1"
+            style={{
+              transform: isMainPage && dragOffset !== 0 ? `translateX(${dragOffset}px)` : 'none',
+              transition: dragOffset === 0 ? 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
+              willChange: 'transform',
+            }}>
+            {children}
+          </main>
         </div>
 
         {/* Footer */}
