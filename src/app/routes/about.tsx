@@ -34,12 +34,6 @@ export default function About() {
             </span>
           </a>
         ))}
-
-        <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-5">Writing</p>
-        <a href="/posts/why-me" className="block py-1.5 border-b border-[#1e1e1e] group">
-          <div className="font-mono text-[16px] text-[#b0b0b0] group-hover:text-[#4a9eff] transition-colors">why me?</div>
-          <div className="font-mono text-[12px] text-[#555] mt-0.5">May 30, 2026</div>
-        </a>
       </aside>
 
       {/* ── Main Content ── */}

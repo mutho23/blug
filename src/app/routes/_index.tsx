@@ -3,7 +3,7 @@ import {getPosts} from '../../atproto/index.js'
 import {getReviews, PopfeedReview} from '../../atproto/getReviews.js'
 import {getDid} from '../../atproto/getDid.js'
 import {useLoaderData} from '@remix-run/react'
-import {useMemo, useState} from 'react'
+import {useMemo, useState, useRef, useEffect} from 'react'
 import {LeafletDocument} from 'src/types'
 
 type FeedItem = LeafletDocument & {type: 'post'}
@@ -56,6 +56,24 @@ export default function Index() {
 
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [activeReviewType, setActiveReviewType] = useState<string | null>(null)
+  const [postDropdownOpen, setPostDropdownOpen] = useState(false)
+  const [reviewDropdownOpen, setReviewDropdownOpen] = useState(false)
+  const postDropdownRef = useRef<HTMLDivElement>(null)
+  const reviewDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (postDropdownRef.current && !postDropdownRef.current.contains(e.target as Node)) {
+        setPostDropdownOpen(false)
+      }
+      if (reviewDropdownRef.current && !reviewDropdownRef.current.contains(e.target as Node)) {
+        setReviewDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>()
@@ -79,47 +97,8 @@ export default function Index() {
     return reviews.filter(r => r.creativeWorkType === activeReviewType)
   }, [reviews, activeReviewType])
 
-  // Stats
-  const tagCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    items.forEach(item => item.tags?.forEach(t => { counts[t] = (counts[t] || 0) + 1 }))
-    return counts
-  }, [items])
-
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
-
-      {/* ── Left Sidebar ── */}
-      <aside className="hidden lg:block w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        {/* Filter */}
-        <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2.5">Filter</p>
-        <div className="flex flex-wrap gap-1 mb-5">
-          <FilterTag active={activeTag === null} onClick={() => setActiveTag(null)}>All</FilterTag>
-          <FilterTag active={activeTag === 'blog'} onClick={() => setActiveTag('blog')}>Blog</FilterTag>
-          <FilterTag active={activeTag === 'review'} onClick={() => setActiveTag('review')}>Review</FilterTag>
-          {allTags.filter(t => t !== 'blog' && t !== 'review').map(tag => (
-            <FilterTag key={tag} active={activeTag === tag} onClick={() => setActiveTag(tag)}>
-              {tag}
-            </FilterTag>
-          ))}
-        </div>
-
-        {/* Recent sidebar */}
-        <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-4">Recent</p>
-        {items.slice(0, 5).map(item => (
-          <a
-            key={item.rkey}
-            href={`/posts/${item.rkey}`}
-            className="block py-1.5 border-b border-[#1e1e1e] group last:border-0">
-            <div className="font-mono text-[16px] text-[#b0b0b0] group-hover:text-[#4a9eff] transition-colors truncate">
-              {item.title}
-            </div>
-            <div className="font-mono text-[12px] text-[#555] mt-0.5">
-              {new Date(item.publishedAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
-            </div>
-          </a>
-        ))}
-      </aside>
 
       {/* ── Main Content ── */}
       <div className="flex-1 px-6 md:px-8 py-7 min-w-0">
@@ -131,24 +110,50 @@ export default function Index() {
           <p className="font-mono text-[15px] text-[#555] mt-1">Just writing random stuff here.</p>
         </section>
 
-        {/* Posts section */}
+        {/* ── Posts section ── */}
         <section className="mb-8">
           <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
             <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555]">Recent Writing</span>
-            <span className="font-mono text-[13px] text-[#555]">{filteredItems.length} Posts</span>
-          </div>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[13px] text-[#555]">{filteredItems.length} Posts</span>
 
-          {/* Mobile tag filter */}
-          {allTags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-4 lg:hidden">
-              <FilterTag active={activeTag === null} onClick={() => setActiveTag(null)}>All</FilterTag>
-              {allTags.map(tag => (
-                <FilterTag key={tag} active={activeTag === tag} onClick={() => setActiveTag(tag)}>
-                  {tag}
-                </FilterTag>
-              ))}
+              {/* Post tag dropdown */}
+              {allTags.length > 0 && (
+                <div className="relative" ref={postDropdownRef}>
+                  <button
+                    onClick={() => setPostDropdownOpen(prev => !prev)}
+                    className={`font-mono text-[13px] uppercase tracking-[0.08em] px-2.5 py-1 rounded border transition-all ${
+                      activeTag
+                        ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]'
+                        : 'text-[#555] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
+                    }`}>
+                    {activeTag ?? 'Filter'} ▾
+                  </button>
+                  {postDropdownOpen && (
+                    <div className="absolute right-0 mt-1 bg-[#141414] border border-[#2a2a2a] rounded-md shadow-xl z-10 min-w-[120px] py-1 overflow-hidden">
+                      <button
+                        onClick={() => { setActiveTag(null); setPostDropdownOpen(false) }}
+                        className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${
+                          activeTag === null ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'
+                        }`}>
+                        All
+                      </button>
+                      {allTags.map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => { setActiveTag(tag); setPostDropdownOpen(false) }}
+                          className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${
+                            activeTag === tag ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'
+                          }`}>
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {filteredItems.length === 0 ? (
             <p className="font-mono text-[15px] text-[#444] py-4">No posts yet.</p>
@@ -161,24 +166,51 @@ export default function Index() {
           )}
         </section>
 
-        {/* Reviews section */}
+        {/* ── Reviews section ── */}
         {reviews.length > 0 && (
           <section>
             <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
               <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555]">Recently Watched &amp; Read</span>
-              <span className="font-mono text-[13px] text-[#555]">{filteredReviews.length} Items</span>
-            </div>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[13px] text-[#555]">{filteredReviews.length} Items</span>
 
-            {availableReviewTypes.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                <FilterTag active={activeReviewType === null} onClick={() => setActiveReviewType(null)}>All</FilterTag>
-                {availableReviewTypes.map(type => (
-                  <FilterTag key={type} active={activeReviewType === type} onClick={() => setActiveReviewType(type)}>
-                    {CATEGORY_LABELS[type] ?? type}
-                  </FilterTag>
-                ))}
+                {/* Review type dropdown */}
+                {availableReviewTypes.length > 0 && (
+                  <div className="relative" ref={reviewDropdownRef}>
+                    <button
+                      onClick={() => setReviewDropdownOpen(prev => !prev)}
+                      className={`font-mono text-[13px] uppercase tracking-[0.08em] px-2.5 py-1 rounded border transition-all ${
+                        activeReviewType
+                          ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]'
+                          : 'text-[#555] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
+                      }`}>
+                      {activeReviewType ? (CATEGORY_LABELS[activeReviewType] ?? activeReviewType) : 'Filter'} ▾
+                    </button>
+                    {reviewDropdownOpen && (
+                      <div className="absolute right-0 mt-1 bg-[#141414] border border-[#2a2a2a] rounded-md shadow-xl z-10 min-w-[120px] py-1 overflow-hidden">
+                        <button
+                          onClick={() => { setActiveReviewType(null); setReviewDropdownOpen(false) }}
+                          className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${
+                            activeReviewType === null ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'
+                          }`}>
+                          All
+                        </button>
+                        {availableReviewTypes.map(type => (
+                          <button
+                            key={type}
+                            onClick={() => { setActiveReviewType(type); setReviewDropdownOpen(false) }}
+                            className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${
+                              activeReviewType === type ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'
+                            }`}>
+                            {CATEGORY_LABELS[type] ?? type}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
             <ul className="divide-y divide-[#1a1a1a]">
               {filteredReviews.map(review => (
@@ -200,21 +232,6 @@ export default function Index() {
           <div className="font-display text-[35px] text-[#f0f0f0]">{reviews.length}</div>
           <div className="font-mono text-[12px] text-[#555] mt-0.5">Reviews</div>
         </div>
-
-        {Object.keys(tagCounts).length > 0 && (
-          <>
-            <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-2">Tags</p>
-            <div className="flex flex-wrap gap-1">
-              {Object.entries(tagCounts).map(([tag]) => (
-                <span
-                  key={tag}
-                  className="font-mono text-[16px] text-[#888] border border-[#2a2a2a] bg-[#1a1a1a] px-2 py-0.5 rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </>
-        )}
       </aside>
 
     </div>
@@ -222,20 +239,6 @@ export default function Index() {
 }
 
 /* ── Sub-components ── */
-
-function FilterTag({active, onClick, children}: {active: boolean; onClick: () => void; children: React.ReactNode}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`font-mono text-[16px] px-2.5 py-1 rounded-full border transition-all ${
-        active
-          ? 'bg-[#1e1e1e] text-[#f0f0f0] border-[#4a9eff]'
-          : 'bg-[#1a1a1a] text-[#888] border-[#2a2a2a] hover:text-[#f0f0f0] hover:border-[#555]'
-      }`}>
-      {children}
-    </button>
-  )
-}
 
 function PostItem({post, did}: {post: LeafletDocument; did: string}) {
   const date = new Date(post.publishedAt)
@@ -265,7 +268,7 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-0.5">
               {post.tags.map(tag => (
-                <span key={tag} className="font-mono text-[18px] text-[#4a9eff]">{tag}</span>
+                <span key={tag} className="font-mono text-[11px] text-[#4a9eff]">{tag}</span>
               ))}
             </div>
           )}
@@ -308,29 +311,29 @@ function ReviewItem({review}: {review: PopfeedReview}) {
           )}
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[18px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+          <h3 className="font-display text-[16px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
             {emoji} {review.title}
           </h3>
           <div className="flex items-center gap-2 flex-wrap">
             {review.creativeWorkType && (
-              <span className="font-mono text-[18px] text-[#555]">
+              <span className="font-mono text-[12px] text-[#555]">
                 {CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}
               </span>
             )}
-            <span className="font-mono text-[18px] text-[#444]">·</span>
+            <span className="font-mono text-[12px] text-[#444]">·</span>
             <time className="font-mono text-[12px] text-[#555]" dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
             </time>
           </div>
           {review.mainCredit && (
-            <p className="font-mono text-[18px] text-[#555]">
+            <p className="font-mono text-[12px] text-[#555]">
               {review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}
             </p>
           )}
           {review.rating && (
             <div className="flex items-center gap-0.5">
               {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[16px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
+                <span key={i} className={`text-[13px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
               ))}
             </div>
           )}
