@@ -106,7 +106,7 @@ export function Layout({children}: {children: React.ReactNode}) {
 
               {/* Desktop nav */}
               <nav className="hidden sm:flex items-center gap-7">
-                <NavLink href="/" selected={isOn('/') && location.pathname === '/'}>Writing</NavLink>
+                <NavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</NavLink>
                 <NavLink href="/about" selected={isOn('/about')}>About</NavLink>
                 <NavLink href="/gallery" selected={isOn('/gallery')}>Gallery</NavLink>
                 <a
@@ -135,7 +135,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             {/* ── Mobile dropdown: Nav (kanan) ── */}
             <div id="mobile-menu" className="hidden sm:hidden border-t border-[#222] px-6 py-1" style={{background: 'rgba(10,10,10,0.97)'}}>
               {[
-                {href: '/',       label: 'Writing',    active: isOn('/') && location.pathname === '/'},
+                {href: '/',       label: 'Blogs',      active: isOn('/') && location.pathname === '/'},
                 {href: '/about',  label: 'About',      active: isOn('/about')},
                 {href: '/gallery',label: 'Gallery',    active: isOn('/gallery')},
                 {href: 'https://bsky.app/profile/mutho.my.id', label: 'Bluesky ↗', active: false},
@@ -175,7 +175,7 @@ export function Layout({children}: {children: React.ReactNode}) {
 
         {/* Footer */}
         <footer className="border-t border-[#1a1a1a] px-8 py-3.5 flex items-center justify-between">
-          <span className="font-display text-[17px] text-[#555]">mutho.</span>
+          <span className="font-mono text-[12px] tracking-[0.12em] uppercase text-[#555]">Made on ATProto</span>
           <a
             href="https://github.com/mutho23/blug"
             className="font-mono text-[16px] text-[#444] hover:text-[#4a9eff] transition-colors">
