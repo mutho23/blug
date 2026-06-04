@@ -84,12 +84,12 @@ export function Layout({children}: {children: React.ReactNode}) {
                   />
                 ) : (
                   <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-medium"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[13px] font-medium"
                     style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
                     M
                   </div>
                 )}
-                <span className="font-display text-[17px] text-[#f0f0f0] hidden sm:inline tracking-[-0.01em]">
+                <span className="font-display text-[20px] text-[#f0f0f0] hidden sm:inline tracking-[-0.01em]">
                   mutho<span className="text-[#4a9eff]">.</span>
                 </span>
               </a>
@@ -103,7 +103,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                   href="https://bsky.app/profile/mutho.my.id"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-[11px] text-[#555] hover:text-[#b0b0b0] transition-colors tracking-[0.04em]">
+                  className="font-mono text-[14px] text-[#555] hover:text-[#b0b0b0] transition-colors tracking-[0.04em]">
                   Bluesky
                 </a>
               </nav>
@@ -134,7 +134,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <a
                   key={href}
                   href={href}
-                  className={`py-3 border-b border-[#1a1a1a] last:border-0 font-mono text-[13px] transition-colors ${active ? 'text-[#4a9eff]' : 'text-[#888]'}`}>
+                  className={`py-3 border-b border-[#1a1a1a] last:border-0 font-mono text-[16px] transition-colors ${active ? 'text-[#4a9eff]' : 'text-[#888]'}`}>
                   {label}
                 </a>
               ))}
@@ -146,10 +146,10 @@ export function Layout({children}: {children: React.ReactNode}) {
 
         {/* Footer */}
         <footer className="border-t border-[#1a1a1a] px-8 py-3.5 flex items-center justify-between">
-          <span className="font-display text-[14px] text-[#555]">mutho.</span>
+          <span className="font-display text-[17px] text-[#555]">mutho.</span>
           <a
             href="https://github.com/mutho23/blug"
-            className="font-mono text-[10px] text-[#444] hover:text-[#4a9eff] transition-colors">
+            className="font-mono text-[16px] text-[#444] hover:text-[#4a9eff] transition-colors">
             source
           </a>
         </footer>
@@ -187,7 +187,7 @@ function NavLink({
   return (
     <a
       href={href}
-      className={`font-mono text-[11px] tracking-[0.04em] pb-0.5 border-b-[1.5px] transition-colors ${
+      className={`font-mono text-[14px] tracking-[0.04em] pb-0.5 border-b-[1.5px] transition-colors ${
         selected
           ? 'text-[#f0f0f0] border-[#4a9eff]'
           : 'text-[#555] border-transparent hover:text-[#b0b0b0]'
@@ -211,7 +211,7 @@ export function ErrorBoundary() {
       </head>
       <body className="bg-[#0a0a0a] text-[#f0f0f0] antialiased font-sans">
         <div className="container mx-auto pt-10 md:pt-20 pb-20 text-center">
-          <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-6">Error</p>
+          <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-6">Error</p>
           <h1 className="font-display text-5xl md:text-7xl text-[#f0f0f0]">
             Something broke.
           </h1>
