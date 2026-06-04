@@ -93,20 +93,20 @@ export default function Index() {
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Left Sidebar: Contact ── */}
-      <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
+      {/* ── Left Sidebar: Contact (sticky) ── */}
+      <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
+        <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
           <a
             key={label}
             href={href}
             target={href.startsWith('mailto') ? undefined : '_blank'}
             rel="noopener noreferrer"
-            className="flex items-center gap-2 py-2 border-b border-[#1a1a1a] last:border-0 group">
-            <div className="w-[20px] h-[20px] rounded bg-[#1a1a1a] flex items-center justify-center text-[11px] shrink-0">
+            className="flex items-center gap-2 py-2.5 border-b border-[#1a1a1a] last:border-0 group">
+            <div className="w-[22px] h-[22px] rounded bg-[#1a1a1a] flex items-center justify-center text-[12px] shrink-0">
               {icon}
             </div>
-            <span className="font-mono text-[13px] text-[#cccccc] group-hover:text-white transition-colors truncate">
+            <span className="font-mono text-[14px] text-[#cccccc] group-hover:text-white transition-colors truncate">
               {label}
             </span>
           </a>
@@ -115,39 +115,39 @@ export default function Index() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
-      <div className="w-full max-w-3xl px-8 md:px-10 py-7">
+      <div className="w-full max-w-3xl px-8 md:px-12 py-8">
         {/* Hero */}
-        <section className="mb-7">
-          <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
+        <section className="mb-9">
+          <h1 className="font-display text-[42px] md:text-[46px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
             It's Mutho<span className="text-[#4a9eff]">.</span>
           </h1>
-          <p className="font-mono text-[15px] text-[#aaaaaa] mt-1">Just writing random stuff here.</p>
+          <p className="font-mono text-[17px] text-[#aaaaaa] mt-2">Just writing random stuff here.</p>
         </section>
 
         {/* Posts section */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
-            <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#aaaaaa]">Recent Writing</span>
+        <section className="mb-10">
+          <div className="flex items-center justify-between border-t border-[#222] pt-4 mb-4">
+            <span className="font-mono text-[14px] tracking-[0.12em] uppercase text-[#aaaaaa]">Recent Blogs</span>
             <div className="flex items-center gap-3">
-              <span className="font-mono text-[13px] text-[#aaaaaa]">{filteredItems.length} Posts</span>
+              <span className="font-mono text-[14px] text-[#aaaaaa]">{filteredItems.length} Posts</span>
               {allTags.length > 0 && (
                 <div className="relative" ref={postRef}>
                   <button
                     onClick={() => setPostDropdownOpen(p => !p)}
-                    className={`font-mono text-[13px] uppercase tracking-[0.08em] px-2.5 py-1 rounded border transition-all ${
+                    className={`font-mono text-[13px] uppercase tracking-[0.08em] px-3 py-1.5 rounded border transition-all ${
                       activeTag ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]' : 'text-[#555] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
                     }`}>
                     {activeTag ?? 'Filter'} ▾
                   </button>
                   {postDropdownOpen && (
-                    <div className="absolute right-0 mt-1 bg-[#141414] border border-[#2a2a2a] rounded-md shadow-xl z-10 min-w-[120px] py-1">
+                    <div className="absolute right-0 mt-1 bg-[#141414] border border-[#2a2a2a] rounded-md shadow-xl z-10 min-w-[130px] py-1">
                       <button onClick={() => { setActiveTag(null); setPostDropdownOpen(false) }}
-                        className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${activeTag === null ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
+                        className={`w-full text-left font-mono text-[14px] px-3 py-2 transition-colors ${activeTag === null ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
                         All
                       </button>
                       {allTags.map(tag => (
                         <button key={tag} onClick={() => { setActiveTag(tag); setPostDropdownOpen(false) }}
-                          className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${activeTag === tag ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
+                          className={`w-full text-left font-mono text-[14px] px-3 py-2 transition-colors ${activeTag === tag ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
                           {tag}
                         </button>
                       ))}
@@ -158,7 +158,7 @@ export default function Index() {
             </div>
           </div>
           {filteredItems.length === 0 ? (
-            <p className="font-mono text-[15px] text-[#444] py-4">No posts yet.</p>
+            <p className="font-mono text-[17px] text-[#444] py-4">No posts yet.</p>
           ) : (
             <ul className="divide-y divide-[#1a1a1a]">
               {filteredItems.map(item => <PostItem post={item} did={did} key={`post-${item.rkey}`} />)}
@@ -169,28 +169,28 @@ export default function Index() {
         {/* Reviews section */}
         {reviews.length > 0 && (
           <section>
-            <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
-              <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#aaaaaa]">Recently Watched &amp; Read</span>
+            <div className="flex items-center justify-between border-t border-[#222] pt-4 mb-4">
+              <span className="font-mono text-[14px] tracking-[0.12em] uppercase text-[#aaaaaa]">Recent Reviews</span>
               <div className="flex items-center gap-3">
-                <span className="font-mono text-[13px] text-[#aaaaaa]">{filteredReviews.length} Items</span>
+                <span className="font-mono text-[14px] text-[#aaaaaa]">{filteredReviews.length} Items</span>
                 {availableReviewTypes.length > 0 && (
                   <div className="relative" ref={reviewRef}>
                     <button
                       onClick={() => setReviewDropdownOpen(p => !p)}
-                      className={`font-mono text-[13px] uppercase tracking-[0.08em] px-2.5 py-1 rounded border transition-all ${
+                      className={`font-mono text-[13px] uppercase tracking-[0.08em] px-3 py-1.5 rounded border transition-all ${
                         activeReviewType ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]' : 'text-[#555] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
                       }`}>
                       {activeReviewType ? (CATEGORY_LABELS[activeReviewType] ?? activeReviewType) : 'Filter'} ▾
                     </button>
                     {reviewDropdownOpen && (
-                      <div className="absolute right-0 mt-1 bg-[#141414] border border-[#2a2a2a] rounded-md shadow-xl z-10 min-w-[120px] py-1">
+                      <div className="absolute right-0 mt-1 bg-[#141414] border border-[#2a2a2a] rounded-md shadow-xl z-10 min-w-[130px] py-1">
                         <button onClick={() => { setActiveReviewType(null); setReviewDropdownOpen(false) }}
-                          className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${activeReviewType === null ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
+                          className={`w-full text-left font-mono text-[14px] px-3 py-2 transition-colors ${activeReviewType === null ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
                           All
                         </button>
                         {availableReviewTypes.map(type => (
                           <button key={type} onClick={() => { setActiveReviewType(type); setReviewDropdownOpen(false) }}
-                            className={`w-full text-left font-mono text-[13px] px-3 py-2 transition-colors ${activeReviewType === type ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
+                            className={`w-full text-left font-mono text-[14px] px-3 py-2 transition-colors ${activeReviewType === type ? 'text-[#4a9eff] bg-[#1a1a1a]' : 'text-[#888] hover:text-[#f0f0f0] hover:bg-[#1a1a1a]'}`}>
                             {CATEGORY_LABELS[type] ?? type}
                           </button>
                         ))}
@@ -208,29 +208,29 @@ export default function Index() {
       </div>
       </div>
 
-      {/* ── Right Sidebar: Stats + Tags ── */}
-      <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
+      {/* ── Right Sidebar: Stats + Tags (sticky) ── */}
+      <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
         {/* Stats */}
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Stats</p>
+        <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Stats</p>
         <div className="mb-3">
-          <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{items.length}</div>
-          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Posts written</div>
+          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{items.length}</div>
+          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Posts written</div>
         </div>
-        <div className="mb-5 pb-5 border-b border-[#1a1a1a]">
-          <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{reviews.length}</div>
-          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Reviews</div>
+        <div className="mb-6 pb-6 border-b border-[#1a1a1a]">
+          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{reviews.length}</div>
+          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Reviews</div>
         </div>
 
         {/* Post Tags */}
         {allTags.length > 0 && (
-          <div className="mb-5 pb-5 border-b border-[#1a1a1a]">
-            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-2.5">Post Tags</p>
-            <div className="flex flex-wrap gap-1">
+          <div className="mb-6 pb-6 border-b border-[#1a1a1a]">
+            <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Post Tags</p>
+            <div className="flex flex-wrap gap-1.5">
               {allTags.map(tag => (
                 <button
                   key={tag}
                   onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                  className={`font-mono text-[11px] px-2 py-0.5 rounded-full border transition-all ${
+                  className={`font-mono text-[12px] px-2.5 py-1 rounded-full border transition-all ${
                     activeTag === tag
                       ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]'
                       : 'text-[#666] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
@@ -245,10 +245,10 @@ export default function Index() {
         {/* Review Tags */}
         {allReviewTags.length > 0 && (
           <div>
-            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-2.5">Review Tags</p>
-            <div className="flex flex-wrap gap-1">
+            <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Review Tags</p>
+            <div className="flex flex-wrap gap-1.5">
               {allReviewTags.map(tag => (
-                <span key={tag} className="font-mono text-[11px] px-2 py-0.5 rounded-full border text-[#666] border-[#2a2a2a] bg-[#1a1a1a]">
+                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-full border text-[#666] border-[#2a2a2a] bg-[#1a1a1a]">
                   {tag}
                 </span>
               ))}
@@ -270,20 +270,23 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
     : null
   return (
     <li>
-      <a href={`/posts/${post.rkey}`} className="group flex gap-3 py-3 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
-        <div className="w-11 h-11 shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
+      <a href={`/posts/${post.rkey}`} className="group flex gap-4 py-4 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
+        <div className="w-14 h-14 shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {coverUrl
             ? <img src={coverUrl} alt={post.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-            : <span className="text-[#444] text-xs">✏️</span>}
+            : <span className="text-[#444] text-sm">✏️</span>}
         </div>
-        <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[18px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{post.title}</h3>
-          <time className="font-mono text-[13px] text-[#aaaaaa]" dateTime={date.toISOString()}>
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <h3 className="font-display text-[20px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{post.title}</h3>
+          <time className="font-mono text-[14px] text-[#aaaaaa]" dateTime={date.toISOString()}>
             {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
           </time>
+          {post.description && (
+            <p className="font-sans text-[15px] text-[#888] leading-relaxed line-clamp-2">{post.description}</p>
+          )}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-0.5">
-              {post.tags.map(tag => <span key={tag} className="font-mono text-[11px] text-[#4a9eff]">{tag}</span>)}
+            <div className="flex flex-wrap gap-1.5 mt-0.5">
+              {post.tags.map(tag => <span key={tag} className="font-mono text-[12px] text-[#4a9eff]">{tag}</span>)}
             </div>
           )}
         </div>
@@ -297,28 +300,28 @@ function ReviewItem({review}: {review: PopfeedReview}) {
   const emoji = TYPE_EMOJI[review.creativeWorkType ?? ''] ?? '🎞️'
   return (
     <li>
-      <a href={`/reviews/${review.rkey}`} className="group flex gap-3 py-3 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
-        <div className="w-11 h-[56px] shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
+      <a href={`/reviews/${review.rkey}`} className="group flex gap-4 py-4 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
+        <div className="w-14 h-[70px] shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {review.posterUrl
             ? <img src={review.posterUrl} alt={review.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-            : <span className="text-[16px]">{emoji}</span>}
+            : <span className="text-[18px]">{emoji}</span>}
         </div>
-        <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[18px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <h3 className="font-display text-[20px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            {review.creativeWorkType && <span className="font-mono text-[13px] text-[#aaaaaa]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
-            <span className="font-mono text-[13px] text-[#777]">·</span>
-            <time className="font-mono text-[13px] text-[#aaaaaa]" dateTime={date.toISOString()}>
+            {review.creativeWorkType && <span className="font-mono text-[14px] text-[#aaaaaa]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
+            <span className="font-mono text-[14px] text-[#777]">·</span>
+            <time className="font-mono text-[14px] text-[#aaaaaa]" dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
             </time>
           </div>
           {review.mainCredit && (
-            <p className="font-mono text-[13px] text-[#aaaaaa]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
+            <p className="font-mono text-[14px] text-[#aaaaaa]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
           )}
           {review.rating && (
             <div className="flex items-center gap-0.5">
               {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[13px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
+                <span key={i} className={`text-[14px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
               ))}
             </div>
           )}

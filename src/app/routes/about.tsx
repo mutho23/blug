@@ -19,20 +19,20 @@ export default function About() {
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Left Sidebar: Contact ── */}
-      <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
+      {/* ── Left Sidebar: Contact (sticky) ── */}
+      <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
+        <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
           <a
             key={label}
             href={href}
             target={href.startsWith('mailto') ? undefined : '_blank'}
             rel="noopener noreferrer"
-            className="flex items-center gap-2 py-2 border-b border-[#1a1a1a] last:border-0 group">
-            <div className="w-[20px] h-[20px] rounded bg-[#1a1a1a] flex items-center justify-center text-[11px] shrink-0">
+            className="flex items-center gap-2 py-2.5 border-b border-[#1a1a1a] last:border-0 group">
+            <div className="w-[22px] h-[22px] rounded bg-[#1a1a1a] flex items-center justify-center text-[12px] shrink-0">
               {icon}
             </div>
-            <span className="font-mono text-[13px] text-[#cccccc] group-hover:text-white transition-colors truncate">
+            <span className="font-mono text-[14px] text-[#cccccc] group-hover:text-white transition-colors truncate">
               {label}
             </span>
           </a>
@@ -41,12 +41,12 @@ export default function About() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
-      <div className="w-full max-w-3xl px-8 md:px-10 py-9">
-        <section className="mb-8">
-          <h1 className="font-display text-[35px] text-[#f0f0f0] tracking-[-0.02em]">
+      <div className="w-full max-w-3xl px-8 md:px-12 py-10">
+        <section className="mb-10">
+          <h1 className="font-display text-[42px] text-[#f0f0f0] tracking-[-0.02em]">
             About Me<span className="text-[#4a9eff]">.</span>
           </h1>
-          <p className="font-mono text-[18px] text-[#cccccc] leading-[1.8] mt-2.5 max-w-[480px]">
+          <p className="font-mono text-[19px] text-[#cccccc] leading-[1.9] mt-3 max-w-[540px]">
             Mutho (Muthohhar) is a coffee addict who loves to ramble about manga,
             anime, movies, books, JRPGs, philosophy, and psychology.
             This site is his personal space to write about whatever else is on his mind.
@@ -60,18 +60,11 @@ export default function About() {
         <Section label="Community">
           <WorkItem company="ASHINA" href="https://discord.gg/dndVwwGhEa" role="Discord Server" period="Dec 2025 — Present" />
         </Section>
-
-        <Section label="Elsewhere">
-          <LinkItem name="Discord"  href="https://discord.com/users/1134329616501309540" />
-          <LinkItem name="Spotify"  href="https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8?si=95240bc3a0ad4de8" />
-          <LinkItem name="Steam"    href="https://steamcommunity.com/id/moebatsu" />
-          <LinkItem name="Popfeed"  href="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />
-        </Section>
       </div>
       </div>
 
-      {/* ── Right Sidebar: kosong ── */}
-      <aside className="hidden lg:block w-[200px] shrink-0 border-l border-[#1e1e1e]" />
+      {/* ── Right Sidebar: kosong (sticky) ── */}
+      <aside className="hidden lg:block w-[220px] shrink-0 border-l border-[#1e1e1e] sticky top-[52px] self-start h-[calc(100vh-52px)]" />
 
     </div>
   )
@@ -79,8 +72,8 @@ export default function About() {
 
 function Section({label, children}: {label: string; children: React.ReactNode}) {
   return (
-    <section className="border-t border-[#1e1e1e] pt-3.5 pb-4 mb-1">
-      <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#aaaaaa] mb-3">{label}</p>
+    <section className="border-t border-[#1e1e1e] pt-4 pb-5 mb-2">
+      <p className="font-mono text-[14px] tracking-[0.12em] uppercase text-[#aaaaaa] mb-4">{label}</p>
       <ul className="flex flex-col gap-0">{children}</ul>
     </section>
   )
@@ -88,33 +81,18 @@ function Section({label, children}: {label: string; children: React.ReactNode}) 
 
 function WorkItem({company, href, role, period}: {company: string; href?: string; role: string; period: string}) {
   return (
-    <li className="flex items-start justify-between py-2 border-b border-[#1a1a1a] last:border-0">
+    <li className="flex items-start justify-between py-3 border-b border-[#1a1a1a] last:border-0">
       <div>
         <a
           href={href}
           target={href ? '_blank' : undefined}
           rel="noopener noreferrer"
-          className={`font-mono text-[18px] text-[#f0f0f0] ${href ? 'hover:text-[#4a9eff] transition-colors' : ''}`}>
+          className={`font-mono text-[19px] text-[#f0f0f0] ${href ? 'hover:text-[#4a9eff] transition-colors' : ''}`}>
           {company}
         </a>
-        <div className="font-mono text-[12px] text-[#aaaaaa] mt-0.5">{role}</div>
+        <div className="font-mono text-[14px] text-[#aaaaaa] mt-1">{role}</div>
       </div>
-      <span className="font-mono text-[18px] text-[#aaaaaa] shrink-0 mt-0.5">{period}</span>
-    </li>
-  )
-}
-
-function LinkItem({name, href}: {name: string; href: string}) {
-  return (
-    <li className="py-2 border-b border-[#1a1a1a] last:border-0">
-      <a
-        href={href}
-        className="group inline-flex items-center gap-1.5 font-mono text-[18px] text-[#cccccc] hover:text-[#f0f0f0] transition-colors"
-        target="_blank"
-        rel="noreferrer">
-        {name}
-        <span className="text-[16px] text-[#444] opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
-      </a>
+      <span className="font-mono text-[17px] text-[#aaaaaa] shrink-0 mt-0.5">{period}</span>
     </li>
   )
 }

@@ -183,20 +183,20 @@ export default function Gallery() {
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Left Sidebar: Contact ── */}
-      <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
+      {/* ── Left Sidebar: Contact (sticky) ── */}
+      <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
+        <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
           <a
             key={label}
             href={href}
             target={href.startsWith('mailto') ? undefined : '_blank'}
             rel="noopener noreferrer"
-            className="flex items-center gap-2 py-2 border-b border-[#1a1a1a] last:border-0 group">
-            <div className="w-[20px] h-[20px] rounded bg-[#1a1a1a] flex items-center justify-center text-[11px] shrink-0">
+            className="flex items-center gap-2 py-2.5 border-b border-[#1a1a1a] last:border-0 group">
+            <div className="w-[22px] h-[22px] rounded bg-[#1a1a1a] flex items-center justify-center text-[12px] shrink-0">
               {icon}
             </div>
-            <span className="font-mono text-[13px] text-[#cccccc] group-hover:text-white transition-colors truncate">
+            <span className="font-mono text-[14px] text-[#cccccc] group-hover:text-white transition-colors truncate">
               {label}
             </span>
           </a>
@@ -204,18 +204,18 @@ export default function Gallery() {
       </aside>
 
       {/* ── Main Content ── */}
-      <div className="flex-1 px-6 md:px-8 py-7 min-w-0 max-w-4xl">
+      <div className="flex-1 px-6 md:px-10 py-8 min-w-0 max-w-4xl">
         {lightbox && (
           <Lightbox images={lightbox.images} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
         )}
 
-        <header className="mb-7">
-          <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] tracking-[-0.02em]">Gallery</h1>
-          <p className="font-mono text-[15px] text-[#aaaaaa] mt-1">Just dropping some memories here.</p>
+        <header className="mb-8">
+          <h1 className="font-display text-[42px] md:text-[46px] text-[#f0f0f0] tracking-[-0.02em]">Gallery</h1>
+          <p className="font-mono text-[17px] text-[#aaaaaa] mt-2">Just dropping some memories here.</p>
         </header>
 
         {galleries.length === 0 ? (
-          <p className="font-mono text-[18px] text-[#555]">Belum ada gallery.</p>
+          <p className="font-mono text-[19px] text-[#555]">Belum ada gallery.</p>
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
             {galleries.map((gallery: any, index: number) => {
@@ -232,11 +232,11 @@ export default function Gallery() {
                   />
                   <a href={`https://grain.social/profile/${did}/gallery/${rkey}`} target="_blank" rel="noopener noreferrer"
                     className="block px-4 py-3">
-                    <h2 className="font-display text-[23px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+                    <h2 className="font-display text-[24px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">
                       {value.title ?? 'Untitled'}
                     </h2>
                     {value.address?.locality && (
-                      <p className="font-mono text-[12px] text-[#aaaaaa] mt-0.5">
+                      <p className="font-mono text-[13px] text-[#aaaaaa] mt-0.5">
                         {value.address.locality}{value.address.region ? `, ${value.address.region}` : ''}
                       </p>
                     )}
@@ -256,16 +256,16 @@ export default function Gallery() {
         )}
       </div>
 
-      {/* ── Right Sidebar: Photo count ── */}
-      <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Gallery</p>
-        <div className="mb-3">
-          <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{galleries.length}</div>
-          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Albums</div>
+      {/* ── Right Sidebar: Photo count (sticky) ── */}
+      <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
+        <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Gallery</p>
+        <div className="mb-4">
+          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{galleries.length}</div>
+          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Albums</div>
         </div>
-        <div className="mb-5">
-          <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{totalPhotos}</div>
-          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Photos</div>
+        <div className="mb-6">
+          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{totalPhotos}</div>
+          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Photos</div>
         </div>
       </aside>
 
