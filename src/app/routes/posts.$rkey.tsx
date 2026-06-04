@@ -78,15 +78,15 @@ export default function Posts() {
 
       {/* ── Article main ── */}
       <article className="flex-1 px-6 md:px-10 py-7 min-w-0 border-r border-[#1e1e1e]">
-        <a href="/" className="inline-block font-mono text-[10px] text-[#555] hover:text-[#4a9eff] transition-colors mb-4">
+        <a href="/" className="inline-block font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-4">
           ← Writing
         </a>
 
-        <h1 className="font-display text-[26px] md:text-[32px] text-[#f0f0f0] leading-tight tracking-[-0.02em] mb-2">
+        <h1 className="font-display text-[35px] md:text-[37px] text-[#f0f0f0] leading-tight tracking-[-0.02em] mb-2">
           {post.title}
         </h1>
 
-        <div className="flex items-center gap-2 font-mono text-[10px] text-[#555] mb-6 uppercase tracking-wider">
+        <div className="flex items-center gap-2 font-mono text-[16px] text-[#555] mb-6 uppercase tracking-wider">
           <span>{profile.displayName}</span>
           <span className="text-[#333]">·</span>
           <time dateTime={publishedDate.toISOString()}>
@@ -97,7 +97,7 @@ export default function Posts() {
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-6">
             {post.tags.map(tag => (
-              <span key={tag} className="font-mono text-[9px] text-[#4a9eff] border border-[#1e3a5f] px-2.5 py-0.5 rounded-full">
+              <span key={tag} className="font-mono text-[18px] text-[#4a9eff] border border-[#1e3a5f] px-2.5 py-0.5 rounded-full">
                 {tag}
               </span>
             ))}
@@ -118,16 +118,16 @@ export default function Posts() {
 
       {/* ── Sidebar: TOC + progress ── */}
       <aside className="hidden lg:block w-[180px] shrink-0 px-4 py-7 sticky top-[52px] self-start">
-        <p className="font-mono text-[9px] tracking-[0.1em] uppercase text-[#555] mb-2">Progress Baca</p>
+        <p className="font-mono text-[13px] tracking-[0.1em] uppercase text-[#555] mb-2">Progress Baca</p>
         <div className="bg-[#1a1a1a] rounded-full h-1 mb-1.5">
           <div
             className="bg-[#4a9eff] rounded-full h-1 transition-all duration-300"
             style={{width: `${readPct}%`}}
           />
         </div>
-        <p className="font-mono text-[10px] text-[#888] mb-5">{readPct}%</p>
+        <p className="font-mono text-[16px] text-[#888] mb-5">{readPct}%</p>
 
-        <p className="font-mono text-[9px] tracking-[0.1em] uppercase text-[#555] mb-2">Daftar Isi</p>
+        <p className="font-mono text-[13px] tracking-[0.1em] uppercase text-[#555] mb-2">Daftar Isi</p>
         {post.content.pages[0].blocks
           .filter(b => b.block.$type === 'pub.leaflet.blocks.header')
           .slice(0, 6)
@@ -136,7 +136,7 @@ export default function Posts() {
             return (
               <div
                 key={i}
-                className={`font-mono text-[9px] py-1 pl-2 border-l-[1.5px] mb-1 cursor-pointer transition-colors ${
+                className={`font-mono text-[18px] py-1 pl-2 border-l-[1.5px] mb-1 cursor-pointer transition-colors ${
                   i === 0
                     ? 'text-[#4a9eff] border-[#4a9eff]'
                     : 'text-[#555] border-[#2a2a2a] hover:text-[#b0b0b0]'
@@ -149,9 +149,9 @@ export default function Posts() {
         {/* Fallback TOC if no headers */}
         {post.content.pages[0].blocks.filter(b => b.block.$type === 'pub.leaflet.blocks.header').length === 0 && (
           <>
-            <div className="font-mono text-[9px] py-1 pl-2 border-l-[1.5px] border-[#4a9eff] text-[#4a9eff] mb-1">Intro</div>
-            <div className="font-mono text-[9px] py-1 pl-2 border-l-[1.5px] border-[#2a2a2a] text-[#555] mb-1 hover:text-[#b0b0b0] cursor-pointer transition-colors">Bagian utama</div>
-            <div className="font-mono text-[9px] py-1 pl-2 border-l-[1.5px] border-[#2a2a2a] text-[#555] mb-1 hover:text-[#b0b0b0] cursor-pointer transition-colors">Penutup</div>
+            <div className="font-mono text-[18px] py-1 pl-2 border-l-[1.5px] border-[#4a9eff] text-[#4a9eff] mb-1">Intro</div>
+            <div className="font-mono text-[18px] py-1 pl-2 border-l-[1.5px] border-[#2a2a2a] text-[#555] mb-1 hover:text-[#b0b0b0] cursor-pointer transition-colors">Bagian utama</div>
+            <div className="font-mono text-[18px] py-1 pl-2 border-l-[1.5px] border-[#2a2a2a] text-[#555] mb-1 hover:text-[#b0b0b0] cursor-pointer transition-colors">Penutup</div>
           </>
         )}
       </aside>
@@ -178,12 +178,12 @@ function Block({block, did}: {block: LeafletBlock; did: string}) {
 
 function Header({block}: {block: LeafletHeaderBlock}) {
   const sizes: Record<number, string> = {
-    1: 'font-display text-[24px] md:text-[28px] text-[#f0f0f0] pt-6 mt-2 leading-tight',
-    2: 'font-display text-[20px] md:text-[24px] text-[#f0f0f0] pt-5 mt-2 leading-tight',
-    3: 'font-display text-[17px] md:text-[20px] text-[#e0e0e0] pt-4 leading-tight',
-    4: 'font-display text-[15px] md:text-[17px] text-[#e0e0e0] pt-4 leading-tight',
-    5: 'font-display text-[13px] text-[#e0e0e0] pt-3 leading-tight',
-    6: 'font-mono uppercase tracking-wider text-[10px] text-[#555] pt-3',
+    1: 'font-display text-[38px] md:text-[38px] text-[#f0f0f0] pt-6 mt-2 leading-tight',
+    2: 'font-display text-[23px] md:text-[38px] text-[#f0f0f0] pt-5 mt-2 leading-tight',
+    3: 'font-display text-[23px] md:text-[23px] text-[#e0e0e0] pt-4 leading-tight',
+    4: 'font-display text-[18px] md:text-[23px] text-[#e0e0e0] pt-4 leading-tight',
+    5: 'font-display text-[16px] text-[#e0e0e0] pt-3 leading-tight',
+    6: 'font-mono uppercase tracking-wider text-[16px] text-[#555] pt-3',
   }
   const Tag = (['h1','h2','h3','h4','h5','h6'] as const)[block.level - 1]
   return <Tag className={sizes[block.level] ?? sizes[3]}>{block.plaintext}</Tag>
@@ -194,7 +194,7 @@ function Text({plaintext, facets, textSize = 'default'}: {
   facets?: LeafletFacet[]
   textSize?: 'default' | 'small' | 'large'
 }) {
-  const sizeClass = textSize === 'default' ? 'text-[14px] md:text-[15px]' : textSize === 'small' ? 'text-[13px]' : 'text-[16px] md:text-[18px]'
+  const sizeClass = textSize === 'default' ? 'text-[23px] md:text-[18px]' : textSize === 'small' ? 'text-[16px]' : 'text-[16px] md:text-[18px]'
   return (
     <p className={`${sizeClass} font-sans text-[#888] leading-[1.9]`}>
       {renderRichText(plaintext, facets)}
@@ -235,7 +235,7 @@ function renderRichText(text: string, facets?: LeafletFacet[]): React.ReactNode 
 
 function BlockQuote({block}: {block: LeafletBlockquoteBlock}) {
   return (
-    <blockquote className="border-l-[1.5px] border-[#4a9eff] pl-4 my-2 italic font-sans text-[15px] text-[#777] leading-relaxed">
+    <blockquote className="border-l-[1.5px] border-[#4a9eff] pl-4 my-2 italic font-sans text-[18px] text-[#777] leading-relaxed">
       {block.plaintext}
     </blockquote>
   )
@@ -243,7 +243,7 @@ function BlockQuote({block}: {block: LeafletBlockquoteBlock}) {
 
 function Code({block}: {block: LeafletCodeBlock}) {
   return (
-    <pre className="bg-[#111] text-[#b0b0b0] py-4 px-5 rounded-md overflow-x-auto my-2 font-mono text-[12px] leading-relaxed border border-[#1e1e1e]">
+    <pre className="bg-[#111] text-[#b0b0b0] py-4 px-5 rounded-md overflow-x-auto my-2 font-mono text-[18px] leading-relaxed border border-[#1e1e1e]">
       {block.plaintext}
     </pre>
   )
@@ -263,7 +263,7 @@ function Image({block, did}: {block: LeafletImageBlock; did: string}) {
     <figure className="my-4 -mx-2 md:-mx-8">
       <img src={cdnUrl} alt={block.alt} className="rounded-md shadow-2xl shadow-black/40 max-w-full mx-auto" />
       {block.alt && (
-        <figcaption className="text-center font-mono text-[9px] uppercase tracking-wider text-[#555] mt-3">
+        <figcaption className="text-center font-mono text-[18px] uppercase tracking-wider text-[#555] mt-3">
           {block.alt}
         </figcaption>
       )}
@@ -280,13 +280,13 @@ function Website({block, did}: {block: LeafletWebsiteBlock; did: string}) {
       href={block.src}
       className="border border-[#1e1e1e] rounded-md flex gap-4 p-4 bg-[#111] hover:bg-[#161616] hover:border-[#2a2a2a] transition-colors group my-2">
       <div className="flex-1 min-w-0">
-        <h3 className="font-display text-[15px] text-[#e0e0e0] truncate group-hover:text-[#4a9eff] transition-colors">
+        <h3 className="font-display text-[18px] text-[#e0e0e0] truncate group-hover:text-[#4a9eff] transition-colors">
           {block.title || block.src}
         </h3>
         {block.description && (
-          <p className="font-sans text-[#555] mt-1 line-clamp-2 text-[12px]">{block.description}</p>
+          <p className="font-sans text-[#555] mt-1 line-clamp-2 text-[18px]">{block.description}</p>
         )}
-        <p className="font-mono text-[#444] mt-2 text-[9px] uppercase tracking-wider truncate">
+        <p className="font-mono text-[#444] mt-2 text-[18px] uppercase tracking-wider truncate">
           {(() => { try { return new URL(block.src).hostname.replace(/^www\./, '') } catch { return block.src } })()}
         </p>
       </div>
@@ -320,14 +320,14 @@ function BskyPost({block}: {block: LeafletBskyPostBlock}) {
 function PostError() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
-      <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-4">404</p>
+      <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-4">404</p>
       <h1 className="font-display text-[40px] md:text-[56px] text-[#f0f0f0] leading-tight">
         That post wandered off.
       </h1>
       <div className="py-10">
         <img src="/monkey.jpg" alt="Monkey muppet meme" className="rounded-md shadow-2xl shadow-black/40 max-w-[280px]" />
       </div>
-      <a href="/" className="font-mono text-[11px] text-[#4a9eff] hover:text-[#7c6ff7] transition-colors">
+      <a href="/" className="font-mono text-[23px] text-[#4a9eff] hover:text-[#7c6ff7] transition-colors">
         ← back to writing
       </a>
     </div>

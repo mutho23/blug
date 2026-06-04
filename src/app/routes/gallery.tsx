@@ -147,7 +147,7 @@ function GalleryThumb({images, title, onPhotoClick, eager = false}: {
   if (images.length === 0) {
     return (
       <div className="w-full h-40 bg-[#1a1a1a] flex items-center justify-center">
-        <span className="font-mono text-[10px] text-[#444]">no photo</span>
+        <span className="font-mono text-[16px] text-[#444]">no photo</span>
       </div>
     )
   }
@@ -213,12 +213,12 @@ export default function Gallery() {
 
       {/* Header */}
       <header className="mb-7">
-        <h1 className="font-display text-[28px] md:text-[34px] text-[#f0f0f0] tracking-[-0.02em]">Gallery</h1>
-        <p className="font-mono text-[11px] text-[#555] mt-1">Just dropping some memories here.</p>
+        <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] tracking-[-0.02em]">Gallery</h1>
+        <p className="font-mono text-[15px] text-[#555] mt-1">Just dropping some memories here.</p>
       </header>
 
       {galleries.length === 0 ? (
-        <p className="font-mono text-[12px] text-[#555]">Belum ada gallery.</p>
+        <p className="font-mono text-[18px] text-[#555]">Belum ada gallery.</p>
       ) : (
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
           {galleries.map((gallery: any, index: number) => {
@@ -240,20 +240,20 @@ export default function Gallery() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block px-4 py-3">
-                  <h2 className="font-display text-[14px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+                  <h2 className="font-display text-[23px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
                     {value.title ?? 'Untitled'}
                   </h2>
                   {value.address?.locality && (
-                    <p className="font-mono text-[9px] text-[#555] mt-0.5">
+                    <p className="font-mono text-[12px] text-[#555] mt-0.5">
                       {value.address.locality}{value.address.region ? `, ${value.address.region}` : ''}
                     </p>
                   )}
                   <div className="flex items-center justify-between mt-2">
-                    <p className="font-mono text-[9px] text-[#444]">
+                    <p className="font-mono text-[18px] text-[#444]">
                       {new Date(value.createdAt).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})}
                     </p>
                     {gallery.images.length > 0 && (
-                      <p className="font-mono text-[9px] text-[#444]">{gallery.images.length} foto</p>
+                      <p className="font-mono text-[18px] text-[#444]">{gallery.images.length} foto</p>
                     )}
                   </div>
                 </a>

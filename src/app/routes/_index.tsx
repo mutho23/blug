@@ -92,7 +92,7 @@ export default function Index() {
       {/* ── Left Sidebar ── */}
       <aside className="hidden lg:block w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
         {/* Filter */}
-        <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-2.5">Filter</p>
+        <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2.5">Filter</p>
         <div className="flex flex-wrap gap-1 mb-5">
           <FilterTag active={activeTag === null} onClick={() => setActiveTag(null)}>All</FilterTag>
           <FilterTag active={activeTag === 'blog'} onClick={() => setActiveTag('blog')}>Blog</FilterTag>
@@ -105,16 +105,16 @@ export default function Index() {
         </div>
 
         {/* Recent sidebar */}
-        <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-4">Recent</p>
+        <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-4">Recent</p>
         {items.slice(0, 5).map(item => (
           <a
             key={item.rkey}
             href={`/posts/${item.rkey}`}
             className="block py-1.5 border-b border-[#1e1e1e] group last:border-0">
-            <div className="font-mono text-[10px] text-[#b0b0b0] group-hover:text-[#4a9eff] transition-colors truncate">
+            <div className="font-mono text-[16px] text-[#b0b0b0] group-hover:text-[#4a9eff] transition-colors truncate">
               {item.title}
             </div>
-            <div className="font-mono text-[9px] text-[#555] mt-0.5">
+            <div className="font-mono text-[12px] text-[#555] mt-0.5">
               {new Date(item.publishedAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
             </div>
           </a>
@@ -125,17 +125,17 @@ export default function Index() {
       <div className="flex-1 px-6 md:px-8 py-7 min-w-0">
         {/* Hero */}
         <section className="mb-7">
-          <h1 className="font-display text-[28px] md:text-[34px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
+          <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
             It's Mutho<span className="text-[#4a9eff]">.</span>
           </h1>
-          <p className="font-mono text-[11px] text-[#555] mt-1">Just writing random stuff here.</p>
+          <p className="font-mono text-[15px] text-[#555] mt-1">Just writing random stuff here.</p>
         </section>
 
         {/* Posts section */}
         <section className="mb-8">
           <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
-            <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555]">Recent Writing</span>
-            <span className="font-mono text-[9px] text-[#555]">{filteredItems.length} Posts</span>
+            <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555]">Recent Writing</span>
+            <span className="font-mono text-[13px] text-[#555]">{filteredItems.length} Posts</span>
           </div>
 
           {/* Mobile tag filter */}
@@ -151,7 +151,7 @@ export default function Index() {
           )}
 
           {filteredItems.length === 0 ? (
-            <p className="font-mono text-[11px] text-[#444] py-4">No posts yet.</p>
+            <p className="font-mono text-[15px] text-[#444] py-4">No posts yet.</p>
           ) : (
             <ul className="divide-y divide-[#1a1a1a]">
               {filteredItems.map(item => (
@@ -165,8 +165,8 @@ export default function Index() {
         {reviews.length > 0 && (
           <section>
             <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
-              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555]">Recently Watched &amp; Read</span>
-              <span className="font-mono text-[9px] text-[#555]">{filteredReviews.length} Items</span>
+              <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555]">Recently Watched &amp; Read</span>
+              <span className="font-mono text-[13px] text-[#555]">{filteredReviews.length} Items</span>
             </div>
 
             {availableReviewTypes.length > 0 && (
@@ -191,24 +191,24 @@ export default function Index() {
 
       {/* ── Right Sidebar ── */}
       <aside className="hidden xl:block w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-3">Stats</p>
+        <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-3">Stats</p>
         <div className="mb-4">
-          <div className="font-display text-[22px] text-[#f0f0f0]">{items.length}</div>
-          <div className="font-mono text-[9px] text-[#555] mt-0.5">Posts written</div>
+          <div className="font-display text-[35px] text-[#f0f0f0]">{items.length}</div>
+          <div className="font-mono text-[12px] text-[#555] mt-0.5">Posts written</div>
         </div>
         <div className="mb-5">
-          <div className="font-display text-[22px] text-[#f0f0f0]">{reviews.length}</div>
-          <div className="font-mono text-[9px] text-[#555] mt-0.5">Reviews</div>
+          <div className="font-display text-[35px] text-[#f0f0f0]">{reviews.length}</div>
+          <div className="font-mono text-[12px] text-[#555] mt-0.5">Reviews</div>
         </div>
 
         {Object.keys(tagCounts).length > 0 && (
           <>
-            <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-2">Tags</p>
+            <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-2">Tags</p>
             <div className="flex flex-wrap gap-1">
               {Object.entries(tagCounts).map(([tag]) => (
                 <span
                   key={tag}
-                  className="font-mono text-[10px] text-[#888] border border-[#2a2a2a] bg-[#1a1a1a] px-2 py-0.5 rounded-full">
+                  className="font-mono text-[16px] text-[#888] border border-[#2a2a2a] bg-[#1a1a1a] px-2 py-0.5 rounded-full">
                   {tag}
                 </span>
               ))}
@@ -227,7 +227,7 @@ function FilterTag({active, onClick, children}: {active: boolean; onClick: () =>
   return (
     <button
       onClick={onClick}
-      className={`font-mono text-[10px] px-2.5 py-1 rounded-full border transition-all ${
+      className={`font-mono text-[16px] px-2.5 py-1 rounded-full border transition-all ${
         active
           ? 'bg-[#1e1e1e] text-[#f0f0f0] border-[#4a9eff]'
           : 'bg-[#1a1a1a] text-[#888] border-[#2a2a2a] hover:text-[#f0f0f0] hover:border-[#555]'
@@ -256,16 +256,16 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
           )}
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[13px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+          <h3 className="font-display text-[16px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
             {post.title}
           </h3>
-          <time className="font-mono text-[9px] text-[#555]" dateTime={date.toISOString()}>
+          <time className="font-mono text-[12px] text-[#555]" dateTime={date.toISOString()}>
             {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
           </time>
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-0.5">
               {post.tags.map(tag => (
-                <span key={tag} className="font-mono text-[9px] text-[#4a9eff]">{tag}</span>
+                <span key={tag} className="font-mono text-[18px] text-[#4a9eff]">{tag}</span>
               ))}
             </div>
           )}
@@ -304,33 +304,33 @@ function ReviewItem({review}: {review: PopfeedReview}) {
           {review.posterUrl ? (
             <img src={review.posterUrl} alt={review.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
           ) : (
-            <span className="text-[10px]">{emoji}</span>
+            <span className="text-[16px]">{emoji}</span>
           )}
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[12px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+          <h3 className="font-display text-[18px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
             {emoji} {review.title}
           </h3>
           <div className="flex items-center gap-2 flex-wrap">
             {review.creativeWorkType && (
-              <span className="font-mono text-[9px] text-[#555]">
+              <span className="font-mono text-[18px] text-[#555]">
                 {CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}
               </span>
             )}
-            <span className="font-mono text-[9px] text-[#444]">·</span>
-            <time className="font-mono text-[9px] text-[#555]" dateTime={date.toISOString()}>
+            <span className="font-mono text-[18px] text-[#444]">·</span>
+            <time className="font-mono text-[12px] text-[#555]" dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
             </time>
           </div>
           {review.mainCredit && (
-            <p className="font-mono text-[9px] text-[#555]">
+            <p className="font-mono text-[18px] text-[#555]">
               {review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}
             </p>
           )}
           {review.rating && (
             <div className="flex items-center gap-0.5">
               {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[10px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
+                <span key={i} className={`text-[16px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
               ))}
             </div>
           )}

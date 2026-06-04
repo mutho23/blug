@@ -60,7 +60,7 @@ export default function ReviewPage() {
         {/* Back */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[#555] hover:text-[#4a9eff] transition-colors mb-7 uppercase tracking-wider">
+          className="inline-flex items-center gap-1.5 font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-7 uppercase tracking-wider">
           ← Back
         </Link>
 
@@ -77,33 +77,33 @@ export default function ReviewPage() {
             {/* Badges */}
             <div className="flex items-center gap-1.5 flex-wrap">
               {review.creativeWorkType && (
-                <span className="font-mono text-[9px] text-[#4a9eff] border border-[#1e3a5f] px-2 py-0.5 rounded-full">
+                <span className="font-mono text-[18px] text-[#4a9eff] border border-[#1e3a5f] px-2 py-0.5 rounded-full">
                   {typeLabel}
                 </span>
               )}
               {review.isRevisit && (
-                <span className="font-mono text-[9px] text-[#555] border border-[#2a2a2a] px-2 py-0.5 rounded-full">Revisit</span>
+                <span className="font-mono text-[18px] text-[#555] border border-[#2a2a2a] px-2 py-0.5 rounded-full">Revisit</span>
               )}
               {review.containsSpoilers && (
-                <span className="font-mono text-[9px] text-amber-500 border border-amber-500/40 px-2 py-0.5 rounded-full">Spoilers</span>
+                <span className="font-mono text-[18px] text-amber-500 border border-amber-500/40 px-2 py-0.5 rounded-full">Spoilers</span>
               )}
             </div>
 
             {/* Title */}
-            <h1 className="font-display text-[24px] md:text-[30px] text-[#f0f0f0] leading-tight">
+            <h1 className="font-display text-[38px] md:text-[35px] text-[#f0f0f0] leading-tight">
               {review.title}
               {releaseYear && (
-                <span className="text-[#555] ml-2 text-[20px] font-normal">({releaseYear})</span>
+                <span className="text-[#555] ml-2 text-[23px] font-normal">({releaseYear})</span>
               )}
             </h1>
 
             {review.mainCredit && (
-              <p className="font-mono text-[10px] text-[#555]">
+              <p className="font-mono text-[16px] text-[#555]">
                 {creditLabel} <span className="text-[#b0b0b0]">{review.mainCredit}</span>
               </p>
             )}
             {review.genres.length > 0 && (
-              <p className="font-mono text-[9px] text-[#444]">{review.genres.join(' · ')}</p>
+              <p className="font-mono text-[18px] text-[#444]">{review.genres.join(' · ')}</p>
             )}
           </div>
         </div>
@@ -113,11 +113,11 @@ export default function ReviewPage() {
           <div className="flex items-center gap-3 py-4 border-y border-[#1e1e1e] mb-7">
             <div className="flex items-center gap-0.5">
               {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[22px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#222]'}`}>★</span>
+                <span key={i} className={`text-[35px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#222]'}`}>★</span>
               ))}
             </div>
             {RATING_LABEL[review.rating] && (
-              <span className="font-mono text-[11px] text-[#888]">{RATING_LABEL[review.rating]}</span>
+              <span className="font-mono text-[23px] text-[#888]">{RATING_LABEL[review.rating]}</span>
             )}
           </div>
         )}
@@ -125,7 +125,7 @@ export default function ReviewPage() {
         {/* Review text */}
         {review.text && (
           <div
-            className="font-sans text-[13px] text-[#777] leading-[1.9] max-w-prose [&_.bq]:border-l-[1.5px] [&_.bq]:border-[#333] [&_.bq]:pl-4 [&_.bq]:italic [&_.bq]:text-[#666] [&_.bq]:my-4"
+            className="font-sans text-[16px] text-[#777] leading-[1.9] max-w-prose [&_.bq]:border-l-[1.5px] [&_.bq]:border-[#333] [&_.bq]:pl-4 [&_.bq]:italic [&_.bq]:text-[#666] [&_.bq]:my-4"
             dangerouslySetInnerHTML={{__html: review.text.replace(/<blockquote>/g, '<blockquote class="bq">').replace(/\r\n/g, '\n')}}
           />
         )}
@@ -134,7 +134,7 @@ export default function ReviewPage() {
         {review.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-7">
             {review.tags.map(tag => (
-              <span key={tag} className="font-mono text-[9px] text-[#555] bg-[#111] border border-[#1e1e1e] px-2 py-0.5 rounded">
+              <span key={tag} className="font-mono text-[18px] text-[#555] bg-[#111] border border-[#1e1e1e] px-2 py-0.5 rounded">
                 #{tag}
               </span>
             ))}
@@ -145,25 +145,25 @@ export default function ReviewPage() {
         <div className="flex gap-2 mt-7">
           {review.identifiers?.imdbId && (
             <a href={`https://www.imdb.com/title/${review.identifiers.imdbId}`} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[9px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">
+              className="font-mono text-[18px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">
               IMDb ↗
             </a>
           )}
           {review.identifiers?.tmdbId && (
             <a href={`https://www.themoviedb.org/${review.creativeWorkType === 'tv' ? 'tv' : 'movie'}/${review.identifiers.tmdbId}`} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[9px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">
+              className="font-mono text-[18px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">
               TMDB ↗
             </a>
           )}
           {review.identifiers?.isbn13 && (
             <a href={`https://www.goodreads.com/search?q=${review.identifiers.isbn13}`} target="_blank" rel="noopener noreferrer"
-              className="font-mono text-[9px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">
+              className="font-mono text-[18px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">
               Goodreads ↗
             </a>
           )}
         </div>
 
-        <p className="font-mono text-[9px] text-[#333] mt-8">Reviewed on {reviewedDate}</p>
+        <p className="font-mono text-[18px] text-[#333] mt-8">Reviewed on {reviewedDate}</p>
       </div>
     </div>
   )
