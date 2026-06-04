@@ -95,7 +95,7 @@ export default function Index() {
 
       {/* ── Left Sidebar: Contact ── */}
       <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-3">Contact</p>
+        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
           <a
             key={label}
@@ -106,7 +106,7 @@ export default function Index() {
             <div className="w-[20px] h-[20px] rounded bg-[#1a1a1a] flex items-center justify-center text-[11px] shrink-0">
               {icon}
             </div>
-            <span className="font-mono text-[13px] text-[#666] group-hover:text-[#f0f0f0] transition-colors truncate">
+            <span className="font-mono text-[13px] text-[#cccccc] group-hover:text-white transition-colors truncate">
               {label}
             </span>
           </a>
@@ -115,21 +115,21 @@ export default function Index() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
-      <div className="w-full max-w-2xl px-6 md:px-8 py-7">
+      <div className="w-full max-w-3xl px-8 md:px-10 py-7">
         {/* Hero */}
         <section className="mb-7">
           <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
             It's Mutho<span className="text-[#4a9eff]">.</span>
           </h1>
-          <p className="font-mono text-[15px] text-[#555] mt-1">Just writing random stuff here.</p>
+          <p className="font-mono text-[15px] text-[#aaaaaa] mt-1">Just writing random stuff here.</p>
         </section>
 
         {/* Posts section */}
         <section className="mb-8">
           <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
-            <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555]">Recent Writing</span>
+            <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#aaaaaa]">Recent Writing</span>
             <div className="flex items-center gap-3">
-              <span className="font-mono text-[13px] text-[#555]">{filteredItems.length} Posts</span>
+              <span className="font-mono text-[13px] text-[#aaaaaa]">{filteredItems.length} Posts</span>
               {allTags.length > 0 && (
                 <div className="relative" ref={postRef}>
                   <button
@@ -170,9 +170,9 @@ export default function Index() {
         {reviews.length > 0 && (
           <section>
             <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
-              <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555]">Recently Watched &amp; Read</span>
+              <span className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#aaaaaa]">Recently Watched &amp; Read</span>
               <div className="flex items-center gap-3">
-                <span className="font-mono text-[13px] text-[#555]">{filteredReviews.length} Items</span>
+                <span className="font-mono text-[13px] text-[#aaaaaa]">{filteredReviews.length} Items</span>
                 {availableReviewTypes.length > 0 && (
                   <div className="relative" ref={reviewRef}>
                     <button
@@ -211,20 +211,20 @@ export default function Index() {
       {/* ── Right Sidebar: Stats + Tags ── */}
       <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
         {/* Stats */}
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-3">Stats</p>
+        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Stats</p>
         <div className="mb-3">
           <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{items.length}</div>
-          <div className="font-mono text-[11px] text-[#555] mt-1">Posts written</div>
+          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Posts written</div>
         </div>
         <div className="mb-5 pb-5 border-b border-[#1a1a1a]">
           <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{reviews.length}</div>
-          <div className="font-mono text-[11px] text-[#555] mt-1">Reviews</div>
+          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Reviews</div>
         </div>
 
         {/* Post Tags */}
         {allTags.length > 0 && (
           <div className="mb-5 pb-5 border-b border-[#1a1a1a]">
-            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-2.5">Post Tags</p>
+            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-2.5">Post Tags</p>
             <div className="flex flex-wrap gap-1">
               {allTags.map(tag => (
                 <button
@@ -245,7 +245,7 @@ export default function Index() {
         {/* Review Tags */}
         {allReviewTags.length > 0 && (
           <div>
-            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-2.5">Review Tags</p>
+            <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-2.5">Review Tags</p>
             <div className="flex flex-wrap gap-1">
               {allReviewTags.map(tag => (
                 <span key={tag} className="font-mono text-[11px] px-2 py-0.5 rounded-full border text-[#666] border-[#2a2a2a] bg-[#1a1a1a]">
@@ -277,8 +277,8 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
             : <span className="text-[#444] text-xs">✏️</span>}
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[16px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">{post.title}</h3>
-          <time className="font-mono text-[12px] text-[#555]" dateTime={date.toISOString()}>
+          <h3 className="font-display text-[18px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{post.title}</h3>
+          <time className="font-mono text-[13px] text-[#aaaaaa]" dateTime={date.toISOString()}>
             {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
           </time>
           {post.tags && post.tags.length > 0 && (
@@ -298,22 +298,22 @@ function ReviewItem({review}: {review: PopfeedReview}) {
   return (
     <li>
       <a href={`/reviews/${review.rkey}`} className="group flex gap-3 py-3 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
-        <div className="w-8 h-[46px] shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
+        <div className="w-11 h-[56px] shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {review.posterUrl
             ? <img src={review.posterUrl} alt={review.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
             : <span className="text-[16px]">{emoji}</span>}
         </div>
         <div className="flex flex-col gap-1 min-w-0">
-          <h3 className="font-display text-[16px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
+          <h3 className="font-display text-[18px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            {review.creativeWorkType && <span className="font-mono text-[12px] text-[#555]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
-            <span className="font-mono text-[12px] text-[#444]">·</span>
-            <time className="font-mono text-[12px] text-[#555]" dateTime={date.toISOString()}>
+            {review.creativeWorkType && <span className="font-mono text-[13px] text-[#aaaaaa]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
+            <span className="font-mono text-[13px] text-[#777]">·</span>
+            <time className="font-mono text-[13px] text-[#aaaaaa]" dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
             </time>
           </div>
           {review.mainCredit && (
-            <p className="font-mono text-[12px] text-[#555]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
+            <p className="font-mono text-[13px] text-[#aaaaaa]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
           )}
           {review.rating && (
             <div className="flex items-center gap-0.5">

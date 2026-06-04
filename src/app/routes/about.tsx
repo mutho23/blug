@@ -21,7 +21,7 @@ export default function About() {
 
       {/* ── Left Sidebar: Contact ── */}
       <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-3">Contact</p>
+        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
           <a
             key={label}
@@ -32,7 +32,7 @@ export default function About() {
             <div className="w-[20px] h-[20px] rounded bg-[#1a1a1a] flex items-center justify-center text-[11px] shrink-0">
               {icon}
             </div>
-            <span className="font-mono text-[13px] text-[#666] group-hover:text-[#f0f0f0] transition-colors truncate">
+            <span className="font-mono text-[13px] text-[#cccccc] group-hover:text-white transition-colors truncate">
               {label}
             </span>
           </a>
@@ -41,12 +41,12 @@ export default function About() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
-      <div className="w-full max-w-2xl px-6 md:px-10 py-9">
+      <div className="w-full max-w-3xl px-8 md:px-10 py-9">
         <section className="mb-8">
           <h1 className="font-display text-[35px] text-[#f0f0f0] tracking-[-0.02em]">
             About Me<span className="text-[#4a9eff]">.</span>
           </h1>
-          <p className="font-mono text-[18px] text-[#888] leading-[1.8] mt-2.5 max-w-[480px]">
+          <p className="font-mono text-[18px] text-[#cccccc] leading-[1.8] mt-2.5 max-w-[480px]">
             Mutho (Muthohhar) is a coffee addict who loves to ramble about manga,
             anime, movies, books, JRPGs, philosophy, and psychology.
             This site is his personal space to write about whatever else is on his mind.
@@ -80,7 +80,7 @@ export default function About() {
 function Section({label, children}: {label: string; children: React.ReactNode}) {
   return (
     <section className="border-t border-[#1e1e1e] pt-3.5 pb-4 mb-1">
-      <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-3">{label}</p>
+      <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#aaaaaa] mb-3">{label}</p>
       <ul className="flex flex-col gap-0">{children}</ul>
     </section>
   )
@@ -94,12 +94,12 @@ function WorkItem({company, href, role, period}: {company: string; href?: string
           href={href}
           target={href ? '_blank' : undefined}
           rel="noopener noreferrer"
-          className={`font-mono text-[18px] text-[#e0e0e0] ${href ? 'hover:text-[#4a9eff] transition-colors' : ''}`}>
+          className={`font-mono text-[18px] text-[#f0f0f0] ${href ? 'hover:text-[#4a9eff] transition-colors' : ''}`}>
           {company}
         </a>
-        <div className="font-mono text-[12px] text-[#555] mt-0.5">{role}</div>
+        <div className="font-mono text-[12px] text-[#aaaaaa] mt-0.5">{role}</div>
       </div>
-      <span className="font-mono text-[18px] text-[#555] shrink-0 mt-0.5">{period}</span>
+      <span className="font-mono text-[18px] text-[#aaaaaa] shrink-0 mt-0.5">{period}</span>
     </li>
   )
 }
@@ -109,7 +109,7 @@ function LinkItem({name, href}: {name: string; href: string}) {
     <li className="py-2 border-b border-[#1a1a1a] last:border-0">
       <a
         href={href}
-        className="group inline-flex items-center gap-1.5 font-mono text-[18px] text-[#888] hover:text-[#f0f0f0] transition-colors"
+        className="group inline-flex items-center gap-1.5 font-mono text-[18px] text-[#cccccc] hover:text-[#f0f0f0] transition-colors"
         target="_blank"
         rel="noreferrer">
         {name}

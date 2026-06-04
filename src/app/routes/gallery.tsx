@@ -185,7 +185,7 @@ export default function Gallery() {
 
       {/* ── Left Sidebar: Contact ── */}
       <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-3">Contact</p>
+        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
           <a
             key={label}
@@ -196,7 +196,7 @@ export default function Gallery() {
             <div className="w-[20px] h-[20px] rounded bg-[#1a1a1a] flex items-center justify-center text-[11px] shrink-0">
               {icon}
             </div>
-            <span className="font-mono text-[13px] text-[#666] group-hover:text-[#f0f0f0] transition-colors truncate">
+            <span className="font-mono text-[13px] text-[#cccccc] group-hover:text-white transition-colors truncate">
               {label}
             </span>
           </a>
@@ -211,7 +211,7 @@ export default function Gallery() {
 
         <header className="mb-7">
           <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] tracking-[-0.02em]">Gallery</h1>
-          <p className="font-mono text-[15px] text-[#555] mt-1">Just dropping some memories here.</p>
+          <p className="font-mono text-[15px] text-[#aaaaaa] mt-1">Just dropping some memories here.</p>
         </header>
 
         {galleries.length === 0 ? (
@@ -232,20 +232,20 @@ export default function Gallery() {
                   />
                   <a href={`https://grain.social/profile/${did}/gallery/${rkey}`} target="_blank" rel="noopener noreferrer"
                     className="block px-4 py-3">
-                    <h2 className="font-display text-[23px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+                    <h2 className="font-display text-[23px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">
                       {value.title ?? 'Untitled'}
                     </h2>
                     {value.address?.locality && (
-                      <p className="font-mono text-[12px] text-[#555] mt-0.5">
+                      <p className="font-mono text-[12px] text-[#aaaaaa] mt-0.5">
                         {value.address.locality}{value.address.region ? `, ${value.address.region}` : ''}
                       </p>
                     )}
                     <div className="flex items-center justify-between mt-2">
-                      <p className="font-mono text-[18px] text-[#444]">
+                      <p className="font-mono text-[14px] text-[#aaaaaa]">
                         {new Date(value.createdAt).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})}
                       </p>
                       {gallery.images.length > 0 && (
-                        <p className="font-mono text-[18px] text-[#444]">{gallery.images.length} foto</p>
+                        <p className="font-mono text-[14px] text-[#aaaaaa]">{gallery.images.length} foto</p>
                       )}
                     </div>
                   </a>
@@ -258,14 +258,14 @@ export default function Gallery() {
 
       {/* ── Right Sidebar: Photo count ── */}
       <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
-        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-3">Gallery</p>
+        <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Gallery</p>
         <div className="mb-3">
           <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{galleries.length}</div>
-          <div className="font-mono text-[11px] text-[#555] mt-1">Albums</div>
+          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Albums</div>
         </div>
         <div className="mb-5">
           <div className="font-display text-[32px] text-[#f0f0f0] leading-none">{totalPhotos}</div>
-          <div className="font-mono text-[11px] text-[#555] mt-1">Photos</div>
+          <div className="font-mono text-[11px] text-[#aaaaaa] mt-1">Photos</div>
         </div>
       </aside>
 
