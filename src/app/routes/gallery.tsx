@@ -3,7 +3,6 @@ import {json} from '@remix-run/node'
 import {useState, useEffect, useCallback, useRef} from 'react'
 
 const HANDLE = 'mutho.my.id'
-
 const THUMB_W = 480
 const THUMB_Q = 60
 const FULL_W  = 1200
@@ -28,25 +27,17 @@ async function resolveDid() {
 
 export const loader = async () => {
   const did = await resolveDid()
-
   const [galleriesRes, photosRes] = await Promise.all([
-    fetch(
-      `https://bsky.social/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=social.grain.gallery&limit=30`,
-    ),
-    fetch(
-      `https://bsky.social/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=social.grain.photo&limit=100`,
-    ),
+    fetch(`https://bsky.social/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=social.grain.gallery&limit=30`),
+    fetch(`https://bsky.social/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=social.grain.photo&limit=100`),
   ])
-
   const galleriesData = await galleriesRes.json()
   const photosData = await photosRes.json()
   const photos: any[] = photosData.records ?? []
 
   const galleries = (galleriesData.records ?? []).map((gallery: any) => {
     const galleryTime = gallery.value.createdAt
-    const matchedPhotos = photos.filter(
-      (photo: any) => photo.value.createdAt === galleryTime,
-    )
+    const matchedPhotos = photos.filter((photo: any) => photo.value.createdAt === galleryTime)
     const images = matchedPhotos.map((photo: any) => {
       const blobUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`
       return {
@@ -59,23 +50,14 @@ export const loader = async () => {
     return {...gallery, images}
   })
 
-  return json(
-    {galleries, did},
-    {
-      headers: {
-        Link: '<https://wsrv.nl>; rel=preconnect, <https://bsky.social>; rel=preconnect',
-      },
-    },
-  )
+  return json({galleries, did}, {
+    headers: {Link: '<https://wsrv.nl>; rel=preconnect, <https://bsky.social>; rel=preconnect'},
+  })
 }
 
 type ImageItem = {thumb: string; full: string; width: number; height: number}
 
-function Lightbox({
-  images,
-  initialIndex,
-  onClose,
-}: {
+function Lightbox({images, initialIndex, onClose}: {
   images: ImageItem[]
   initialIndex: number
   onClose: () => void
@@ -101,65 +83,35 @@ function Lightbox({
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  useEffect(() => {
-    if (images.length <= 1) return
-    new Image().src = images[(index + 1) % images.length].full
-    new Image().src = images[(index - 1 + images.length) % images.length].full
-  }, [index, images])
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-  }, [])
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null) return
-    const diff = touchStartX.current - e.changedTouches[0].clientX
-    if (Math.abs(diff) > 50) diff > 0 ? next() : prev()
-    touchStartX.current = null
-  }, [next, prev])
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
       onClick={onClose}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}>
-      <button
-        className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light z-10"
-        onClick={onClose}>
-        ✕
-      </button>
-
+      onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
+      onTouchEnd={e => {
+        if (touchStartX.current === null) return
+        const diff = touchStartX.current - e.changedTouches[0].clientX
+        if (Math.abs(diff) > 50) diff > 0 ? next() : prev()
+        touchStartX.current = null
+      }}>
+      <button className="absolute top-4 right-4 text-white/60 hover:text-white text-2xl font-light z-10 font-mono" onClick={onClose}>✕</button>
       {images.length > 1 && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 font-mono text-xs text-white/50">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 font-mono text-xs text-white/40">
           {index + 1} / {images.length}
         </div>
       )}
-
       {images.length > 1 && (
-        <button
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl z-10 px-2"
-          onClick={e => { e.stopPropagation(); prev() }}>
-          ‹
-        </button>
+        <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 px-2" onClick={e => { e.stopPropagation(); prev() }}>‹</button>
       )}
-
       <div
         className="relative flex items-center justify-center"
         style={{maxHeight: '90vh', maxWidth: '90vw'}}
         onClick={e => e.stopPropagation()}>
-        <img
-          key={`t-${index}`}
-          src={images[index].thumb}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-contain blur-sm scale-105"
-        />
+        <img key={`t-${index}`} src={images[index].thumb} alt="" aria-hidden className="absolute inset-0 w-full h-full object-contain blur-sm scale-105" />
         <img
           key={`f-${index}`}
           src={images[index].full}
           alt={`Photo ${index + 1}`}
-          // @ts-expect-error fetchpriority valid HTML
-          fetchpriority="high"
           className="relative max-h-full max-w-full object-contain"
           style={{maxHeight: '90vh', maxWidth: '90vw'}}
           onLoad={e => {
@@ -168,22 +120,16 @@ function Lightbox({
           }}
         />
       </div>
-
       {images.length > 1 && (
-        <button
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl z-10 px-2"
-          onClick={e => { e.stopPropagation(); next() }}>
-          ›
-        </button>
+        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 px-2" onClick={e => { e.stopPropagation(); next() }}>›</button>
       )}
-
       {images.length > 1 && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
           {images.map((_, i) => (
             <button
               key={i}
               onClick={e => { e.stopPropagation(); setIndex(i) }}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${i === index ? 'bg-white' : 'bg-white/30'}`}
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${i === index ? 'bg-white' : 'bg-white/25'}`}
             />
           ))}
         </div>
@@ -192,23 +138,16 @@ function Lightbox({
   )
 }
 
-const GRID_H = 'h-48'
-
-function MasonryGrid({
-  images,
-  title,
-  onPhotoClick,
-  eager = false,
-}: {
+function GalleryThumb({images, title, onPhotoClick, eager = false}: {
   images: ImageItem[]
   title: string
-  onPhotoClick: (index: number) => void
+  onPhotoClick: (i: number) => void
   eager?: boolean
 }) {
   if (images.length === 0) {
     return (
-      <div className="w-full h-48 bg-100 flex items-center justify-center">
-        <span className="font-mono text-xs text-300">no photo</span>
+      <div className="w-full h-40 bg-[#1a1a1a] flex items-center justify-center">
+        <span className="font-mono text-[10px] text-[#444]">no photo</span>
       </div>
     )
   }
@@ -221,93 +160,43 @@ function MasonryGrid({
         className="w-full relative overflow-hidden cursor-zoom-in bg-black"
         style={{paddingTop}}
         onClick={e => { e.preventDefault(); onPhotoClick(0) }}>
-        <img
-          src={thumb}
-          alt={title}
-          loading={eager ? 'eager' : 'lazy'}
-          className="absolute inset-0 w-full h-full object-contain"
-        />
+        <img src={thumb} alt={title} loading={eager ? 'eager' : 'lazy'} className="absolute inset-0 w-full h-full object-contain" />
       </div>
     )
   }
 
+  // 2-photo layout
   if (images.length === 2) {
     return (
-      <div className="grid grid-cols-2 gap-px bg-200 overflow-hidden">
+      <div className="grid grid-cols-2 gap-px bg-[#1a1a1a] overflow-hidden">
         {images.map((img, i) => (
-          <div
-            key={i}
-            className={`relative ${GRID_H} overflow-hidden cursor-zoom-in`}
-            onClick={e => { e.preventDefault(); onPhotoClick(i) }}>
-            <img
-              src={img.thumb}
-              alt={`${title} ${i + 1}`}
-              loading={eager ? 'eager' : 'lazy'}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+          <div key={i} className="relative h-40 overflow-hidden cursor-zoom-in" onClick={e => { e.preventDefault(); onPhotoClick(i) }}>
+            <img src={img.thumb} alt={`${title} ${i + 1}`} loading={eager ? 'eager' : 'lazy'} className="absolute inset-0 w-full h-full object-cover" />
           </div>
         ))}
       </div>
     )
   }
 
-  const isOdd = images.length % 2 !== 0
-  const paired = isOdd ? images.slice(0, -1) : images
-  const lastImg = isOdd ? images[images.length - 1] : null
-
-  const col1: any[] = []
-  const col2: any[] = []
-  paired.forEach((img, i) => {
-    if (i % 2 === 0) col1.push({...img, origIndex: i})
-    else col2.push({...img, origIndex: i})
-  })
-
+  // 3+ photos: first big, rest small grid
+  const [first, ...rest] = images
   return (
-    <div className="flex flex-col gap-px bg-200 overflow-hidden">
-      <div className="grid grid-cols-2 gap-px">
-        <div className="flex flex-col gap-px">
-          {col1.map((img: any, i) => (
-            <div
-              key={i}
-              className={`relative ${GRID_H} overflow-hidden cursor-zoom-in`}
-              onClick={e => { e.preventDefault(); onPhotoClick(img.origIndex) }}>
-              <img
-                src={img.thumb}
-                alt={`${title} ${img.origIndex + 1}`}
-                loading={eager ? 'eager' : 'lazy'}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col gap-px">
-          {col2.map((img: any, i) => (
-            <div
-              key={i}
-              className={`relative ${GRID_H} overflow-hidden cursor-zoom-in`}
-              onClick={e => { e.preventDefault(); onPhotoClick(img.origIndex) }}>
-              <img
-                src={img.thumb}
-                alt={`${title} ${img.origIndex + 1}`}
-                loading={eager ? 'eager' : 'lazy'}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
+    <div className="flex flex-col gap-px bg-[#1a1a1a] overflow-hidden">
+      <div className="relative h-44 cursor-zoom-in" onClick={e => { e.preventDefault(); onPhotoClick(0) }}>
+        <img src={first.thumb} alt={title} loading={eager ? 'eager' : 'lazy'} className="absolute inset-0 w-full h-full object-cover" />
       </div>
-      {lastImg && (
-        <div
-          className={`relative ${GRID_H} overflow-hidden cursor-zoom-in`}
-          onClick={e => { e.preventDefault(); onPhotoClick(images.length - 1) }}>
-          <img
-            src={lastImg.thumb}
-            alt={`${title} ${images.length}`}
-            loading={eager ? 'eager' : 'lazy'}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-      )}
+      <div className={`grid gap-px`} style={{gridTemplateColumns: `repeat(${Math.min(rest.length, 3)}, 1fr)`}}>
+        {rest.slice(0, 3).map((img, i) => (
+          <div key={i} className="relative h-24 cursor-zoom-in overflow-hidden" onClick={e => { e.preventDefault(); onPhotoClick(i + 1) }}>
+            <img src={img.thumb} alt={`${title} ${i + 2}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            {i === 2 && rest.length > 3 && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <span className="font-mono text-white text-sm">+{rest.length - 2}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -317,74 +206,55 @@ export default function Gallery() {
   const [lightbox, setLightbox] = useState<{images: ImageItem[]; index: number} | null>(null)
 
   return (
-    <article className="container mx-auto max-w-4xl pt-8 md:pt-12 pb-12 px-6">
+    <div className="px-6 md:px-8 py-7">
       {lightbox && (
-        <Lightbox
-          images={lightbox.images}
-          initialIndex={lightbox.index}
-          onClose={() => setLightbox(null)}
-        />
+        <Lightbox images={lightbox.images} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
       )}
 
-      <header className="flex flex-col gap-3 mb-8 md:mb-10 max-w-prose">
-        <h1 className="font-display text-950 text-4xl md:text-6xl leading-[1.02]">
-          Gallery
-        </h1>
-        <p className="font-sans text-500 text-lg">
-          Just dropping some memories here.
-        </p>
+      {/* Header */}
+      <header className="mb-7">
+        <h1 className="font-display text-[28px] md:text-[34px] text-[#f0f0f0] tracking-[-0.02em]">Gallery</h1>
+        <p className="font-mono text-[11px] text-[#555] mt-1">Just dropping some memories here.</p>
       </header>
 
       {galleries.length === 0 ? (
-        <div className="max-w-prose">
-          <p className="font-sans text-500 text-lg">Belum ada gallery.</p>
-        </div>
+        <p className="font-mono text-[12px] text-[#555]">Belum ada gallery.</p>
       ) : (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
           {galleries.map((gallery: any, index: number) => {
             const value = gallery.value
-            const uriParts = gallery.uri.split('/')
-            const rkey = uriParts[uriParts.length - 1]
+            const rkey = gallery.uri.split('/').pop()
 
             return (
               <div
                 key={gallery.uri}
-                className="group break-inside-avoid block border border-100 rounded-md overflow-hidden bg-50 hover:border-300 transition-colors">
-                <MasonryGrid
+                className="break-inside-avoid border border-[#1e1e1e] rounded-md overflow-hidden bg-[#0f0f0f] hover:border-[#2a2a2a] transition-colors group">
+                <GalleryThumb
                   images={gallery.images}
                   title={value.title ?? 'Gallery'}
                   eager={index === 0}
-                  onPhotoClick={i =>
-                    setLightbox({images: gallery.images, index: i})
-                  }
+                  onPhotoClick={i => setLightbox({images: gallery.images, index: i})}
                 />
                 <a
                   href={`https://grain.social/profile/${did}/gallery/${rkey}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col gap-2 p-4 block">
-                  <h2 className="font-display text-xl text-950 group-hover:text-600 transition-colors">
+                  className="block px-4 py-3">
+                  <h2 className="font-display text-[14px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
                     {value.title ?? 'Untitled'}
                   </h2>
-                  {value.address ? (
-                    <p className="font-sans text-sm text-500">
-                      {value.address.locality}
-                      {value.address.region ? ', ' + value.address.region : ''}
+                  {value.address?.locality && (
+                    <p className="font-mono text-[9px] text-[#555] mt-0.5">
+                      {value.address.locality}{value.address.region ? `, ${value.address.region}` : ''}
                     </p>
-                  ) : null}
-                  <div className="flex items-center justify-between mt-auto pt-2">
-                    <p className="font-mono text-xs text-300">
-                      {new Date(value.createdAt).toLocaleDateString('id-ID', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                  )}
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="font-mono text-[9px] text-[#444]">
+                      {new Date(value.createdAt).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})}
                     </p>
-                    {gallery.images.length > 0 ? (
-                      <p className="font-mono text-xs text-300">
-                        {gallery.images.length} foto
-                      </p>
-                    ) : null}
+                    {gallery.images.length > 0 && (
+                      <p className="font-mono text-[9px] text-[#444]">{gallery.images.length} foto</p>
+                    )}
                   </div>
                 </a>
               </div>
@@ -392,6 +262,6 @@ export default function Gallery() {
           })}
         </div>
       )}
-    </article>
+    </div>
   )
 }

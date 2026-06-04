@@ -42,11 +42,8 @@ export const loader = async () => {
 
 export const meta: MetaFunction = () => {
   return [
-    {title: "Mutho's Blog"},
-    {
-      name: 'description',
-      content: 'thoughts and vibes from mutho',
-    },
+    {title: "mutho. — writing random stuff"},
+    {name: 'description', content: 'thoughts and vibes from mutho'},
   ]
 }
 
@@ -58,7 +55,7 @@ export default function Index() {
   }>()
 
   const [activeTag, setActiveTag] = useState<string | null>(null)
-  const [showTags, setShowTags] = useState(false)
+  const [activeReviewType, setActiveReviewType] = useState<string | null>(null)
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>()
@@ -71,86 +68,172 @@ export default function Index() {
     return items.filter(item => item.tags?.includes(activeTag))
   }, [items, activeTag])
 
+  const availableReviewTypes = useMemo(() => {
+    const typeSet = new Set<string>()
+    reviews.forEach(r => {if (r.creativeWorkType) typeSet.add(r.creativeWorkType)})
+    return Array.from(typeSet).sort()
+  }, [reviews])
+
+  const filteredReviews = useMemo(() => {
+    if (!activeReviewType) return reviews
+    return reviews.filter(r => r.creativeWorkType === activeReviewType)
+  }, [reviews, activeReviewType])
+
+  // Stats
+  const tagCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    items.forEach(item => item.tags?.forEach(t => { counts[t] = (counts[t] || 0) + 1 }))
+    return counts
+  }, [items])
+
   return (
-    <div className="container mx-auto max-w-2xl pt-8 md:pt-12 pb-12">
-      <section className="mb-8 md:mb-10 flex flex-col gap-3">
-        <h1 className="font-display text-4xl md:text-5xl text-950 leading-[1.05]">
-          It's Mutho<span className="text-[#5EA2FF]">.</span>
-        </h1>
+    <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-        <p className="text-lg leading-relaxed text-zinc-400 max-w-prose">
-          Just writing random stuff here.
-        </p>
-      </section>
-
-      <section>
-        <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
-          <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
-            Recent writing
-          </h2>
-
-          <span className="label text-zinc-500">
-            {filteredItems.length} posts
-          </span>
+      {/* ── Left Sidebar ── */}
+      <aside className="hidden lg:block w-[200px] shrink-0 border-r border-[#1e1e1e] px-4 py-6">
+        {/* Filter */}
+        <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-2.5">Filter</p>
+        <div className="flex flex-wrap gap-1 mb-5">
+          <FilterTag active={activeTag === null} onClick={() => setActiveTag(null)}>All</FilterTag>
+          <FilterTag active={activeTag === 'blog'} onClick={() => setActiveTag('blog')}>Blog</FilterTag>
+          <FilterTag active={activeTag === 'review'} onClick={() => setActiveTag('review')}>Review</FilterTag>
+          {allTags.filter(t => t !== 'blog' && t !== 'review').map(tag => (
+            <FilterTag key={tag} active={activeTag === tag} onClick={() => setActiveTag(tag)}>
+              {tag}
+            </FilterTag>
+          ))}
         </div>
 
-        {allTags.length > 0 && (
-          <div className="relative inline-block mb-5">
-            <button
-              onClick={() => setShowTags(!showTags)}
-              className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
-              {activeTag ?? 'All Posts'}
-              <span className={`transition-transform duration-200 ${showTags ? 'rotate-180' : ''}`}>
-                ▼
-              </span>
-            </button>
+        {/* Recent sidebar */}
+        <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-4">Recent</p>
+        {items.slice(0, 5).map(item => (
+          <a
+            key={item.rkey}
+            href={`/posts/${item.rkey}`}
+            className="block py-1.5 border-b border-[#1e1e1e] group last:border-0">
+            <div className="font-mono text-[10px] text-[#b0b0b0] group-hover:text-[#4a9eff] transition-colors truncate">
+              {item.title}
+            </div>
+            <div className="font-mono text-[9px] text-[#555] mt-0.5">
+              {new Date(item.publishedAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
+            </div>
+          </a>
+        ))}
+      </aside>
 
-            {showTags && (
-              <div className="absolute left-0 top-full mt-2 w-[180px] rounded-[18px] border border-zinc-800 bg-[#0A0A0A] p-2 shadow-2xl z-50">
-                <button
-                  onClick={() => { setActiveTag(null); setShowTags(false) }}
-                  className={`w-full text-left px-3 py-2 rounded-[14px] text-[13px] transition-all ${
-                    activeTag === null
-                      ? 'bg-[#69A7F5] text-black'
-                      : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                  }`}>
-                  All Posts
-                </button>
+      {/* ── Main Content ── */}
+      <div className="flex-1 px-6 md:px-8 py-7 min-w-0">
+        {/* Hero */}
+        <section className="mb-7">
+          <h1 className="font-display text-[28px] md:text-[34px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
+            It's Mutho<span className="text-[#4a9eff]">.</span>
+          </h1>
+          <p className="font-mono text-[11px] text-[#555] mt-1">Just writing random stuff here.</p>
+        </section>
 
-                <div className="mt-2 flex flex-col">
-                  {allTags.map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => { setActiveTag(tag); setShowTags(false) }}
-                      className={`w-full text-left px-3 py-2 rounded-[14px] text-[13px] transition-all ${
-                        activeTag === tag
-                          ? 'bg-[#69A7F5] text-black'
-                          : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                      }`}>
-                      {tag}
-                    </button>
-                  ))}
-                </div>
+        {/* Posts section */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
+            <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555]">Recent Writing</span>
+            <span className="font-mono text-[9px] text-[#555]">{filteredItems.length} Posts</span>
+          </div>
+
+          {/* Mobile tag filter */}
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-4 lg:hidden">
+              <FilterTag active={activeTag === null} onClick={() => setActiveTag(null)}>All</FilterTag>
+              {allTags.map(tag => (
+                <FilterTag key={tag} active={activeTag === tag} onClick={() => setActiveTag(tag)}>
+                  {tag}
+                </FilterTag>
+              ))}
+            </div>
+          )}
+
+          {filteredItems.length === 0 ? (
+            <p className="font-mono text-[11px] text-[#444] py-4">No posts yet.</p>
+          ) : (
+            <ul className="divide-y divide-[#1a1a1a]">
+              {filteredItems.map(item => (
+                <PostItem post={item} did={did} key={`post-${item.rkey}`} />
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Reviews section */}
+        {reviews.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between border-t border-[#222] pt-3 mb-3">
+              <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555]">Recently Watched &amp; Read</span>
+              <span className="font-mono text-[9px] text-[#555]">{filteredReviews.length} Items</span>
+            </div>
+
+            {availableReviewTypes.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                <FilterTag active={activeReviewType === null} onClick={() => setActiveReviewType(null)}>All</FilterTag>
+                {availableReviewTypes.map(type => (
+                  <FilterTag key={type} active={activeReviewType === type} onClick={() => setActiveReviewType(type)}>
+                    {CATEGORY_LABELS[type] ?? type}
+                  </FilterTag>
+                ))}
               </div>
             )}
-          </div>
-        )}
 
-        {filteredItems.length === 0 ? (
-          <p className="text-zinc-600 font-mono text-sm pt-4">No posts yet.</p>
-        ) : (
-          <ul className="divide-y divide-zinc-900">
-            {filteredItems.map(item => (
-              <PostItem post={item} did={did} key={`post-${item.rkey}`} />
-            ))}
-          </ul>
+            <ul className="divide-y divide-[#1a1a1a]">
+              {filteredReviews.map(review => (
+                <ReviewItem review={review} key={`review-${review.rkey}`} />
+              ))}
+            </ul>
+          </section>
         )}
-      </section>
+      </div>
 
-      {reviews.length > 0 && (
-        <ReviewsSection reviews={reviews} />
-      )}
+      {/* ── Right Sidebar ── */}
+      <aside className="hidden xl:block w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
+        <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-3">Stats</p>
+        <div className="mb-4">
+          <div className="font-display text-[22px] text-[#f0f0f0]">{items.length}</div>
+          <div className="font-mono text-[9px] text-[#555] mt-0.5">Posts written</div>
+        </div>
+        <div className="mb-5">
+          <div className="font-display text-[22px] text-[#f0f0f0]">{reviews.length}</div>
+          <div className="font-mono text-[9px] text-[#555] mt-0.5">Reviews</div>
+        </div>
+
+        {Object.keys(tagCounts).length > 0 && (
+          <>
+            <p className="font-mono text-[9px] tracking-[0.12em] uppercase text-[#555] mb-2 mt-2">Tags</p>
+            <div className="flex flex-wrap gap-1">
+              {Object.entries(tagCounts).map(([tag]) => (
+                <span
+                  key={tag}
+                  className="font-mono text-[10px] text-[#888] border border-[#2a2a2a] bg-[#1a1a1a] px-2 py-0.5 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </aside>
+
     </div>
+  )
+}
+
+/* ── Sub-components ── */
+
+function FilterTag({active, onClick, children}: {active: boolean; onClick: () => void; children: React.ReactNode}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`font-mono text-[10px] px-2.5 py-1 rounded-full border transition-all ${
+        active
+          ? 'bg-[#1e1e1e] text-[#f0f0f0] border-[#4a9eff]'
+          : 'bg-[#1a1a1a] text-[#888] border-[#2a2a2a] hover:text-[#f0f0f0] hover:border-[#555]'
+      }`}>
+      {children}
+    </button>
   )
 }
 
@@ -164,46 +247,25 @@ function PostItem({post, did}: {post: LeafletDocument; did: string}) {
     <li>
       <a
         href={`/posts/${post.rkey}`}
-        className="group flex gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
-
-        <div className="w-12 h-[4.5rem] flex-shrink-0">
+        className="group flex gap-3 py-3 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
+        <div className="w-11 h-11 shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {coverUrl ? (
-            <img
-              src={coverUrl}
-              alt={post.title}
-              className="w-full h-full object-cover rounded opacity-80 group-hover:opacity-100 transition-opacity"
-            />
+            <img src={coverUrl} alt={post.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
           ) : (
-            <div className="w-full h-full rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-              <span className="text-zinc-700 text-xs">✏️</span>
-            </div>
+            <span className="text-[#444] text-xs">✏️</span>
           )}
         </div>
-
-        <div className="flex flex-col gap-1.5 min-w-0">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-display text-3xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
-              {post.title}
-            </h3>
-            <time
-              className="font-mono text-sm text-zinc-500 uppercase tracking-wider"
-              dateTime={date.toISOString()}>
-              {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
-            </time>
-          </div>
-
-          {post.description ? (
-            <p className="text-zinc-500 text-base leading-relaxed line-clamp-2">
-              {post.description}
-            </p>
-          ) : null}
-
+        <div className="flex flex-col gap-1 min-w-0">
+          <h3 className="font-display text-[13px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+            {post.title}
+          </h3>
+          <time className="font-mono text-[9px] text-[#555]" dateTime={date.toISOString()}>
+            {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
+          </time>
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-1">
+            <div className="flex flex-wrap gap-1 mt-0.5">
               {post.tags.map(tag => (
-                <span key={tag} className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
-                  {tag}
-                </span>
+                <span key={tag} className="font-mono text-[9px] text-[#4a9eff]">{tag}</span>
               ))}
             </div>
           )}
@@ -218,165 +280,57 @@ const CATEGORY_LABELS: Record<string, string> = {
   tv: 'TV Show',
   book: 'Book',
   game: 'Game',
+  music: 'Music',
 }
 
-function ReviewsSection({reviews}: {reviews: PopfeedReview[]}) {
-  const [activeType, setActiveType] = useState<string | null>(null)
-  const [showTypes, setShowTypes] = useState(false)
-
-  const availableTypes = useMemo(() => {
-    const typeSet = new Set<string>()
-    reviews.forEach(r => { if (r.creativeWorkType) typeSet.add(r.creativeWorkType) })
-    return Array.from(typeSet).sort()
-  }, [reviews])
-
-  const filteredReviews = useMemo(() => {
-    if (!activeType) return reviews
-    return reviews.filter(r => r.creativeWorkType === activeType)
-  }, [reviews, activeType])
-
-  const activeLabel = activeType ? (CATEGORY_LABELS[activeType] ?? activeType) : 'All Reviews'
-
-  return (
-    <section className="mt-10">
-      <div className="flex items-baseline justify-between mb-4 border-b border-zinc-800 pb-3">
-        <h2 className="label tracking-[0.25em] uppercase text-zinc-500">
-          Recently watched & read
-        </h2>
-        <span className="label text-zinc-500">{filteredReviews.length} items</span>
-      </div>
-
-      {availableTypes.length > 0 && (
-        <div className="relative inline-block mb-5">
-          <button
-            onClick={() => setShowTypes(!showTypes)}
-            className="flex items-center gap-2 font-mono text-[12px] text-[#5EA2FF] border-2 border-[#5EA2FF] rounded-xl px-4 py-2.5 bg-black hover:bg-zinc-950 transition-all">
-            {activeLabel}
-            <span className={`transition-transform duration-200 ${showTypes ? 'rotate-180' : ''}`}>
-              ▼
-            </span>
-          </button>
-
-          {showTypes && (
-            <div className="absolute left-0 top-full mt-2 w-[180px] rounded-[18px] border border-zinc-800 bg-[#0A0A0A] p-2 shadow-2xl z-50">
-              <button
-                onClick={() => { setActiveType(null); setShowTypes(false) }}
-                className={`w-full text-left px-3 py-2 rounded-[14px] text-[13px] transition-all ${
-                  activeType === null
-                    ? 'bg-[#69A7F5] text-black'
-                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                }`}>
-                All Reviews
-              </button>
-              <div className="mt-2 flex flex-col">
-                {availableTypes.map(type => (
-                  <button
-                    key={type}
-                    onClick={() => { setActiveType(type); setShowTypes(false) }}
-                    className={`w-full text-left px-3 py-2 rounded-[14px] text-[13px] transition-all ${
-                      activeType === type
-                        ? 'bg-[#69A7F5] text-black'
-                        : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                    }`}>
-                    {CATEGORY_LABELS[type] ?? type}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      <ul className="divide-y divide-zinc-900">
-        {filteredReviews.map(review => (
-          <ReviewItem review={review} key={`review-${review.rkey}`} />
-        ))}
-      </ul>
-    </section>
-  )
+const TYPE_EMOJI: Record<string, string> = {
+  book: '📚',
+  movie: '🎬',
+  tv: '📺',
+  game: '🎮',
+  music: '🎵',
 }
 
 function ReviewItem({review}: {review: PopfeedReview}) {
   const date = new Date(review.addedAt)
+  const emoji = TYPE_EMOJI[review.creativeWorkType ?? ''] ?? '🎞️'
 
   return (
     <li>
       <a
         href={`/reviews/${review.rkey}`}
-        className="group flex gap-4 py-4 -mx-3 px-3 rounded-md transition-colors hover:bg-zinc-950">
-
-        <div className="w-12 h-[4.5rem] flex-shrink-0">
+        className="group flex gap-3 py-3 -mx-2 px-2 rounded transition-colors hover:bg-[#111]">
+        <div className="w-8 h-[46px] shrink-0 rounded bg-[#1a1a1a] border border-[#222] overflow-hidden flex items-center justify-center">
           {review.posterUrl ? (
-            <img
-              src={review.posterUrl}
-              alt={review.title}
-              className="w-full h-full object-cover rounded opacity-80 group-hover:opacity-100 transition-opacity"
-            />
+            <img src={review.posterUrl} alt={review.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
           ) : (
-            <div className="w-full h-full rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-              <span className="text-zinc-700 text-xs">
-                {review.creativeWorkType === 'book' ? '📚' : '🎬'}
-              </span>
-            </div>
+            <span className="text-[10px]">{emoji}</span>
           )}
         </div>
-
-        <div className="flex flex-col gap-1.5 min-w-0">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-display text-2xl text-zinc-100 group-hover:text-[#5EA2FF] transition-colors leading-tight">
-              {review.creativeWorkType === 'book' ? '📚' :
-               review.creativeWorkType === 'movie' ? '🎬' :
-               review.creativeWorkType === 'tv' ? '📺' :
-               review.creativeWorkType === 'game' ? '🎮' :
-               review.creativeWorkType === 'music' ? '🎵' : '🎞️'}{' '}
-              {review.title}
-            </h3>
-            {review.releaseDate && (
-              <span className="font-mono text-sm text-zinc-600">
-                {new Date(review.releaseDate).getFullYear()}
+        <div className="flex flex-col gap-1 min-w-0">
+          <h3 className="font-display text-[12px] text-[#e0e0e0] group-hover:text-[#4a9eff] transition-colors leading-snug">
+            {emoji} {review.title}
+          </h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            {review.creativeWorkType && (
+              <span className="font-mono text-[9px] text-[#555]">
+                {CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}
               </span>
             )}
-            <time
-              className="font-mono text-sm text-zinc-500 uppercase tracking-wider"
-              dateTime={date.toISOString()}>
-              {date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}
+            <span className="font-mono text-[9px] text-[#444]">·</span>
+            <time className="font-mono text-[9px] text-[#555]" dateTime={date.toISOString()}>
+              {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
             </time>
           </div>
-
           {review.mainCredit && (
-            <p className="text-zinc-500 text-sm">
+            <p className="font-mono text-[9px] text-[#555]">
               {review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}
             </p>
           )}
-
           {review.rating && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {Array.from({length: 5}, (_, i) => (
-                <span
-                  key={i}
-                  className={`text-base ${i < Math.round(review.rating! / 2) ? 'text-[#5EA2FF]' : 'text-zinc-700'}`}>
-                  ★
-                </span>
-              ))}
-            </div>
-          )}
-
-          {(review.genres && review.genres.length > 0 || review.creativeWorkType) && (
-            <div className="flex flex-wrap gap-2 mt-1">
-              {review.creativeWorkType && (
-                <span className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
-                  {review.creativeWorkType === 'book' ? '📚 Book' :
-                   review.creativeWorkType === 'movie' ? '🎬 Movie' :
-                   review.creativeWorkType === 'tv' ? '📺 TV Show' :
-                   review.creativeWorkType === 'game' ? '🎮 Game' :
-                   review.creativeWorkType === 'music' ? '🎵 Music' :
-                   review.creativeWorkType}
-                </span>
-              )}
-              {review.genres && review.genres.slice(0, 3).map(genre => (
-                <span key={genre} className="font-mono text-xs text-[#5EA2FF] border border-[#5EA2FF] px-3 py-1 rounded-full">
-                  {genre}
-                </span>
+                <span key={i} className={`text-[10px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
               ))}
             </div>
           )}
