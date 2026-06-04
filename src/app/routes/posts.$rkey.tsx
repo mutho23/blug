@@ -194,7 +194,7 @@ function Text({plaintext, facets, textSize = 'default'}: {
   facets?: LeafletFacet[]
   textSize?: 'default' | 'small' | 'large'
 }) {
-  const sizeClass = textSize === 'default' ? 'text-[23px] md:text-[18px]' : textSize === 'small' ? 'text-[16px]' : 'text-[16px] md:text-[18px]'
+  const sizeClass = textSize === 'default' ? 'text-[18px]' : textSize === 'small' ? 'text-[15px]' : 'text-[18px]'
   return (
     <p className={`${sizeClass} font-sans text-[#888] leading-[1.9]`}>
       {renderRichText(plaintext, facets)}

@@ -59,16 +59,17 @@ type ImageItem = {thumb: string; full: string; width: number; height: number}
 const SOCIALS = [
   {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
   {icon: '💬', label: 'Discord',  href: 'https://discord.gg/dndVwwGhEa'},
-  {icon: '📸', label: 'Instagram', href: 'https://www.instagram.com/amuthohari'},
+  {icon: '🌾', label: 'Grain', href: 'https://grain.social/profile/mutho.my.id'},
   {icon: '🎵', label: 'Spotify',  href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
   {icon: '🎮', label: 'Steam',    href: 'https://steamcommunity.com/id/moebatsu'},
-  {icon: '🍿', label: 'Popfeed',  href: 'https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu'},
+  {icon: '✈️', label: 'Telegram', href: 'https://t.me/moebatsu'},
   {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
 ]
 
 function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initialIndex: number; onClose: () => void}) {
   const [index, setIndex] = useState(initialIndex)
   const touchStartX = useRef<number | null>(null)
+  const touchStartY = useRef<number | null>(null)
   const prev = useCallback(() => setIndex(i => (i - 1 + images.length) % images.length), [images.length])
   const next = useCallback(() => setIndex(i => (i + 1) % images.length), [images.length])
 
@@ -87,38 +88,84 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
     return () => { document.body.style.overflow = '' }
   }, [])
 
+  // Capture & stop ALL touch events so root.tsx swipe handler tidak keikutan
+  const stopTouch = (e: React.TouchEvent) => e.stopPropagation()
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
+      className="fixed inset-0 flex items-center justify-center bg-black/97"
+      style={{zIndex: 9999}}
       onClick={onClose}
-      onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
+      onTouchStart={e => {
+        e.stopPropagation()
+        touchStartX.current = e.touches[0].clientX
+        touchStartY.current = e.touches[0].clientY
+      }}
+      onTouchMove={stopTouch}
       onTouchEnd={e => {
+        e.stopPropagation()
         if (touchStartX.current === null) return
-        const diff = touchStartX.current - e.changedTouches[0].clientX
-        if (Math.abs(diff) > 50) diff > 0 ? next() : prev()
+        const dx = touchStartX.current - e.changedTouches[0].clientX
+        const dy = Math.abs((touchStartY.current ?? 0) - e.changedTouches[0].clientY)
+        if (Math.abs(dx) > 50 && dy < Math.abs(dx) * 0.8) {
+          dx > 0 ? next() : prev()
+        }
         touchStartX.current = null
+        touchStartY.current = null
       }}>
-      <button className="absolute top-4 right-4 text-white/60 hover:text-white text-2xl font-light z-10 font-mono" onClick={onClose}>✕</button>
+
+      {/* Close button */}
+      <button
+        className="absolute top-5 right-5 text-white/70 hover:text-white text-3xl font-light font-mono leading-none"
+        style={{zIndex: 10000}}
+        onClick={onClose}>✕</button>
+
+      {/* Counter */}
       {images.length > 1 && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 font-mono text-xs text-white/40">{index + 1} / {images.length}</div>
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 font-mono text-sm text-white/40" style={{zIndex: 10000}}>
+          {index + 1} / {images.length}
+        </div>
       )}
+
+      {/* Prev / Next arrows */}
       {images.length > 1 && (
-        <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 px-2" onClick={e => { e.stopPropagation(); prev() }}>‹</button>
+        <button
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-5xl px-3 py-6"
+          style={{zIndex: 10000}}
+          onClick={e => { e.stopPropagation(); prev() }}>‹</button>
       )}
-      <div className="relative flex items-center justify-center" style={{maxHeight: '90vh', maxWidth: '90vw'}} onClick={e => e.stopPropagation()}>
-        <img key={`t-${index}`} src={images[index].thumb} alt="" aria-hidden className="absolute inset-0 w-full h-full object-contain blur-sm scale-105" />
+
+      {/* Image container — centered, never goes off-screen */}
+      <div
+        className="relative flex items-center justify-center"
+        style={{width: '100vw', height: '100vh', padding: '60px 60px'}}
+        onClick={e => e.stopPropagation()}>
+        {/* Blur placeholder */}
+        <img key={`t-${index}`} src={images[index].thumb} alt="" aria-hidden
+          className="absolute inset-0 w-full h-full object-contain blur-md scale-105 opacity-30" />
+        {/* Full image */}
         <img key={`f-${index}`} src={images[index].full} alt={`Photo ${index + 1}`}
-          className="relative max-h-full max-w-full object-contain" style={{maxHeight: '90vh', maxWidth: '90vw'}}
-          onLoad={e => { const t = e.currentTarget.previousElementSibling as HTMLElement | null; if (t) t.style.display = 'none' }} />
+          className="relative object-contain"
+          style={{maxWidth: '100%', maxHeight: '100%'}}
+          onLoad={e => {
+            const t = e.currentTarget.previousElementSibling as HTMLElement | null
+            if (t) t.style.display = 'none'
+          }} />
       </div>
+
       {images.length > 1 && (
-        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 px-2" onClick={e => { e.stopPropagation(); next() }}>›</button>
+        <button
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white text-5xl px-3 py-6"
+          style={{zIndex: 10000}}
+          onClick={e => { e.stopPropagation(); next() }}>›</button>
       )}
+
+      {/* Dot indicators */}
       {images.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2" style={{zIndex: 10000}}>
           {images.map((_, i) => (
             <button key={i} onClick={e => { e.stopPropagation(); setIndex(i) }}
-              className={`w-1.5 h-1.5 rounded-full transition-colors ${i === index ? 'bg-white' : 'bg-white/25'}`} />
+              className={`rounded-full transition-all ${i === index ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/25'}`} />
           ))}
         </div>
       )}

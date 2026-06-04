@@ -134,7 +134,7 @@ export default function ReviewPage() {
         {review.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-7">
             {review.tags.map(tag => (
-              <span key={tag} className="font-mono text-[13px] text-[#555] bg-[#111] border border-[#1e1e1e] px-2 py-0.5 rounded">
+              <span key={tag} className="font-mono text-[13px] text-[#4a9eff] border border-[#1e3a5f] px-2 py-0.5 rounded-full bg-[#0d1f33]">
                 #{tag}
               </span>
             ))}
