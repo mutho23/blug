@@ -36,10 +36,10 @@ export const loader = async () => {
 const SOCIALS = [
   {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
   {icon: '💬', label: 'Discord',  href: 'https://discord.gg/dndVwwGhEa'},
-  {icon: '📸', label: 'Instagram', href: 'https://www.instagram.com/amuthohari'},
+  {icon: '🌾', label: 'Grain', href: 'https://grain.social/profile/mutho.my.id'},
   {icon: '🎵', label: 'Spotify',  href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
   {icon: '🎮', label: 'Steam',    href: 'https://steamcommunity.com/id/moebatsu'},
-  {icon: '🍿', label: 'Popfeed',  href: 'https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu'},
+  {icon: '✈️', label: 'Telegram', href: 'https://t.me/moebatsu'},
   {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
 ]
 
@@ -67,6 +67,8 @@ export function Layout({children}: {children: React.ReactNode}) {
     if (!isMainPage) return
 
     const onTouchStart = (e: TouchEvent) => {
+      // Jangan aktifkan page swipe kalau lightbox sedang terbuka
+      if (document.querySelector('[style*="z-index: 9999"]')) return
       touchStartX.current = e.touches[0].clientX
       touchStartY.current = e.touches[0].clientY
       dragging.current = false
@@ -74,6 +76,7 @@ export function Layout({children}: {children: React.ReactNode}) {
     }
 
     const onTouchMove = (e: TouchEvent) => {
+      if (document.querySelector('[style*="z-index: 9999"]')) return
       const dx = e.touches[0].clientX - touchStartX.current
       const dy = Math.abs(e.touches[0].clientY - touchStartY.current)
       // Only hijack if mostly horizontal
@@ -89,6 +92,7 @@ export function Layout({children}: {children: React.ReactNode}) {
     }
 
     const onTouchEnd = (e: TouchEvent) => {
+      if (document.querySelector('[style*="z-index: 9999"]')) return
       const dx = touchStartX.current - e.changedTouches[0].clientX
       const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY)
       setDragOffset(0)
