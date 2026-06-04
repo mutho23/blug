@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
   useLoaderData,
   useLocation,
+  useNavigate,
   useRouteError,
 } from '@remix-run/react'
 import {json, LinksFunction} from '@remix-run/node'
@@ -42,13 +43,49 @@ const SOCIALS = [
   {icon: '✉️', label: 'Email',    href: 'mailto:hello@mutho.site'},
 ]
 
+// Urutan halaman untuk swipe
+const PAGE_ORDER = ['/', '/about', '/gallery']
+
 export function Layout({children}: {children: React.ReactNode}) {
   const data = useLoaderData<{profile: AppBskyActorDefs.ProfileViewDetailed | null}>()
   const profile = data?.profile ?? null
   const location = useLocation()
+  const navigate = useNavigate()
 
   const isOn = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
+
+  // Swipe handler — hanya aktif di halaman utama (bukan post/review detail)
+  const isMainPage = PAGE_ORDER.includes(location.pathname)
+  const currentIndex = PAGE_ORDER.indexOf(location.pathname)
+
+  React.useEffect(() => {
+    if (!isMainPage) return
+    let startX = 0
+    let startY = 0
+
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+    }
+    const onTouchEnd = (e: TouchEvent) => {
+      const dx = startX - e.changedTouches[0].clientX
+      const dy = Math.abs(startY - e.changedTouches[0].clientY)
+      // Swipe horizontal minimal 60px, lebih horizontal dari vertikal
+      if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.6) return
+      if (dx > 0 && currentIndex < PAGE_ORDER.length - 1) {
+        navigate(PAGE_ORDER[currentIndex + 1])
+      } else if (dx < 0 && currentIndex > 0) {
+        navigate(PAGE_ORDER[currentIndex - 1])
+      }
+    }
+    document.addEventListener('touchstart', onTouchStart, {passive: true})
+    document.addEventListener('touchend', onTouchEnd, {passive: true})
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart)
+      document.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [isMainPage, currentIndex, navigate])
 
   return (
     <html lang="en">
@@ -69,23 +106,10 @@ export function Layout({children}: {children: React.ReactNode}) {
             className="sticky top-0 z-50 border-b border-[#222]"
             style={{background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(12px)'}}>
 
-            <div className="mx-auto w-full max-w-[1600px] px-5 h-[52px] flex items-center justify-between">
+            <div className="mx-auto w-full max-w-[1600px] px-4 h-[52px] flex items-center justify-between">
 
-              {/* ── Mobile kiri: tombol Contact ── */}
-              <button
-                className="sm:hidden flex flex-col justify-center gap-[5px] w-9 h-9 shrink-0"
-                aria-label="Contact"
-                onClick={() => {
-                  document.getElementById('mobile-contact')?.classList.toggle('hidden')
-                  document.getElementById('mobile-menu')?.classList.add('hidden')
-                }}>
-                <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
-                <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
-                <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
-              </button>
-
-              {/* Brand — mobile: absolut tengah; desktop: kiri */}
-              <a href="/" className="flex items-center gap-2.5 group sm:static absolute left-1/2 -translate-x-1/2 sm:translate-x-0">
+              {/* ── Mobile kiri: Avatar/Brand ── */}
+              <a href="/" className="flex items-center gap-2 group sm:gap-2.5">
                 {profile?.avatar ? (
                   <img
                     className="rounded-full w-8 h-8 ring-1 ring-[#333] group-hover:ring-[#4a9eff] transition-all"
@@ -104,54 +128,37 @@ export function Layout({children}: {children: React.ReactNode}) {
                 </span>
               </a>
 
+              {/* ── Mobile tengah: Nav links langsung ── */}
+              <nav className="sm:hidden flex items-center gap-5">
+                <MobileNavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</MobileNavLink>
+                <MobileNavLink href="/about" selected={isOn('/about')}>About</MobileNavLink>
+                <MobileNavLink href="/gallery" selected={isOn('/gallery')}>Gallery</MobileNavLink>
+              </nav>
+
               {/* Desktop nav */}
               <nav className="hidden sm:flex items-center gap-7">
                 <NavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</NavLink>
                 <NavLink href="/about" selected={isOn('/about')}>About</NavLink>
                 <NavLink href="/gallery" selected={isOn('/gallery')}>Gallery</NavLink>
-                <a
-                  href="https://bsky.app/profile/mutho.my.id"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-[14px] text-[#555] hover:text-[#b0b0b0] transition-colors tracking-[0.04em]">
-                  Bluesky
-                </a>
               </nav>
 
-              {/* ── Mobile kanan: tombol Nav ── */}
+              {/* ── Mobile kanan: tombol Contact ── */}
               <button
                 className="sm:hidden flex flex-col justify-center gap-[5px] w-9 h-9 shrink-0"
-                aria-label="Menu"
+                aria-label="Contact"
                 onClick={() => {
-                  document.getElementById('mobile-menu')?.classList.toggle('hidden')
-                  document.getElementById('mobile-contact')?.classList.add('hidden')
+                  document.getElementById('mobile-contact')?.classList.toggle('hidden')
                 }}>
                 <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
                 <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
                 <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
               </button>
+
+              {/* Desktop kanan: kosong / placeholder jika perlu */}
+              <div className="hidden sm:block w-9" />
             </div>
 
-            {/* ── Mobile dropdown: Nav (kanan) ── */}
-            <div id="mobile-menu" className="hidden sm:hidden border-t border-[#222] px-6 py-1" style={{background: 'rgba(10,10,10,0.97)'}}>
-              {[
-                {href: '/',       label: 'Blogs',      active: isOn('/') && location.pathname === '/'},
-                {href: '/about',  label: 'About',      active: isOn('/about')},
-                {href: '/gallery',label: 'Gallery',    active: isOn('/gallery')},
-                {href: 'https://bsky.app/profile/mutho.my.id', label: 'Bluesky ↗', active: false},
-              ].map(({href, label, active}) => (
-                <a
-                  key={href}
-                  href={href}
-                  target={href.startsWith('http') ? '_blank' : undefined}
-                  rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className={`block py-3 border-b border-[#1a1a1a] last:border-0 font-mono text-[16px] transition-colors ${active ? 'text-[#4a9eff]' : 'text-[#cccccc]'}`}>
-                  {label}
-                </a>
-              ))}
-            </div>
-
-            {/* ── Mobile dropdown: Contact (kiri) ── */}
+            {/* ── Mobile dropdown: Contact ── */}
             <div id="mobile-contact" className="hidden sm:hidden border-t border-[#222] px-6 py-1" style={{background: 'rgba(10,10,10,0.97)'}}>
               <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] pt-3 pb-2">Contact</p>
               {SOCIALS.map(({icon, label, href}) => (
@@ -168,6 +175,16 @@ export function Layout({children}: {children: React.ReactNode}) {
                 </a>
               ))}
             </div>
+
+            {/* ── Mobile: swipe indicator dots ── */}
+            {isMainPage && (
+              <div className="sm:hidden flex justify-center gap-1.5 py-1.5">
+                {PAGE_ORDER.map((path, i) => (
+                  <a key={path} href={path}
+                    className={`block rounded-full transition-all ${i === currentIndex ? 'w-4 h-1.5 bg-[#4a9eff]' : 'w-1.5 h-1.5 bg-[#333]'}`} />
+                ))}
+              </div>
+            )}
           </header>
 
           <main className="flex-1">{children}</main>
@@ -209,6 +226,18 @@ function NavLink({href, selected, children}: {href: string; selected: boolean; c
       href={href}
       className={`font-mono text-[14px] tracking-[0.04em] pb-0.5 border-b-[1.5px] transition-colors ${
         selected ? 'text-[#f0f0f0] border-[#4a9eff]' : 'text-[#555] border-transparent hover:text-[#b0b0b0]'
+      }`}>
+      {children}
+    </a>
+  )
+}
+
+function MobileNavLink({href, selected, children}: {href: string; selected: boolean; children: string}) {
+  return (
+    <a
+      href={href}
+      className={`font-mono text-[13px] tracking-[0.04em] pb-0.5 border-b-[1.5px] transition-colors ${
+        selected ? 'text-[#f0f0f0] border-[#4a9eff]' : 'text-[#444] border-transparent'
       }`}>
       {children}
     </a>
