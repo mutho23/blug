@@ -40,7 +40,8 @@ export default function About() {
       </aside>
 
       {/* ── Main Content ── */}
-      <div className="flex-1 px-6 md:px-10 py-9 max-w-2xl">
+      <div className="flex-1 min-w-0 flex justify-center">
+      <div className="w-full max-w-2xl px-6 md:px-10 py-9">
         <section className="mb-8">
           <h1 className="font-display text-[35px] text-[#f0f0f0] tracking-[-0.02em]">
             About Me<span className="text-[#4a9eff]">.</span>
@@ -67,9 +68,10 @@ export default function About() {
           <LinkItem name="Popfeed"  href="https://popfeed.social/profile/did:plc:kxb2w63yrod2t65mlnecgrlu" />
         </Section>
       </div>
+      </div>
 
       {/* ── Right Sidebar: kosong ── */}
-      <aside className="hidden xl:block w-[200px] shrink-0 border-l border-[#1e1e1e]" />
+      <aside className="hidden lg:block w-[200px] shrink-0 border-l border-[#1e1e1e]" />
 
     </div>
   )

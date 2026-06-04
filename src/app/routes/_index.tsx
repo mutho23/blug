@@ -114,7 +114,8 @@ export default function Index() {
       </aside>
 
       {/* ── Main Content ── */}
-      <div className="flex-1 px-6 md:px-8 py-7 min-w-0">
+      <div className="flex-1 min-w-0 flex justify-center">
+      <div className="w-full max-w-2xl px-6 md:px-8 py-7">
         {/* Hero */}
         <section className="mb-7">
           <h1 className="font-display text-[38px] md:text-[40px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
@@ -205,9 +206,10 @@ export default function Index() {
           </section>
         )}
       </div>
+      </div>
 
       {/* ── Right Sidebar: Stats + Tags ── */}
-      <aside className="hidden xl:flex flex-col w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
+      <aside className="hidden lg:flex flex-col w-[200px] shrink-0 border-l border-[#1e1e1e] px-4 py-6">
         {/* Stats */}
         <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#555] mb-3">Stats</p>
         <div className="mb-3">
