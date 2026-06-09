@@ -1,7 +1,8 @@
 import {json, MetaFunction} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
-import {getReviews, PopfeedReview} from '../../atproto/getReviews.js'
+import {PopfeedReview} from '../../atproto/getReviews.js'
 import {getAnilistCurrentManga, AnilistManga} from '../../atproto/getAnilist.js'
+import {getListItems, LIST_RKEYS} from '../../atproto/getList.js'
 
 export const meta: MetaFunction = () => [
   {title: 'mutho. — now'},
@@ -10,30 +11,25 @@ export const meta: MetaFunction = () => [
 
 type NowData = {
   manga: AnilistManga[]
-  books: PopfeedReview[]
-  movies: PopfeedReview[]
-  games: PopfeedReview[]
-  tv: PopfeedReview[]
+  currentReading: PopfeedReview[]
+  currentWatching: PopfeedReview[]
   updatedAt: string
 }
 
-// Pick the N most recently added entries for a given type
-function getRecent(reviews: PopfeedReview[], type: string, limit = 3): PopfeedReview[] {
-  return reviews
-    .filter(r => r.creativeWorkType === type)
-    .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
-    .slice(0, limit)
-}
-
 export const loader = async () => {
-  const [reviews, manga] = await Promise.all([getReviews(), getAnilistCurrentManga()])
+  const [manga, currentReading, currentWatching] = await Promise.all([
+    getAnilistCurrentManga(),
+    getListItems(LIST_RKEYS.currentReading),
+    getListItems(LIST_RKEYS.currentWatching),
+  ])
+
+  // Only show the most recently updated manga
+  const latestManga = manga.slice(0, 1)
 
   const data: NowData = {
-    manga,
-    books: getRecent(reviews, 'book'),
-    movies: getRecent(reviews, 'movie'),
-    games: getRecent(reviews, 'game'),
-    tv: getRecent(reviews, 'tv'),
+    manga: latestManga,
+    currentReading,
+    currentWatching,
     updatedAt: new Date().toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
@@ -63,14 +59,22 @@ const TYPE_EMOJI: Record<string, string> = {
 }
 
 export default function Now() {
-  const {manga, books, movies, games, tv, updatedAt} = useLoaderData<NowData>()
+  const {manga, currentReading, currentWatching, updatedAt} = useLoaderData<NowData>()
 
-  const totalItems = manga.length + books.length + movies.length + games.length + tv.length
+  const books = currentReading.filter(r => r.creativeWorkType === 'book')
+  const games = currentReading.filter(r => r.creativeWorkType === 'game')
+  const otherReading = currentReading.filter(r => r.creativeWorkType !== 'book' && r.creativeWorkType !== 'game')
+
+  const movies = currentWatching.filter(r => r.creativeWorkType === 'movie')
+  const tv = currentWatching.filter(r => r.creativeWorkType === 'tv' || r.creativeWorkType === 'anime')
+  const otherWatching = currentWatching.filter(r => r.creativeWorkType !== 'movie' && r.creativeWorkType !== 'tv' && r.creativeWorkType !== 'anime')
+
+  const totalItems = manga.length + currentReading.length + currentWatching.length
 
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Left Sidebar ── */}
+      {/* Left Sidebar */}
       <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
         <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
         {SOCIALS.map(({icon, label, href}) => (
@@ -90,7 +94,7 @@ export default function Now() {
         ))}
       </aside>
 
-      {/* ── Main Content ── */}
+      {/* Main Content */}
       <div className="flex-1 min-w-0 flex justify-center">
         <div className="w-full max-w-5xl px-8 md:px-14 py-8">
 
@@ -105,9 +109,9 @@ export default function Now() {
             </p>
           </section>
 
-          {/* Manga section (from AniList) */}
+          {/* Manga (AniList — most recently updated) */}
           {manga.length > 0 && (
-            <NowSection title="📖 Reading (Manga)" source="AniList" sourceUrl={`https://anilist.co/user/moebatsu/mangalist`}>
+            <NowSection title="📖 Reading (Manga)" source="AniList" sourceUrl="https://anilist.co/user/moebatsu/mangalist">
               {manga.map(m => (
                 <a key={m.id} href={m.siteUrl} target="_blank" rel="noopener noreferrer"
                   className="group flex gap-4 py-4 -mx-2 px-2 rounded hover:bg-[#111] transition-colors">
@@ -119,9 +123,11 @@ export default function Now() {
                     <p className="font-mono text-[13px] text-[#555]">
                       Ch. {m.progress}{m.totalChapters ? ` / ${m.totalChapters}` : ''}
                     </p>
-                    {m.genres.slice(0, 3).map(g => (
-                      <span key={g} className="inline-block font-mono text-[11px] text-[#4a9eff] mr-2">{g}</span>
-                    ))}
+                    <div className="flex flex-wrap gap-2">
+                      {m.genres.slice(0, 3).map(g => (
+                        <span key={g} className="font-mono text-[11px] text-[#4a9eff]">{g}</span>
+                      ))}
+                    </div>
                   </div>
                 </a>
               ))}
@@ -130,29 +136,43 @@ export default function Now() {
 
           {/* Books */}
           {books.length > 0 && (
-            <NowSection title="📚 Reading (Books)" source="Popfeed">
+            <NowSection title="📚 Reading (Books)" source="Popfeed" sourceUrl="https://popfeed.social/list/at:/did:plc:kxb2w63yrod2t65mlnecgrlu/social.popfeed.feed.list/3mduaqji7vs24">
               <ReviewList reviews={books} />
             </NowSection>
           )}
 
           {/* Games */}
           {games.length > 0 && (
-            <NowSection title="🎮 Playing" source="Popfeed">
+            <NowSection title="🎮 Playing" source="Popfeed" sourceUrl="https://popfeed.social/list/at:/did:plc:kxb2w63yrod2t65mlnecgrlu/social.popfeed.feed.list/3mduaqji7vs24">
               <ReviewList reviews={games} />
+            </NowSection>
+          )}
+
+          {/* Other reading types */}
+          {otherReading.length > 0 && (
+            <NowSection title="📖 Reading" source="Popfeed">
+              <ReviewList reviews={otherReading} />
             </NowSection>
           )}
 
           {/* Movies */}
           {movies.length > 0 && (
-            <NowSection title="🎬 Watching (Movies)" source="Popfeed">
+            <NowSection title="🎬 Watching (Movies)" source="Popfeed" sourceUrl="https://popfeed.social/list/at:/did:plc:kxb2w63yrod2t65mlnecgrlu/social.popfeed.feed.list/3mntm5c7uc22f">
               <ReviewList reviews={movies} />
             </NowSection>
           )}
 
-          {/* TV */}
+          {/* TV / Anime */}
           {tv.length > 0 && (
-            <NowSection title="📺 Watching (TV / Anime)" source="Popfeed">
+            <NowSection title="📺 Watching (TV / Anime)" source="Popfeed" sourceUrl="https://popfeed.social/list/at:/did:plc:kxb2w63yrod2t65mlnecgrlu/social.popfeed.feed.list/3mntm5c7uc22f">
               <ReviewList reviews={tv} />
+            </NowSection>
+          )}
+
+          {/* Other watching */}
+          {otherWatching.length > 0 && (
+            <NowSection title="▶️ Watching" source="Popfeed">
+              <ReviewList reviews={otherWatching} />
             </NowSection>
           )}
 
@@ -169,7 +189,7 @@ export default function Now() {
         </div>
       </div>
 
-      {/* ── Right Sidebar ── */}
+      {/* Right Sidebar */}
       <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
         <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Now</p>
 
@@ -192,8 +212,6 @@ export default function Now() {
     </div>
   )
 }
-
-/* ── Sub-components ── */
 
 function NowSection({
   title,
