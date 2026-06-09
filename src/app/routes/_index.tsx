@@ -316,7 +316,7 @@ function ReviewItem({review}: {review: PopfeedReview}) {
         <div className="flex flex-col gap-2 min-w-0">
           <h3 className="font-display text-[24px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">{emoji} {review.title}</h3>
           <div className="flex items-center gap-2 flex-wrap">
-            {review.creativeWorkType && <span className="font-mono text-[15px] text-[#aaaaaa]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
+            {review.creativeWorkType && <span className="font-mono text-[15px] text-[#4a9eff]">{CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType}</span>}
             <span className="font-mono text-[15px] text-[#777]">·</span>
             <time className="font-mono text-[15px] text-[#aaaaaa]" dateTime={date.toISOString()}>
               {date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
