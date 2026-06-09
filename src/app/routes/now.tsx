@@ -2,7 +2,7 @@ import {json, MetaFunction} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
 import {PopfeedReview} from '../../atproto/getReviews.js'
 import {getAnilistCurrentManga, AnilistManga} from '../../atproto/getAnilist.js'
-import {getListItems, LIST_RKEYS} from '../../atproto/getList.js'
+import {getListItems, LIST_URIS} from '../../atproto/getList.js'
 
 export const meta: MetaFunction = () => [
   {title: 'mutho. — now'},
@@ -19,8 +19,8 @@ type NowData = {
 export const loader = async () => {
   const [manga, currentReading, currentWatching] = await Promise.all([
     getAnilistCurrentManga(),
-    getListItems(LIST_RKEYS.currentReading),
-    getListItems(LIST_RKEYS.currentWatching),
+    getListItems(LIST_URIS.currentReading),
+    getListItems(LIST_URIS.currentWatching),
   ])
 
   // Only show the most recently updated manga
