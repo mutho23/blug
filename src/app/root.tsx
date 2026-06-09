@@ -43,7 +43,7 @@ const SOCIALS = [
   {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
 ]
 
-const PAGE_ORDER = ['/', '/about', '/gallery', '/now']
+const PAGE_ORDER = ['/', '/about', '/gallery']
 
 export function Layout({children}: {children: React.ReactNode}) {
   const data = useLoaderData<{profile: AppBskyActorDefs.ProfileViewDetailed | null}>()
@@ -161,7 +161,6 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <MobileNavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</MobileNavLink>
                 <MobileNavLink href="/about" selected={isOn('/about')}>About</MobileNavLink>
                 <MobileNavLink href="/gallery" selected={isOn('/gallery')}>Gallery</MobileNavLink>
-                <MobileNavLink href="/now" selected={isOn('/now')}>Now</MobileNavLink>
               </nav>
 
               {/* Desktop nav */}
@@ -169,7 +168,6 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <NavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</NavLink>
                 <NavLink href="/about" selected={isOn('/about')}>About</NavLink>
                 <NavLink href="/gallery" selected={isOn('/gallery')}>Gallery</NavLink>
-                <NavLink href="/now" selected={isOn('/now')}>Now</NavLink>
               </nav>
 
               {/* ── Kanan: burger Contact (mobile) / spacer (desktop) ── */}
