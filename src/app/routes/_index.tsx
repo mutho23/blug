@@ -214,7 +214,7 @@ export default function Index() {
         <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Stats</p>
         <div className="mb-3">
           <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{items.length}</div>
-          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Posts written</div>
+          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Blogs written</div>
         </div>
         <div className="mb-6 pb-6 border-b border-[#1a1a1a]">
           <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{reviews.length}</div>
@@ -224,7 +224,7 @@ export default function Index() {
         {/* Post Tags */}
         {allTags.length > 0 && (
           <div className="mb-6 pb-6 border-b border-[#1a1a1a]">
-            <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Post Tags</p>
+            <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Blog Tags</p>
             <div className="flex flex-wrap gap-1.5">
               {allTags.map(tag => (
                 <button
@@ -243,14 +243,21 @@ export default function Index() {
         )}
 
         {/* Review Tags */}
-        {allReviewTags.length > 0 && (
+        {availableReviewTypes.length > 0 && (
           <div>
             <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Review Tags</p>
             <div className="flex flex-wrap gap-1.5">
-              {allReviewTags.map(tag => (
-                <span key={tag} className="font-mono text-[12px] px-2.5 py-1 rounded-full border text-[#666] border-[#2a2a2a] bg-[#1a1a1a]">
-                  {tag}
-                </span>
+              {availableReviewTypes.map(type => (
+                <button
+                  key={type}
+                  onClick={() => setActiveReviewType(activeReviewType === type ? null : type)}
+                  className={`font-mono text-[12px] px-2.5 py-1 rounded-full border transition-all ${
+                    activeReviewType === type
+                      ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]'
+                      : 'text-[#666] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
+                  }`}>
+                  {CATEGORY_LABELS[type] ?? type}
+                </button>
               ))}
             </div>
           </div>
