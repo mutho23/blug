@@ -14,7 +14,7 @@ import {
   LeafletWebsiteBlock,
 } from 'src/types'
 import {getDid} from 'src/atproto/getDid'
-import {useEffect, useRef, useState} from 'react'
+import {useRef} from 'react'
 import {Link} from '../components/link'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
@@ -52,20 +52,7 @@ export default function Posts() {
     rkey: string
   }>()
 
-  const [readPct, setReadPct] = useState(0)
   const bodyRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (!bodyRef.current) return
-      const rect = bodyRef.current.getBoundingClientRect()
-      const total = bodyRef.current.offsetHeight
-      const seen = Math.max(0, window.innerHeight - rect.top)
-      setReadPct(Math.min(100, Math.round((seen / total) * 100)))
-    }
-    window.addEventListener('scroll', onScroll, {passive: true})
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   if (!post) return <PostError />
 
@@ -73,88 +60,45 @@ export default function Posts() {
 
   return (
     <div
-      className="flex"
+      className="max-w-2xl mx-auto px-6 py-7"
       style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Article main ── */}
-      <article className="flex-1 px-6 md:px-10 py-7 min-w-0 border-r border-[#1e1e1e]">
-        <a href="/" className="inline-block font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-4">
-          ← Writing
-        </a>
+      <a href="/" className="inline-block font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-4">
+        ← Writing
+      </a>
 
-        <h1 className="font-display text-[35px] md:text-[37px] text-[#f0f0f0] leading-tight tracking-[-0.02em] mb-2">
-          {post.title}
-        </h1>
+      <h1 className="font-display text-[35px] md:text-[37px] text-[#f0f0f0] leading-tight tracking-[-0.02em] mb-2">
+        {post.title}
+      </h1>
 
-        <div className="flex items-center gap-2 font-mono text-[16px] text-[#555] mb-6 uppercase tracking-wider">
-          <span>{profile.displayName}</span>
-          <span className="text-[#333]">·</span>
-          <time dateTime={publishedDate.toISOString()}>
-            {publishedDate.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}
-          </time>
-        </div>
+      <div className="flex items-center gap-2 font-mono text-[16px] text-[#555] mb-6 uppercase tracking-wider">
+        <span>{profile.displayName}</span>
+        <span className="text-[#333]">·</span>
+        <time dateTime={publishedDate.toISOString()}>
+          {publishedDate.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}
+        </time>
+      </div>
 
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-6">
-            {post.tags.map(tag => (
-              <span key={tag} className="font-mono text-[18px] text-[#4a9eff] border border-[#1e3a5f] px-2.5 py-0.5 rounded-full">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="flex flex-col gap-5 max-w-prose" ref={bodyRef}>
-          {post.content.pages.map((page, idx) => (
-            <div className="flex flex-col gap-5" key={idx}>
-              {page.blocks.map((block, i) => (
-                // @ts-ignore
-                <Block block={block} did={did} key={i} />
-              ))}
-            </div>
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          {post.tags.map(tag => (
+            <span key={tag} className="font-mono text-[18px] text-[#4a9eff] border border-[#1e3a5f] px-2.5 py-0.5 rounded-full">
+              {tag}
+            </span>
           ))}
         </div>
-      </article>
+      )}
 
-      {/* ── Sidebar: TOC + progress ── */}
-      <aside className="hidden lg:block w-[180px] shrink-0 px-4 py-7 sticky top-[52px] self-start">
-        <p className="font-mono text-[13px] tracking-[0.1em] uppercase text-[#555] mb-2">Progress Baca</p>
-        <div className="bg-[#1a1a1a] rounded-full h-1 mb-1.5">
-          <div
-            className="bg-[#4a9eff] rounded-full h-1 transition-all duration-300"
-            style={{width: `${readPct}%`}}
-          />
-        </div>
-        <p className="font-mono text-[16px] text-[#888] mb-5">{readPct}%</p>
-
-        <p className="font-mono text-[13px] tracking-[0.1em] uppercase text-[#555] mb-2">Daftar Isi</p>
-        {post.content.pages[0].blocks
-          .filter(b => b.block.$type === 'pub.leaflet.blocks.header')
-          .slice(0, 6)
-          .map((b, i) => {
-            const hb = b.block as LeafletHeaderBlock
-            return (
-              <div
-                key={i}
-                className={`font-mono text-[18px] py-1 pl-2 border-l-[1.5px] mb-1 cursor-pointer transition-colors ${
-                  i === 0
-                    ? 'text-[#4a9eff] border-[#4a9eff]'
-                    : 'text-[#555] border-[#2a2a2a] hover:text-[#b0b0b0]'
-                }`}>
-                {hb.plaintext}
-              </div>
-            )
-          })}
-
-        {/* Fallback TOC if no headers */}
-        {post.content.pages[0].blocks.filter(b => b.block.$type === 'pub.leaflet.blocks.header').length === 0 && (
-          <>
-            <div className="font-mono text-[18px] py-1 pl-2 border-l-[1.5px] border-[#4a9eff] text-[#4a9eff] mb-1">Intro</div>
-            <div className="font-mono text-[18px] py-1 pl-2 border-l-[1.5px] border-[#2a2a2a] text-[#555] mb-1 hover:text-[#b0b0b0] cursor-pointer transition-colors">Bagian utama</div>
-            <div className="font-mono text-[18px] py-1 pl-2 border-l-[1.5px] border-[#2a2a2a] text-[#555] mb-1 hover:text-[#b0b0b0] cursor-pointer transition-colors">Penutup</div>
-          </>
-        )}
-      </aside>
+      <div className="flex flex-col gap-5" ref={bodyRef}>
+        {post.content.pages.map((page, idx) => (
+          <div className="flex flex-col gap-5" key={idx}>
+            {page.blocks.map((block, i) => (
+              // @ts-ignore
+              <Block block={block} did={did} key={i} />
+            ))}
+          </div>
+        ))}
+      </div>
 
     </div>
   )
