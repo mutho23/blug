@@ -38,6 +38,21 @@ const CREDIT_LABEL: Record<string, string> = {
   developer: 'Developed by',
 }
 
+function formatReviewText(text: string): string {
+  const normalized = text.replace(/\r\n/g, '\n').trim()
+
+  return normalized
+    .split(/\n{2,}/)
+    .map(block => {
+      const trimmed = block.trim()
+      if (/^<blockquote/i.test(trimmed)) {
+        return trimmed.replace(/<blockquote>/g, '<blockquote class="bq">')
+      }
+      return `<p>${trimmed.replace(/\n/g, '<br/>')}</p>`
+    })
+    .join('')
+}
+
 export default function ReviewPage() {
   const {review} = useLoaderData<typeof loader>()
 
@@ -125,8 +140,8 @@ export default function ReviewPage() {
         {/* Review text — sama dengan posts: font-sans text-[#888] leading-[1.9] */}
         {review.text && (
           <div
-            className="font-sans text-[17px] md:text-[18px] text-[#888] leading-[1.9] max-w-prose [&_.bq]:border-l-[1.5px] [&_.bq]:border-[#4a9eff] [&_.bq]:pl-4 [&_.bq]:italic [&_.bq]:text-[#777] [&_.bq]:my-4"
-            dangerouslySetInnerHTML={{__html: review.text.replace(/<blockquote>/g, '<blockquote class="bq">').replace(/\r\n/g, '\n')}}
+            className="font-sans text-[17px] md:text-[18px] text-[#888] leading-[1.9] max-w-prose [&_p]:mb-5 [&_p:last-child]:mb-0 [&_.bq]:border-l-[1.5px] [&_.bq]:border-[#4a9eff] [&_.bq]:pl-4 [&_.bq]:italic [&_.bq]:text-[#777] [&_.bq]:my-4"
+            dangerouslySetInnerHTML={{__html: formatReviewText(review.text)}}
           />
         )}
 
