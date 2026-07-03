@@ -13,16 +13,16 @@ export const loader = async ({params}: LoaderFunctionArgs) => {
 }
 
 const RATING_LABEL: Record<number, string> = {
-  5: 'Masterpiece',
-  4.5: 'Excellent',
-  4: 'Great',
-  3.5: 'Good',
-  3: 'Fine',
-  2.5: 'Average',
-  2: 'Bad',
-  1.5: 'Terrible',
-  1: 'Awful',
-  0.5: 'Unbearable',
+  10: 'Masterpiece',
+  9: 'Excellent',
+  8: 'Great',
+  7: 'Good',
+  6: 'Fine',
+  5: 'Average',
+  4: 'Bad',
+  3: 'Terrible',
+  2: 'Awful',
+  1: 'Unbearable',
 }
 
 const TYPE_LABEL: Record<string, string> = {
