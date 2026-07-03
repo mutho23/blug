@@ -2,6 +2,7 @@ import {json, type LoaderFunctionArgs} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
 import {getReview} from '../../atproto/getReviews.js'
 import {Link} from '../components/link.js'
+import {StarRating} from '../components/star-rating'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
   const rkey = params.rkey
@@ -12,16 +13,16 @@ export const loader = async ({params}: LoaderFunctionArgs) => {
 }
 
 const RATING_LABEL: Record<number, string> = {
-  10: 'Masterpiece',
-  9: 'Excellent',
-  8: 'Great',
-  7: 'Good',
-  6: 'Fine',
-  5: 'Average',
-  4: 'Bad',
-  3: 'Terrible',
-  2: 'Awful',
-  1: 'Unbearable',
+  5: 'Masterpiece',
+  4.5: 'Excellent',
+  4: 'Great',
+  3.5: 'Good',
+  3: 'Fine',
+  2.5: 'Average',
+  2: 'Bad',
+  1.5: 'Terrible',
+  1: 'Awful',
+  0.5: 'Unbearable',
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -126,11 +127,7 @@ export default function ReviewPage() {
         {/* Rating */}
         {review.rating && (
           <div className="flex items-center gap-3 py-4 border-y border-[#1e1e1e] mb-7">
-            <div className="flex items-center gap-0.5">
-              {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[28px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#222]'}`}>★</span>
-              ))}
-            </div>
+            <StarRating rating={review.rating} size={28} filledClassName="text-[#4a9eff]" emptyClassName="text-[#222]" />
             {RATING_LABEL[review.rating] && (
               <span className="font-mono text-[16px] text-[#888]">{RATING_LABEL[review.rating]}</span>
             )}
