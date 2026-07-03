@@ -5,6 +5,7 @@ import {getDid} from '../../atproto/getDid.js'
 import {useLoaderData} from '@remix-run/react'
 import {useMemo, useState, useRef, useEffect} from 'react'
 import {LeafletDocument} from 'src/types'
+import {StarRating} from '../components/star-rating'
 
 type FeedItem = LeafletDocument & {type: 'post'}
 
@@ -326,11 +327,7 @@ function ReviewItem({review}: {review: PopfeedReview}) {
             <p className="font-mono text-[15px] text-[#aaaaaa]">{review.mainCreditRole === 'author' ? 'by' : 'dir.'} {review.mainCredit}</p>
           )}
           {review.rating && (
-            <div className="flex items-center gap-0.5">
-              {Array.from({length: 5}, (_, i) => (
-                <span key={i} className={`text-[16px] ${i < Math.round(review.rating! / 2) ? 'text-[#4a9eff]' : 'text-[#333]'}`}>★</span>
-              ))}
-            </div>
+            <StarRating rating={review.rating} size={16} filledClassName="text-[#4a9eff]" emptyClassName="text-[#333]" />
           )}
         </div>
       </a>
