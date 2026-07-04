@@ -57,7 +57,7 @@ export default function About() {
         </Section>
 
         <Section label="Community">
-          <WorkItem company="ASHINA" href="https://discord.gg/DNcNBQaqgM" role="Discord Server" period="Dec 2025 — Present" />
+          <WorkItem company="KIKEN" href="https://discord.gg/DNcNBQaqgM" role="Discord Server" period="Dec 2026 — Present" />
         </Section>
       </div>
       </div>
