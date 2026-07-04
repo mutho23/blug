@@ -36,11 +36,10 @@ export const meta: MetaFunction = () => [
 
 const SOCIALS = [
   {icon: '🦋', label: 'Bluesky',       href: 'https://bsky.app/profile/mutho.my.id'},
-  {icon: '💬', label: 'Discord',        href: 'https://discord.gg/dndVwwGhEa'},
+  {icon: '💬', label: 'Discord',        href: 'https://discord.gg/DNcNBQaqgM'},
   {icon: '🌾', label: 'Grain', href: 'https://grain.social/profile/mutho.my.id'},
   {icon: '🎵', label: 'Spotify',        href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
   {icon: '🎮', label: 'Steam',          href: 'https://steamcommunity.com/id/moebatsu'},
-  {icon: '✈️', label: 'Telegram', href: 'https://t.me/moebatsu'},
   {icon: '✉️', label: 'Email',          href: 'mailto:amuthohhari@gmail.com'},
 ]
 
