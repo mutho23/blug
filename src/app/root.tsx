@@ -42,7 +42,7 @@ const SOCIALS = [
   {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
 ]
 
-const PAGE_ORDER = ['/', '/about', '/gallery']
+const PAGE_ORDER = ['/', '/blog', '/gallery']
 
 export function Layout({children}: {children: React.ReactNode}) {
   const data = useLoaderData<{profile: AppBskyActorDefs.ProfileViewDetailed | null}>()
@@ -157,15 +157,15 @@ export function Layout({children}: {children: React.ReactNode}) {
 
               {/* ── Mobile tengah: nav links ── */}
               <nav className="sm:hidden flex items-center gap-5">
-                <MobileNavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</MobileNavLink>
-                <MobileNavLink href="/about" selected={isOn('/about')}>About</MobileNavLink>
+                <MobileNavLink href="/" selected={location.pathname === '/'}>About</MobileNavLink>
+                <MobileNavLink href="/blog" selected={isOn('/blog')}>Blogs</MobileNavLink>
                 <MobileNavLink href="/gallery" selected={isOn('/gallery')}>Gallery</MobileNavLink>
               </nav>
 
               {/* Desktop nav */}
               <nav className="hidden sm:flex items-center gap-7">
-                <NavLink href="/" selected={isOn('/') && location.pathname === '/'}>Blogs</NavLink>
-                <NavLink href="/about" selected={isOn('/about')}>About</NavLink>
+                <NavLink href="/" selected={location.pathname === '/'}>About</NavLink>
+                <NavLink href="/blog" selected={isOn('/blog')}>Blogs</NavLink>
                 <NavLink href="/gallery" selected={isOn('/gallery')}>Gallery</NavLink>
               </nav>
 
@@ -296,7 +296,7 @@ export function ErrorBoundary() {
           <div className="p-10 flex justify-center">
             <img src="/monkey.jpg" alt="Monkey muppet meme" className="rounded-lg shadow-2xl shadow-black/40 max-w-sm" />
           </div>
-          <a href="/" className="inline-block font-mono text-xs text-[#4a9eff] hover:text-[#7c6ff7] transition-colors">
+          <a href="/blog" className="inline-block font-mono text-xs text-[#4a9eff] hover:text-[#7c6ff7] transition-colors">
             ← back to writing
           </a>
         </div>
