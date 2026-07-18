@@ -50,6 +50,7 @@ type FeedEntry = {
   title: string
   date: Date
   meta: string
+  tags: string[]
   excerpt?: string
   rating?: number
 }
@@ -63,6 +64,7 @@ const TABS: {id: 'all' | Kind; label: string}[] = [
 export default function Blog() {
   const {posts, reviews} = useLoaderData<{posts: LeafletDocument[]; did: string; reviews: PopfeedReview[]}>()
   const [activeTab, setActiveTab] = useState<'all' | Kind>('all')
+  const [activeTag, setActiveTag] = useState<string | null>(null)
 
   const entries: FeedEntry[] = useMemo(() => {
     const postEntries: FeedEntry[] = posts.map(p => ({
@@ -72,24 +74,42 @@ export default function Blog() {
       title: p.title,
       date: new Date(p.publishedAt),
       meta: p.tags?.[0] ? p.tags[0] : 'Blog',
+      tags: p.tags ?? [],
       excerpt: p.description,
     }))
-    const reviewEntries: FeedEntry[] = reviews.map(r => ({
-      key: `review-${r.rkey}`,
-      kind: 'review',
-      href: `/reviews/${r.rkey}`,
-      title: r.title,
-      date: new Date(r.addedAt),
-      meta: CATEGORY_LABELS[r.creativeWorkType] ?? r.creativeWorkType ?? 'Review',
-      rating: r.rating,
-    }))
+    const reviewEntries: FeedEntry[] = reviews.map(r => {
+      const categoryLabel = CATEGORY_LABELS[r.creativeWorkType] ?? r.creativeWorkType
+      return {
+        key: `review-${r.rkey}`,
+        kind: 'review',
+        href: `/reviews/${r.rkey}`,
+        title: r.title,
+        date: new Date(r.addedAt),
+        meta: categoryLabel ?? 'Review',
+        tags: [...(categoryLabel ? [categoryLabel] : []), ...(r.tags ?? [])],
+        rating: r.rating,
+      }
+    })
     return [...postEntries, ...reviewEntries].sort((a, b) => b.date.getTime() - a.date.getTime())
   }, [posts, reviews])
 
-  const filtered = useMemo(
-    () => (activeTab === 'all' ? entries : entries.filter(e => e.kind === activeTab)),
-    [entries, activeTab],
-  )
+  const allTags = useMemo(() => {
+    const seen = new Map<string, string>() // lowercase -> display label
+    entries.forEach(e => e.tags.forEach(t => {
+      const key = t.toLowerCase()
+      if (!seen.has(key)) seen.set(key, t)
+    }))
+    return Array.from(seen.values()).sort((a, b) => a.localeCompare(b))
+  }, [entries])
+
+  const filtered = useMemo(() => {
+    let result = activeTab === 'all' ? entries : entries.filter(e => e.kind === activeTab)
+    if (activeTag) {
+      const key = activeTag.toLowerCase()
+      result = result.filter(e => e.tags.some(t => t.toLowerCase() === key))
+    }
+    return result
+  }, [entries, activeTab, activeTag])
 
   const counts = useMemo(() => ({
     all: entries.length,
@@ -133,7 +153,7 @@ export default function Blog() {
           </section>
 
           {/* Tab switcher */}
-          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#141414] border border-[#222] mb-8">
+          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#141414] border border-[#222] mb-5">
             {TABS.map(tab => (
               <button
                 key={tab.id}
@@ -148,9 +168,36 @@ export default function Blog() {
             ))}
           </div>
 
+          {/* Tag filter */}
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-8">
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(activeTag?.toLowerCase() === tag.toLowerCase() ? null : tag)}
+                  className={`font-mono text-[12px] px-2.5 py-1 rounded-full border transition-all ${
+                    activeTag?.toLowerCase() === tag.toLowerCase()
+                      ? 'text-[#4a9eff] border-[#4a9eff] bg-[#1e1e1e]'
+                      : 'text-[#666] border-[#2a2a2a] bg-[#1a1a1a] hover:text-[#f0f0f0] hover:border-[#555]'
+                  }`}>
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Feed */}
           {filtered.length === 0 ? (
-            <p className="font-mono text-[17px] text-[#444] py-4">Nothing here yet.</p>
+            <div className="py-4">
+              <p className="font-mono text-[17px] text-[#444]">Nothing here yet.</p>
+              {(activeTag || activeTab !== 'all') && (
+                <button
+                  onClick={() => { setActiveTag(null); setActiveTab('all') }}
+                  className="font-mono text-[13px] text-[#4a9eff] hover:text-[#7c6ff7] transition-colors mt-2">
+                  Clear filters
+                </button>
+              )}
+            </div>
           ) : (
             <ul className="divide-y divide-[#1a1a1a]">
               {filtered.map(entry => <FeedItem entry={entry} key={entry.key} />)}
