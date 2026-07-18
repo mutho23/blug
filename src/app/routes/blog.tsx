@@ -86,7 +86,9 @@ export default function Blog() {
         title: r.title,
         date: new Date(r.addedAt),
         meta: categoryLabel ?? 'Review',
-        tags: [...(categoryLabel ? [categoryLabel] : []), ...(r.tags ?? [])],
+        // Hanya pakai kategori resmi Popfeed (Book/Movie/TV Show/Game/Music) sebagai tag,
+        // bukan tag bebas dari review.tags (biar nggak muncul tag liar kayak "netflix").
+        tags: categoryLabel ? [categoryLabel] : [],
         rating: r.rating,
       }
     })
@@ -242,7 +244,13 @@ function FeedItem({entry}: {entry: FeedEntry}) {
           </time>
         </div>
         <div className="flex items-center gap-2 font-mono text-[13px] text-[#666] mt-1.5">
-          <span className="uppercase tracking-[0.06em] text-[11px] text-[#555]">{entry.meta}</span>
+          {entry.kind === 'post' ? (
+            <span className="uppercase tracking-[0.06em] text-[11px] text-[#555]">
+              {entry.tags.length > 0 ? entry.tags.join(' · ') : 'Blog'}
+            </span>
+          ) : (
+            <span className="uppercase tracking-[0.06em] text-[11px] text-[#555]">{entry.meta}</span>
+          )}
           {entry.rating != null && (
             <>
               <span className="text-[#333]">·</span>
