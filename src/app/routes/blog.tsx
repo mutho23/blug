@@ -3,7 +3,7 @@ import {getPosts} from '../../atproto/index.js'
 import {getReviews, PopfeedReview} from '../../atproto/getReviews.js'
 import {getDid} from '../../atproto/getDid.js'
 import {useLoaderData} from '@remix-run/react'
-import {useMemo, useState} from 'react'
+import {useMemo, useState, useEffect} from 'react'
 import {LeafletDocument} from 'src/types'
 import {StarRating} from '../components/star-rating'
 
@@ -39,7 +39,7 @@ const SOCIALS = [
 ]
 
 const CATEGORY_LABELS: Record<string, string> = {
-  movie: 'Movie', tv: 'TV Show', book: 'Book', game: 'Game', music: 'Music',
+  movie: 'Movie', tv: 'TV Show', tv_show: 'TV Show', book: 'Book', game: 'Game', music: 'Music',
 }
 
 type Kind = 'post' | 'review'
@@ -93,14 +93,26 @@ export default function Blog() {
     return [...postEntries, ...reviewEntries].sort((a, b) => b.date.getTime() - a.date.getTime())
   }, [posts, reviews])
 
+  const tagSourceEntries = useMemo(
+    () => (activeTab === 'all' ? entries : entries.filter(e => e.kind === activeTab)),
+    [entries, activeTab],
+  )
+
   const allTags = useMemo(() => {
     const seen = new Map<string, string>() // lowercase -> display label
-    entries.forEach(e => e.tags.forEach(t => {
+    tagSourceEntries.forEach(e => e.tags.forEach(t => {
       const key = t.toLowerCase()
       if (!seen.has(key)) seen.set(key, t)
     }))
     return Array.from(seen.values()).sort((a, b) => a.localeCompare(b))
-  }, [entries])
+  }, [tagSourceEntries])
+
+  // Kalau ganti tab dan tag yang lagi aktif nggak relevan lagi di tab baru, lepas filternya.
+  useEffect(() => {
+    if (activeTag && !allTags.some(t => t.toLowerCase() === activeTag.toLowerCase())) {
+      setActiveTag(null)
+    }
+  }, [allTags, activeTag])
 
   const filtered = useMemo(() => {
     let result = activeTab === 'all' ? entries : entries.filter(e => e.kind === activeTab)

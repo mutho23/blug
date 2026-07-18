@@ -29,6 +29,7 @@ const TYPE_LABEL: Record<string, string> = {
   book: 'Book',
   movie: 'Movie',
   tv: 'TV Show',
+  tv_show: 'TV Show',
   game: 'Game',
   music: 'Music',
 }
