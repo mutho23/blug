@@ -75,7 +75,7 @@ export default function ReviewPage() {
       <div className="max-w-2xl mx-auto px-6 py-8 relative" style={{marginTop: review.backdropUrl ? '-60px' : 0}}>
         {/* Back */}
         <Link
-          href="/"
+          href="/blog"
           className="inline-flex items-center gap-1.5 font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-7 uppercase tracking-wider">
           ← Back
         </Link>
