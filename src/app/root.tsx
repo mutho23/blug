@@ -62,6 +62,25 @@ export function Layout({children}: {children: React.ReactNode}) {
   const dragging = React.useRef(false)
   const [dragOffset, setDragOffset] = React.useState(0)
 
+  // Juttu (kolom komentar) sengaja dimuat lewat effect, bukan <script> statis di <head>.
+  // Kalau statis, script-nya (defer) bisa nyuntik konten ke #juttu-comments SEBELUM React
+  // selesai hydrate elemen itu -> hydration mismatch (React error #418/#423) -> widget
+  // ke-reset/ilang. useEffect di sini baru jalan SETELAH commit awal selesai, jadi aman.
+  React.useEffect(() => {
+    const SRC = 'https://cdn.jsdelivr.net/npm/juttu@latest/juttu-embed.js'
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${SRC}"]`)
+    if (existing) {
+      // Sudah pernah dimuat (mis. navigasi client-side ke post lain) — Juttu belum tentu
+      // auto rescan, jadi re-append supaya browser re-run script-nya buat scan ulang DOM.
+      existing.remove()
+    }
+    const script = document.createElement('script')
+    script.src = SRC
+    script.defer = true
+    script.dataset.theme = 'dark'
+    document.head.appendChild(script)
+  }, [location.pathname])
+
   React.useEffect(() => {
     if (!isMainPage) return
 
@@ -122,7 +141,6 @@ export function Layout({children}: {children: React.ReactNode}) {
         <Meta />
         <Links />
         <script async src="https://embed.bsky.app/static/embed.js" />
-        <script defer src="https://cdn.jsdelivr.net/npm/juttu@latest/juttu-embed.js" data-theme="dark" />
       </head>
       <body className="flex flex-col min-h-screen bg-[#0a0a0a] text-[#f0f0f0] antialiased font-sans">
         {/* Scroll progress bar */}
