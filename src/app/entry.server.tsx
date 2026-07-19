@@ -20,10 +20,10 @@ function setSecurityHeaders(responseHeaders: Headers) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app https://embed.bsky.app",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app https://embed.bsky.app https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://giscus.app",
       "frame-src https://giscus.app",
-      "connect-src 'self' https://giscus.app https://api.github.com https://public.api.bsky.app",
+      "connect-src 'self' https://giscus.app https://api.github.com https://public.api.bsky.app https://api.juttu.app https://bsky.social",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
     ].join("; ")
