@@ -3,6 +3,7 @@ import {useLoaderData} from '@remix-run/react'
 import {getReview} from '../../atproto/getReviews.js'
 import {Link} from '../components/link.js'
 import {StarRating} from '../components/star-rating'
+import {BskyEmbed} from '../components/bsky-embed'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
   const rkey = params.rkey
@@ -62,6 +63,8 @@ export default function ReviewPage() {
   const releaseYear = review.releaseDate ? new Date(review.releaseDate).getFullYear() : null
   const reviewedDate = new Date(review.addedAt).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})
   const creditLabel = CREDIT_LABEL[review.mainCreditRole ?? ''] ?? 'By'
+  // review.uri: at://did/social.popfeed.feed.review/rkey -> https://popfeed.social/review/at:/did/social.popfeed.feed.review/rkey
+  const popfeedUrl = `https://popfeed.social/review/${review.uri.replace('at://', 'at:/')}`
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -154,8 +157,25 @@ export default function ReviewPage() {
           </div>
         )}
 
+        {/* Komentar: embed post Bluesky hasil cross-post Popfeed (kalau ketemu) */}
+        {review.bskyPostUri && (
+          <div className="mt-10 pt-7 border-t border-[#1e1e1e]">
+            <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-3">Comments</p>
+            <BskyEmbed postUri={review.bskyPostUri} />
+          </div>
+        )}
+
+        {/* Comment (link out ke Popfeed, karena komentar review live di sana) */}
+        <a
+          href={popfeedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 font-mono text-[15px] text-[#f0f0f0] bg-[#141414] border border-[#2a2a2a] px-4 py-2.5 rounded-lg hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors mt-7">
+          💬 Comment on Popfeed ↗
+        </a>
+
         {/* External links */}
-        <div className="flex gap-2 mt-7">
+        <div className="flex gap-2 mt-4">
           {review.identifiers?.imdbId && (
             <a href={`https://www.imdb.com/title/${review.identifiers.imdbId}`} target="_blank" rel="noopener noreferrer"
               className="font-mono text-[14px] text-[#555] border border-[#222] px-3 py-1.5 rounded hover:border-[#4a9eff] hover:text-[#4a9eff] transition-colors">

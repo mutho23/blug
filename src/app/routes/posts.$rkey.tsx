@@ -5,7 +5,6 @@ import {AppBskyActorDefs} from '@atproto/api'
 import {
   LeafletBlock,
   LeafletBlockquoteBlock,
-  LeafletBskyPostBlock,
   LeafletCodeBlock,
   LeafletDocument,
   LeafletFacet,
@@ -16,6 +15,7 @@ import {
 import {getDid} from 'src/atproto/getDid'
 import {useRef} from 'react'
 import {Link} from '../components/link'
+import {BskyEmbed} from '../components/bsky-embed'
 
 export const loader = async ({params}: LoaderFunctionArgs) => {
   const {rkey} = params
@@ -41,6 +41,8 @@ export const meta: MetaFunction<typeof loader> = ({data}) => {
     {name: 'og:title', content: data?.post.title},
     {name: 'og:description', content: data?.post.description ?? `${postText.split(' ').slice(0, 100).join(' ')}...`},
     ...(ogImageUrl ? [{property: 'og:image', content: ogImageUrl}] : []),
+    // Dipakai Juttu buat nemuin thread Bluesky yang jadi kolom komentar post ini.
+    ...(data ? [{tagName: 'link', rel: 'site.standard.document', href: `at://${data.did}/site.standard.document/${data.rkey}`}] : []),
   ]
 }
 
@@ -100,6 +102,11 @@ export default function Posts() {
         ))}
       </div>
 
+      {/* Kolom komentar (Juttu, baca thread Bluesky lewat site.standard.document) */}
+      <div className="mt-12 pt-8 border-t border-[#1e1e1e]">
+        <div id="juttu-comments" />
+      </div>
+
     </div>
   )
 }
@@ -116,7 +123,7 @@ function Block({block, did}: {block: LeafletBlock; did: string}) {
     case 'pub.leaflet.blocks.code': return <Code block={b} />
     case 'pub.leaflet.blocks.horizontalRule': return <HorizontalRule />
     case 'pub.leaflet.blocks.website': return <Website block={b} did={did} />
-    case 'pub.leaflet.blocks.bskyPost': return <BskyPost block={b} />
+    case 'pub.leaflet.blocks.bskyPost': return <BskyEmbed postUri={b.postRef.uri} />
   }
 }
 
@@ -237,28 +244,6 @@ function Website({block, did}: {block: LeafletWebsiteBlock; did: string}) {
       {cdnUrl && <img src={cdnUrl} className="rounded h-[72px] object-cover flex-shrink-0" />}
     </a>
   )
-}
-
-function BskyPost({block}: {block: LeafletBskyPostBlock}) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!containerRef.current) return
-    const blockquote = document.createElement('blockquote')
-    blockquote.className = 'bluesky-embed'
-    blockquote.dataset.blueskyUri = block.postRef.uri
-    containerRef.current.appendChild(blockquote)
-    if (!document.querySelector('script[src="https://embed.bsky.app/static/embed.js"]')) {
-      const script = document.createElement('script')
-      script.src = 'https://embed.bsky.app/static/embed.js'
-      script.async = true
-      script.charset = 'utf-8'
-      document.body.appendChild(script)
-    } else {
-      ;(window as any).bluesky?.scan?.()
-    }
-    return () => { if (containerRef.current) containerRef.current.innerHTML = '' }
-  }, [block.postRef.uri])
-  return <div ref={containerRef} className="flex justify-center my-4" />
 }
 
 function PostError() {
