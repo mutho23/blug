@@ -1,4 +1,4 @@
-import {useLoaderData} from '@remix-run/react'
+import {Link, useLoaderData} from '@remix-run/react'
 import {getPost, getProfile} from '../../atproto'
 import {json, LoaderFunctionArgs, MetaFunction} from '@remix-run/node'
 import {AppBskyActorDefs} from '@atproto/api'
@@ -65,9 +65,9 @@ export default function Posts() {
       className="max-w-2xl mx-auto px-6 py-7"
       style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      <a href="/blog" className="inline-block font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-4">
+      <Link to="/blog" prefetch="intent" className="inline-block font-mono text-[16px] text-[#555] hover:text-[#4a9eff] transition-colors mb-4">
         ← Writing
-      </a>
+      </Link>
 
       <h1 className="font-display text-[35px] md:text-[37px] text-[#f0f0f0] leading-tight tracking-[-0.02em] mb-2">
         {post.title}
@@ -258,9 +258,9 @@ function PostError() {
       <div className="py-10">
         <img src="/monkey.jpg" alt="Monkey muppet meme" className="rounded-md shadow-2xl shadow-black/40 max-w-[280px]" />
       </div>
-      <a href="/blog" className="font-mono text-[23px] text-[#4a9eff] hover:text-[#7c6ff7] transition-colors">
+      <Link to="/blog" prefetch="intent" className="font-mono text-[23px] text-[#4a9eff] hover:text-[#7c6ff7] transition-colors">
         ← back to writing
-      </a>
+      </Link>
     </div>
   )
 }

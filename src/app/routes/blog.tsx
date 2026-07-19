@@ -2,7 +2,7 @@ import {json, MetaFunction} from '@remix-run/node'
 import {getPosts} from '../../atproto/index.js'
 import {getReviews, PopfeedReview} from '../../atproto/getReviews.js'
 import {getDid} from '../../atproto/getDid.js'
-import {useLoaderData} from '@remix-run/react'
+import {Link, useLoaderData} from '@remix-run/react'
 import {useMemo, useState, useEffect} from 'react'
 import {LeafletDocument} from 'src/types'
 import {StarRating} from '../components/star-rating'
@@ -232,7 +232,7 @@ export default function Blog() {
 function FeedItem({entry}: {entry: FeedEntry}) {
   return (
     <li>
-      <a href={entry.href} className="group block py-6">
+      <Link to={entry.href} prefetch="intent" className="group block py-6">
         <div className="flex items-baseline justify-between gap-4">
           <h3 className="font-display text-[22px] md:text-[24px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">
             {entry.title}
@@ -263,7 +263,7 @@ function FeedItem({entry}: {entry: FeedEntry}) {
             {entry.excerpt}
           </p>
         )}
-      </a>
+      </Link>
     </li>
   )
 }
