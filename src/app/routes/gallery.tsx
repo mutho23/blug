@@ -22,34 +22,61 @@ async function resolveDid() {
   return did
 }
 
-export const loader = async () => {
-  const did = await resolveDid()
-  const [galleriesRes, photosRes] = await Promise.all([
-    fetch(`https://bsky.social/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=social.grain.gallery&limit=30`),
-    fetch(`https://bsky.social/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=social.grain.photo&limit=100`),
-  ])
-  const galleriesData = await galleriesRes.json()
-  const photosData    = await photosRes.json()
-  const photos: any[] = photosData.records ?? []
+// Zeens nyimpen foto sebagai post Bluesky biasa (app.bsky.feed.post + embed app.bsky.embed.images),
+// dan nempelin sidecar record app.photosky.postMeta (rkey sama persis) buat data tambahan (warna, EXIF).
+// Jadi: list dulu semua postMeta buat dapetin daftar rkey foto, baru tarik post asli satu-satu buat gambarnya.
+async function fetchZeensPhotos(did: string): Promise<ImageItem[]> {
+  // Ambil semua record postMeta (paginated, dibatasin 5 halaman/±500 foto biar aman)
+  const metaRecords: any[] = []
+  let cursor: string | undefined
+  for (let page = 0; page < 5; page++) {
+    const url = new URL('https://bsky.social/xrpc/com.atproto.repo.listRecords')
+    url.searchParams.set('repo', did)
+    url.searchParams.set('collection', 'app.photosky.postMeta')
+    url.searchParams.set('limit', '100')
+    if (cursor) url.searchParams.set('cursor', cursor)
+    const res = await fetch(url.toString())
+    const data = await res.json()
+    metaRecords.push(...(data.records ?? []))
+    if (!data.cursor || (data.records ?? []).length === 0) break
+    cursor = data.cursor
+  }
 
-  const galleries = (galleriesData.records ?? []).map((gallery: any) => {
-    const galleryTime = gallery.value.createdAt
-    const matchedPhotos = photos.filter((photo: any) => photo.value.createdAt === galleryTime)
-    const images = matchedPhotos.map((photo: any) => {
-      const blobUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${photo.value.photo.ref.$link}`
+  // Tarik post Bluesky asli satu-satu (paralel) buat dapetin blob foto + aspect ratio
+  const results = await Promise.all(metaRecords.map(async (meta: any) => {
+    const rkey = meta.uri.split('/').pop()
+    try {
+      const res = await fetch(`https://bsky.social/xrpc/com.atproto.repo.getRecord?repo=${did}&collection=app.bsky.feed.post&rkey=${rkey}`)
+      if (!res.ok) return null
+      const {value} = await res.json()
+      const images = value?.embed?.images ?? value?.embed?.media?.images ?? []
+      if (images.length === 0) return null
+      const img = images[0]
+      const cid = img.image?.ref?.$link
+      if (!cid) return null
+      const blobUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`
       return {
         thumb: wsrv(blobUrl, THUMB_W, THUMB_Q),
         full:  wsrv(blobUrl, FULL_W, FULL_Q),
-        width:  photo.value.aspectRatio?.width  ?? 1,
-        height: photo.value.aspectRatio?.height ?? 1,
+        width:  img.aspectRatio?.width  ?? 1,
+        height: img.aspectRatio?.height ?? 1,
+        createdAt: value.createdAt ?? meta.value.createdAt,
       }
-    })
-    return {...gallery, images}
-  })
+    } catch {
+      return null
+    }
+  }))
 
-  const totalPhotos = galleries.reduce((sum: number, g: any) => sum + g.images.length, 0)
+  return results
+    .filter((p): p is NonNullable<typeof p> => p !== null)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+}
 
-  return json({galleries, did, totalPhotos}, {
+export const loader = async () => {
+  const did = await resolveDid()
+  const photos = await fetchZeensPhotos(did)
+
+  return json({photos, did}, {
     headers: {Link: '<https://wsrv.nl>; rel=preconnect, <https://bsky.social>; rel=preconnect'},
   })
 }
@@ -59,7 +86,7 @@ type ImageItem = {thumb: string; full: string; width: number; height: number}
 const SOCIALS = [
   {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
   {icon: '💬', label: 'Discord',  href: 'https://discord.gg/DNcNBQaqgM'},
-  {icon: '🌾', label: 'Grain', href: 'https://grain.social/profile/mutho.my.id'},
+  {icon: '📷', label: 'Zeens',    href: 'https://zeens.app/profile/mutho.my.id'},
   {icon: '🎵', label: 'Spotify',  href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
   {icon: '🎮', label: 'Steam',    href: 'https://steamcommunity.com/id/moebatsu'},
   {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
@@ -209,59 +236,24 @@ function renderLightboxContent(
   div.addEventListener('touchend', (e) => { e.stopPropagation(); onTouchEnd(e as TouchEvent) }, {passive: true})
 }
 
-function GalleryThumb({images, title, onPhotoClick, eager = false}: {images: ImageItem[]; title: string; onPhotoClick: (i: number) => void; eager?: boolean}) {
-  if (images.length === 0) {
-    return (
-      <div className="w-full h-40 bg-[#1a1a1a] flex items-center justify-center">
-        <span className="font-mono text-[16px] text-[#444]">no photo</span>
-      </div>
-    )
-  }
-  if (images.length === 1) {
-    const {thumb, width, height} = images[0]
-    return (
-      <div className="w-full relative overflow-hidden cursor-zoom-in bg-black" style={{paddingTop: `${(height / width) * 100}%`}}
-        onClick={e => { e.preventDefault(); onPhotoClick(0) }}>
-        <img src={thumb} alt={title} loading={eager ? 'eager' : 'lazy'} className="absolute inset-0 w-full h-full object-contain" />
-      </div>
-    )
-  }
-  if (images.length === 2) {
-    return (
-      <div className="grid grid-cols-2 gap-px bg-[#1a1a1a] overflow-hidden">
-        {images.map((img, i) => (
-          <div key={i} className="relative h-40 overflow-hidden cursor-zoom-in" onClick={e => { e.preventDefault(); onPhotoClick(i) }}>
-            <img src={img.thumb} alt={`${title} ${i + 1}`} loading={eager ? 'eager' : 'lazy'} className="absolute inset-0 w-full h-full object-cover" />
-          </div>
-        ))}
-      </div>
-    )
-  }
-  const [first, ...rest] = images
+function PhotoTile({image, eager, onClick}: {image: ImageItem; eager?: boolean; onClick: () => void}) {
   return (
-    <div className="flex flex-col gap-px bg-[#1a1a1a] overflow-hidden">
-      <div className="relative h-44 cursor-zoom-in" onClick={e => { e.preventDefault(); onPhotoClick(0) }}>
-        <img src={first.thumb} alt={title} loading={eager ? 'eager' : 'lazy'} className="absolute inset-0 w-full h-full object-cover" />
-      </div>
-      <div className="grid gap-px" style={{gridTemplateColumns: `repeat(${Math.min(rest.length, 3)}, 1fr)`}}>
-        {rest.slice(0, 3).map((img, i) => (
-          <div key={i} className="relative h-24 cursor-zoom-in overflow-hidden" onClick={e => { e.preventDefault(); onPhotoClick(i + 1) }}>
-            <img src={img.thumb} alt={`${title} ${i + 2}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-            {i === 2 && rest.length > 3 && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <span className="font-mono text-white text-sm">+{rest.length - 2}</span>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+    <div
+      className="relative aspect-square overflow-hidden cursor-zoom-in bg-[#111]"
+      onClick={e => { e.preventDefault(); onClick() }}>
+      <img
+        src={image.thumb}
+        alt=""
+        loading={eager ? 'eager' : 'lazy'}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
     </div>
   )
 }
 
 export default function Gallery() {
-  const {galleries, did, totalPhotos} = useLoaderData<typeof loader>()
-  const [lightbox, setLightbox] = useState<{images: ImageItem[]; index: number} | null>(null)
+  const {photos} = useLoaderData<typeof loader>()
+  const [lightbox, setLightbox] = useState<{index: number} | null>(null)
 
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
@@ -289,7 +281,7 @@ export default function Gallery() {
       {/* ── Main Content ── */}
       <div className="flex-1 px-6 md:px-14 py-8 min-w-0">
         {lightbox && (
-          <Lightbox images={lightbox.images} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
+          <Lightbox images={photos} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
         )}
 
         <header className="mb-8">
@@ -297,44 +289,18 @@ export default function Gallery() {
           <p className="font-mono text-[17px] text-[#aaaaaa] mt-2">Just dropping some memories here.</p>
         </header>
 
-        {galleries.length === 0 ? (
-          <p className="font-mono text-[19px] text-[#555]">Belum ada gallery.</p>
+        {photos.length === 0 ? (
+          <p className="font-mono text-[19px] text-[#555]">Belum ada foto.</p>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-            {galleries.map((gallery: any, index: number) => {
-              const value = gallery.value
-              const rkey  = gallery.uri.split('/').pop()
-              return (
-                <div key={gallery.uri}
-                  className="break-inside-avoid border border-[#1e1e1e] rounded-md overflow-hidden bg-[#0f0f0f] hover:border-[#2a2a2a] transition-colors group">
-                  <GalleryThumb
-                    images={gallery.images}
-                    title={value.title ?? 'Gallery'}
-                    eager={index === 0}
-                    onPhotoClick={i => setLightbox({images: gallery.images, index: i})}
-                  />
-                  <a href={`https://grain.social/profile/${did}/gallery/${rkey}`} target="_blank" rel="noopener noreferrer"
-                    className="block px-4 py-3">
-                    <h2 className="font-display text-[24px] text-[#f0f0f0] group-hover:text-[#4a9eff] transition-colors leading-snug">
-                      {value.title ?? 'Untitled'}
-                    </h2>
-                    {value.address?.locality && (
-                      <p className="font-mono text-[13px] text-[#aaaaaa] mt-0.5">
-                        {value.address.locality}{value.address.region ? `, ${value.address.region}` : ''}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="font-mono text-[14px] text-[#aaaaaa]">
-                        {new Date(value.createdAt).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})}
-                      </p>
-                      {gallery.images.length > 0 && (
-                        <p className="font-mono text-[14px] text-[#aaaaaa]">{gallery.images.length} foto</p>
-                      )}
-                    </div>
-                  </a>
-                </div>
-              )
-            })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+            {photos.map((photo: ImageItem, index: number) => (
+              <PhotoTile
+                key={index}
+                image={photo}
+                eager={index < 6}
+                onClick={() => setLightbox({index})}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -342,12 +308,8 @@ export default function Gallery() {
       {/* ── Right Sidebar: Photo count (sticky) ── */}
       <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
         <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Gallery</p>
-        <div className="mb-4">
-          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{galleries.length}</div>
-          <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Albums</div>
-        </div>
         <div className="mb-6">
-          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{totalPhotos}</div>
+          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{photos.length}</div>
           <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Photos</div>
         </div>
       </aside>
