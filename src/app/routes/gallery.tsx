@@ -217,13 +217,13 @@ function renderLightboxContent(
           background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:99px;">
           ${index + 1} / ${images.length}
         </div>
-        <div id="lb-prev" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);
-          z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
-          color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
+        <div id="lb-prev" style="position:absolute;left:0;top:50%;transform:translateY(-50%);
+          z-index:1000001;background:rgba(0,0,0,0.35);border:none;border-radius:0 8px 8px 0;
+          color:rgba(255,255,255,0.65);font-size:20px;line-height:1;padding:10px 6px;cursor:pointer;
           -webkit-tap-highlight-color:transparent;">‹</div>
-        <div id="lb-next" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);
-          z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
-          color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
+        <div id="lb-next" style="position:absolute;right:0;top:50%;transform:translateY(-50%);
+          z-index:1000001;background:rgba(0,0,0,0.35);border:none;border-radius:8px 0 0 8px;
+          color:rgba(255,255,255,0.65);font-size:20px;line-height:1;padding:10px 6px;cursor:pointer;
           -webkit-tap-highlight-color:transparent;">›</div>
         ` : ''}
 
