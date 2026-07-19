@@ -103,8 +103,10 @@ export default function Posts() {
       </div>
 
       {/* Kolom komentar (Juttu, baca thread Bluesky lewat site.standard.document) */}
+      {/* suppressHydrationWarning: Juttu (script eksternal `defer`) nyuntik konten ke div ini
+          sebelum React selesai hydrate, jadi wajar kalau isinya beda dari yang di-render server. */}
       <div className="mt-12 pt-8 border-t border-[#1e1e1e]">
-        <div id="juttu-comments" />
+        <div id="juttu-comments" suppressHydrationWarning />
       </div>
 
     </div>
