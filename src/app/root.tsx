@@ -203,16 +203,6 @@ export function Layout({children}: {children: React.ReactNode}) {
             {navItems.map(item => <PillNavItem key={item.key} item={item} />)}
           </nav>
 
-          {/* ── Dot indicator (mobile, halaman utama) — nempel di ruang kosong dikit di atas pill ── */}
-          {isMainPage && (
-            <div className="sm:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex justify-center gap-1.5">
-              {PAGE_ORDER.map((path, i) => (
-                <a key={path} href={path}
-                  className={`block rounded-full transition-all duration-300 ${i === currentIndex ? 'w-4 h-1.5 bg-[#4a9eff]' : 'w-1.5 h-1.5 bg-[#333]'}`} />
-              ))}
-            </div>
-          )}
-
           {/* ── Social popover: dibuka lewat item "Social" di pill nav, posisinya ngikutin
               pill-nya sendiri (nempel bawah pill di mobile, nempel bawah header di desktop) ── */}
           {contactOpen && (
