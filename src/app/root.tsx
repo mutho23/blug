@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  Link,
   Links,
   Meta,
   Outlet,
@@ -8,6 +9,7 @@ import {
   useLoaderData,
   useLocation,
   useNavigate,
+  useNavigation,
   useRouteError,
 } from '@remix-run/react'
 import {json, LinksFunction} from '@remix-run/node'
@@ -49,6 +51,8 @@ export function Layout({children}: {children: React.ReactNode}) {
   const profile = data?.profile ?? null
   const location = useLocation()
   const navigate = useNavigate()
+  const navigation = useNavigation()
+  const isNavigating = navigation.state !== 'idle'
 
   const isOn = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
@@ -167,7 +171,7 @@ export function Layout({children}: {children: React.ReactNode}) {
             <div className="mx-auto w-full max-w-[1600px] px-4 h-[52px] flex items-center justify-between">
 
               {/* ── Kiri: Avatar ── */}
-              <a href="/" className="flex items-center gap-2 group sm:gap-2.5">
+              <Link to="/" prefetch="intent" className="flex items-center gap-2 group sm:gap-2.5">
                 {profile?.avatar ? (
                   <img
                     className="rounded-full w-8 h-8 ring-1 ring-[#333] group-hover:ring-[#4a9eff] transition-all"
@@ -184,7 +188,7 @@ export function Layout({children}: {children: React.ReactNode}) {
                 <span className="font-display text-[20px] text-[#f0f0f0] hidden sm:inline tracking-[-0.01em]">
                   mutho<span className="text-[#4a9eff]">.</span>
                 </span>
-              </a>
+              </Link>
 
               {/* ── Desktop: pill nav nempel di header ── */}
               <nav className="hidden sm:flex items-center gap-1 rounded-full p-1 border border-[#222]"
@@ -228,13 +232,16 @@ export function Layout({children}: {children: React.ReactNode}) {
             </>
           )}
 
-          {/* Konten — live drag transform saat swipe */}
+          {/* Konten — live drag transform saat swipe, plus fade halus tiap ganti halaman/loader jalan */}
           <main
             className="flex-1"
             style={{
               transform: isMainPage && dragOffset !== 0 ? `translateX(${dragOffset}px)` : 'none',
-              transition: dragOffset === 0 ? 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
-              willChange: 'transform',
+              opacity: isNavigating ? 0.6 : 1,
+              transition: dragOffset === 0
+                ? 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.12s ease-out'
+                : 'none',
+              willChange: 'transform, opacity',
             }}>
             {children}
           </main>
@@ -334,7 +341,7 @@ function PillNavItem({item}: {item: NavItemDef}) {
     </div>
   )
   if (item.href) {
-    return <a href={item.href} className="shrink-0">{inner}</a>
+    return <Link to={item.href} prefetch="intent" className="shrink-0">{inner}</Link>
   }
   return (
     <button type="button" onClick={item.onClick} aria-pressed={item.selected} className="shrink-0">
