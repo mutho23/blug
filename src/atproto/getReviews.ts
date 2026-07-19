@@ -113,8 +113,6 @@ export const getReview = async (rkey: string): Promise<PopfeedReview | null> => 
     if (!res.success) return null
 
     const val = res.data.value as any
-    const uriPts = res.data.uri.split('/')
-    const rkey = uriPts[uriPts.length - 1]
     return {
       rkey,
       uri: res.data.uri,
