@@ -29,23 +29,32 @@ export type PopfeedReview = {
 
 // Popfeed nyimpen referensi ke post Bluesky hasil cross-post di salah satu nama field ini
 // (belum tau pasti yang mana, jadi dicoba beberapa kemungkinan yang paling umum).
+// Dibungkus try/catch soalnya ini logic tebak-tebakan — kalau meleset/aneh, jangan sampai bikin halaman review error.
 function extractBskyPostUri(val: any, rkey: string): string | undefined {
-  const candidate =
-    val.bskyPostUri ??
-    val.blueskyPostUri ??
-    val.crosspostUri ??
-    val.syncedPostUri ??
-    val.postRef?.uri ??
-    val.bskyPost?.uri ??
-    val.crosspost?.uri ??
-    undefined
+  try {
+    if (!val || typeof val !== 'object') return undefined
 
-  if (!candidate) {
-    // Belum ketemu field yang cocok — catat semua key yang ada biar gampang dicek di log server.
-    console.log(`[getReviews] no bsky post ref found for rkey=${rkey}, raw keys:`, Object.keys(val))
+    const candidate =
+      val.bskyPostUri ??
+      val.blueskyPostUri ??
+      val.crosspostUri ??
+      val.syncedPostUri ??
+      val.postRef?.uri ??
+      val.bskyPost?.uri ??
+      val.crosspost?.uri ??
+      undefined
+
+    if (typeof candidate !== 'string' || !candidate) {
+      // Belum ketemu field yang cocok — catat semua key yang ada biar gampang dicek di log server.
+      console.log(`[getReviews] no bsky post ref found for rkey=${rkey}, raw keys:`, Object.keys(val))
+      return undefined
+    }
+
+    return candidate
+  } catch (err) {
+    console.error(`[getReviews] extractBskyPostUri failed for rkey=${rkey}:`, err)
+    return undefined
   }
-
-  return candidate
 }
 
 export const getReviews = async (): Promise<PopfeedReview[]> => {
