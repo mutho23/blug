@@ -22,11 +22,15 @@ async function resolveDid() {
   return did
 }
 
-// Zeens nyimpen foto sebagai post Bluesky biasa (app.bsky.feed.post + embed app.bsky.embed.images),
-// dan nempelin sidecar record app.photosky.postMeta (rkey sama persis) buat data tambahan (warna, EXIF).
-// Jadi: list dulu semua postMeta buat dapetin daftar rkey foto, baru tarik post asli satu-satu buat gambarnya.
-async function fetchZeensPhotos(did: string): Promise<ImageItem[]> {
-  // Ambil semua record postMeta (paginated, dibatasin 5 halaman/±500 foto biar aman)
+type ImageItem = {thumb: string; full: string; width: number; height: number; alt: string}
+type PhotoPost = {images: ImageItem[]; createdAt: string}
+
+// Zeens nyimpen foto sebagai post Bluesky biasa (app.bsky.feed.post + embed app.bsky.embed.images,
+// bisa lebih dari 1 foto per post), dan nempelin sidecar record app.photosky.postMeta (rkey sama
+// persis) buat data tambahan (warna, EXIF). Jadi: list dulu semua postMeta buat dapetin daftar rkey,
+// baru tarik post asli satu-satu buat ambil SEMUA foto di dalamnya.
+async function fetchZeensPhotos(did: string): Promise<PhotoPost[]> {
+  // Ambil semua record postMeta (paginated, dibatasin 5 halaman/±500 post biar aman)
   const metaRecords: any[] = []
   let cursor: string | undefined
   for (let page = 0; page < 5; page++) {
@@ -42,46 +46,46 @@ async function fetchZeensPhotos(did: string): Promise<ImageItem[]> {
     cursor = data.cursor
   }
 
-  // Tarik post Bluesky asli satu-satu (paralel) buat dapetin blob foto + aspect ratio
-  const results = await Promise.all(metaRecords.map(async (meta: any) => {
+  // Tarik post Bluesky asli satu-satu (paralel) buat dapetin semua blob foto + aspect ratio-nya
+  const results = await Promise.all(metaRecords.map(async (meta: any): Promise<PhotoPost | null> => {
     const rkey = meta.uri.split('/').pop()
     try {
       const res = await fetch(`https://bsky.social/xrpc/com.atproto.repo.getRecord?repo=${did}&collection=app.bsky.feed.post&rkey=${rkey}`)
       if (!res.ok) return null
       const {value} = await res.json()
-      const images = value?.embed?.images ?? value?.embed?.media?.images ?? []
+      const embedImages = value?.embed?.images ?? value?.embed?.media?.images ?? []
+      const images: ImageItem[] = embedImages
+        .filter((img: any) => img?.image?.ref?.$link)
+        .map((img: any) => {
+          const blobUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${img.image.ref.$link}`
+          return {
+            thumb: wsrv(blobUrl, THUMB_W, THUMB_Q),
+            full:  wsrv(blobUrl, FULL_W, FULL_Q),
+            width:  img.aspectRatio?.width  ?? 1,
+            height: img.aspectRatio?.height ?? 1,
+            alt: img.alt ?? '',
+          }
+        })
       if (images.length === 0) return null
-      const img = images[0]
-      const cid = img.image?.ref?.$link
-      if (!cid) return null
-      const blobUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`
-      return {
-        thumb: wsrv(blobUrl, THUMB_W, THUMB_Q),
-        full:  wsrv(blobUrl, FULL_W, FULL_Q),
-        width:  img.aspectRatio?.width  ?? 1,
-        height: img.aspectRatio?.height ?? 1,
-        createdAt: value.createdAt ?? meta.value.createdAt,
-      }
+      return {images, createdAt: value.createdAt ?? meta.value.createdAt}
     } catch {
       return null
     }
   }))
 
   return results
-    .filter((p): p is NonNullable<typeof p> => p !== null)
+    .filter((p): p is PhotoPost => p !== null)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 }
 
 export const loader = async () => {
   const did = await resolveDid()
-  const photos = await fetchZeensPhotos(did)
+  const posts = await fetchZeensPhotos(did)
 
-  return json({photos, did}, {
+  return json({posts, did}, {
     headers: {Link: '<https://wsrv.nl>; rel=preconnect, <https://bsky.social>; rel=preconnect'},
   })
 }
-
-type ImageItem = {thumb: string; full: string; width: number; height: number}
 
 const SOCIALS = [
   {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
@@ -161,6 +165,15 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
   return null // render dilakukan via vanilla DOM
 }
 
+function escapeHtml(s: string) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function renderLightboxContent(
   div: HTMLDivElement,
   images: ImageItem[],
@@ -203,8 +216,20 @@ function renderLightboxContent(
         pointer-events:auto;-webkit-user-select:none;user-select:none;" />
     </div>
 
+    ${images[index].alt ? `
+    <div style="position:fixed;bottom:0;left:0;right:0;z-index:1000001;
+      background:linear-gradient(transparent, rgba(0,0,0,0.75) 40%);
+      padding:32px 20px ${images.length > 1 ? '48px' : '20px'};
+      pointer-events:none;">
+      <p style="max-width:640px;margin:0 auto;text-align:center;color:rgba(255,255,255,0.85);
+        font-family:monospace;font-size:13px;line-height:1.5;">
+        ${escapeHtml(images[index].alt)}
+      </p>
+    </div>
+    ` : ''}
+
     ${images.length > 1 ? `
-    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    <div style="position:fixed;bottom:${images[index].alt ? '12px' : '24px'};left:50%;transform:translateX(-50%);
       z-index:1000001;display:flex;gap:8px;align-items:center;">
       ${images.map((_, i) => `
         <div data-dot="${i}" style="border-radius:999px;cursor:pointer;
@@ -236,24 +261,30 @@ function renderLightboxContent(
   div.addEventListener('touchend', (e) => { e.stopPropagation(); onTouchEnd(e as TouchEvent) }, {passive: true})
 }
 
-function PhotoTile({image, eager, onClick}: {image: ImageItem; eager?: boolean; onClick: () => void}) {
+function PhotoTile({post, eager, onClick}: {post: PhotoPost; eager?: boolean; onClick: () => void}) {
   return (
     <div
       className="relative aspect-square overflow-hidden cursor-zoom-in bg-[#111]"
       onClick={e => { e.preventDefault(); onClick() }}>
       <img
-        src={image.thumb}
+        src={post.images[0].thumb}
         alt=""
         loading={eager ? 'eager' : 'lazy'}
         className="absolute inset-0 w-full h-full object-cover"
       />
+      {post.images.length > 1 && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 rounded-full px-2 py-0.5">
+          <span className="font-mono text-[11px] text-white/90">1/{post.images.length}</span>
+        </div>
+      )}
     </div>
   )
 }
 
 export default function Gallery() {
-  const {photos} = useLoaderData<typeof loader>()
-  const [lightbox, setLightbox] = useState<{index: number} | null>(null)
+  const {posts} = useLoaderData<typeof loader>()
+  const [lightbox, setLightbox] = useState<{postIndex: number} | null>(null)
+  const totalPhotos = posts.reduce((sum: number, p: PhotoPost) => sum + p.images.length, 0)
 
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
@@ -281,7 +312,11 @@ export default function Gallery() {
       {/* ── Main Content ── */}
       <div className="flex-1 px-6 md:px-14 py-8 min-w-0">
         {lightbox && (
-          <Lightbox images={photos} initialIndex={lightbox.index} onClose={() => setLightbox(null)} />
+          <Lightbox
+            images={posts[lightbox.postIndex].images}
+            initialIndex={0}
+            onClose={() => setLightbox(null)}
+          />
         )}
 
         <header className="mb-8">
@@ -289,16 +324,16 @@ export default function Gallery() {
           <p className="font-mono text-[17px] text-[#aaaaaa] mt-2">Just dropping some memories here.</p>
         </header>
 
-        {photos.length === 0 ? (
+        {posts.length === 0 ? (
           <p className="font-mono text-[19px] text-[#555]">Belum ada foto.</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
-            {photos.map((photo: ImageItem, index: number) => (
+            {posts.map((post: PhotoPost, index: number) => (
               <PhotoTile
                 key={index}
-                image={photo}
+                post={post}
                 eager={index < 6}
-                onClick={() => setLightbox({index})}
+                onClick={() => setLightbox({postIndex: index})}
               />
             ))}
           </div>
@@ -309,7 +344,7 @@ export default function Gallery() {
       <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
         <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Gallery</p>
         <div className="mb-6">
-          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{photos.length}</div>
+          <div className="font-display text-[36px] text-[#f0f0f0] leading-none">{totalPhotos}</div>
           <div className="font-mono text-[12px] text-[#aaaaaa] mt-1">Photos</div>
         </div>
       </aside>
