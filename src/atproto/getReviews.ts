@@ -23,6 +23,29 @@ export type PopfeedReview = {
     isbn10?: string
     isbn13?: string
   }
+  // AT-URI dari post Bluesky hasil cross-post otomatis Popfeed (kalau ada), dipakai buat nampilin komentar.
+  bskyPostUri?: string
+}
+
+// Popfeed nyimpen referensi ke post Bluesky hasil cross-post di salah satu nama field ini
+// (belum tau pasti yang mana, jadi dicoba beberapa kemungkinan yang paling umum).
+function extractBskyPostUri(val: any, rkey: string): string | undefined {
+  const candidate =
+    val.bskyPostUri ??
+    val.blueskyPostUri ??
+    val.crosspostUri ??
+    val.syncedPostUri ??
+    val.postRef?.uri ??
+    val.bskyPost?.uri ??
+    val.crosspost?.uri ??
+    undefined
+
+  if (!candidate) {
+    // Belum ketemu field yang cocok — catat semua key yang ada biar gampang dicek di log server.
+    console.log(`[getReviews] no bsky post ref found for rkey=${rkey}, raw keys:`, Object.keys(val))
+  }
+
+  return candidate
 }
 
 export const getReviews = async (): Promise<PopfeedReview[]> => {
@@ -40,8 +63,9 @@ export const getReviews = async (): Promise<PopfeedReview[]> => {
     return res.data.records.map(data => {
       const val = data.value as any
       const uriPts = data.uri.split('/')
+      const rkey = uriPts[uriPts.length - 1]
       return {
-        rkey: uriPts[uriPts.length - 1],
+        rkey,
         uri: data.uri,
         title: val.title ?? 'Untitled',
         text: val.text ?? '',
@@ -58,6 +82,7 @@ export const getReviews = async (): Promise<PopfeedReview[]> => {
         isRevisit: val.isRevisit ?? false,
         containsSpoilers: val.containsSpoilers ?? false,
         identifiers: val.identifiers,
+        bskyPostUri: extractBskyPostUri(val, rkey),
       }
     })
   } catch (err) {
@@ -80,8 +105,9 @@ export const getReview = async (rkey: string): Promise<PopfeedReview | null> => 
 
     const val = res.data.value as any
     const uriPts = res.data.uri.split('/')
+    const rkey = uriPts[uriPts.length - 1]
     return {
-      rkey: uriPts[uriPts.length - 1],
+      rkey,
       uri: res.data.uri,
       title: val.title ?? 'Untitled',
       text: val.text ?? '',
@@ -98,6 +124,7 @@ export const getReview = async (rkey: string): Promise<PopfeedReview | null> => 
       isRevisit: val.isRevisit ?? false,
       containsSpoilers: val.containsSpoilers ?? false,
       identifiers: val.identifiers,
+      bskyPostUri: extractBskyPostUri(val, rkey),
     }
   } catch (err) {
     console.error('[getReview] error:', err)
