@@ -30,12 +30,21 @@ export const getPosts = async (
     throw new Error('Failed to get posts.')
   }
 
-  const posts = res.data.records.map(data => {
-    const post = data.value as LeafletDocument
-    const uriPts = data.uri.split('/')
-    post.rkey = uriPts[uriPts.length - 1]
-    return post
-  })
+  const posts = res.data.records
+    // Juttu (kolom komentar) juga nulis record ke collection `site.standard.document` yang
+    // sama pas dipakai buat "Link comments" -> "Post & Link" di halaman yang belum ke-link
+    // (mis. review). Record itu bentuknya beda dari post blog asli (nggak punya content.pages),
+    // jadi di-skip di sini biar nggak nyasar keanggep postingan blog.
+    .filter(data => {
+      const val = data.value as any
+      return val?.content && Array.isArray(val.content.pages) && val.content.pages.length > 0
+    })
+    .map(data => {
+      const post = data.value as LeafletDocument
+      const uriPts = data.uri.split('/')
+      post.rkey = uriPts[uriPts.length - 1]
+      return post
+    })
 
   await setCachedPosts(posts)
 

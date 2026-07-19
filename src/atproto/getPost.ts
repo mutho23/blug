@@ -20,6 +20,14 @@ export const getPost = async (rkey: string, skipCache?: boolean) => {
     throw new Error('Failed to get post.')
   }
 
+  const val = res.data.value as any
+  // Juttu bisa nulis record ke collection yang sama (lihat catatan di getPosts.ts) — kalau
+  // rkey yang diminta ternyata bukan post blog asli (nggak punya content.pages), 404 rapi
+  // daripada nge-crash ke halaman "Something broke".
+  if (!val?.content || !Array.isArray(val.content.pages) || val.content.pages.length === 0) {
+    throw new Response('Not Found', {status: 404})
+  }
+
   const post = res.data.value as LeafletDocument
 
   await setCachedPost(rkey, post)
