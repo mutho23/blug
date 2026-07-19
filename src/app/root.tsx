@@ -36,7 +36,7 @@ export const loader = async () => {
 const SOCIALS = [
   {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
   {icon: '💬', label: 'Discord',  href: 'https://discord.gg/DNcNBQaqgM'},
-  {icon: '🌾', label: 'Grain', href: 'https://grain.social/profile/mutho.my.id'},
+  {icon: '📷', label: 'Zeens', href: 'https://zeens.app/profile/mutho.my.id'},
   {icon: '🎵', label: 'Spotify',  href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
   {icon: '🎮', label: 'Steam',    href: 'https://steamcommunity.com/id/moebatsu'},
   {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
@@ -61,11 +61,23 @@ export function Layout({children}: {children: React.ReactNode}) {
   const touchStartY = React.useRef(0)
   const dragging = React.useRef(false)
   const [dragOffset, setDragOffset] = React.useState(0)
+  const [contactOpen, setContactOpen] = React.useState(false)
+
+  const navItems: NavItemDef[] = [
+    {key: 'home', label: 'Home', icon: 'home', href: '/', selected: location.pathname === '/'},
+    {key: 'blog', label: 'Blog', icon: 'blog', href: '/blog', selected: isOn('/blog')},
+    {key: 'gallery', label: 'Gallery', icon: 'gallery', href: '/gallery', selected: isOn('/gallery')},
+    {key: 'social', label: 'Social', icon: 'social', selected: contactOpen, onClick: () => setContactOpen(o => !o)},
+  ]
 
   // Juttu (kolom komentar) sengaja dimuat lewat effect, bukan <script> statis di <head>.
   // Kalau statis, script-nya (defer) bisa nyuntik konten ke #juttu-comments SEBELUM React
   // selesai hydrate elemen itu -> hydration mismatch (React error #418/#423) -> widget
   // ke-reset/ilang. useEffect di sini baru jalan SETELAH commit awal selesai, jadi aman.
+  React.useEffect(() => {
+    setContactOpen(false)
+  }, [location.pathname])
+
   React.useEffect(() => {
     const SRC = 'https://cdn.jsdelivr.net/npm/juttu@latest/juttu-embed.js'
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${SRC}"]`)
@@ -142,7 +154,7 @@ export function Layout({children}: {children: React.ReactNode}) {
         <Links />
         <script async src="https://embed.bsky.app/static/embed.js" />
       </head>
-      <body className="flex flex-col min-h-screen bg-[#0a0a0a] text-[#f0f0f0] antialiased font-sans">
+      <body className="flex flex-col min-h-screen bg-[#0a0a0a] text-[#f0f0f0] antialiased font-sans pb-24 sm:pb-0">
         {/* Scroll progress bar */}
         <div id="scroll-progress" className="fixed top-0 left-0 h-[2px] bg-[#4a9eff] z-[200] w-0 transition-[width] duration-100" />
 
@@ -174,50 +186,13 @@ export function Layout({children}: {children: React.ReactNode}) {
                 </span>
               </a>
 
-              {/* ── Mobile tengah: nav links ── */}
-              <nav className="sm:hidden flex items-center gap-5">
-                <MobileNavLink href="/" selected={location.pathname === '/'}>About</MobileNavLink>
-                <MobileNavLink href="/blog" selected={isOn('/blog')}>Blogs</MobileNavLink>
-                <MobileNavLink href="/gallery" selected={isOn('/gallery')}>Gallery</MobileNavLink>
+              {/* ── Desktop: pill nav nempel di header ── */}
+              <nav className="hidden sm:flex items-center gap-1 rounded-full p-1 border border-[#222]"
+                style={{background: 'rgba(255,255,255,0.03)'}}>
+                {navItems.map(item => <PillNavItem key={item.key} item={item} />)}
               </nav>
 
-              {/* Desktop nav */}
-              <nav className="hidden sm:flex items-center gap-7">
-                <NavLink href="/" selected={location.pathname === '/'}>About</NavLink>
-                <NavLink href="/blog" selected={isOn('/blog')}>Blogs</NavLink>
-                <NavLink href="/gallery" selected={isOn('/gallery')}>Gallery</NavLink>
-              </nav>
-
-              {/* ── Kanan: burger Contact (mobile) / spacer (desktop) ── */}
-              <button
-                className="sm:hidden flex flex-col justify-center gap-[5px] w-9 h-9 shrink-0"
-                aria-label="Contact"
-                onClick={() => {
-                  document.getElementById('mobile-contact')?.classList.toggle('hidden')
-                }}>
-                <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
-                <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
-                <span className="block w-5 h-[1.5px] bg-[#ccc] rounded" />
-              </button>
-              <div className="hidden sm:block w-9" />
-            </div>
-
-            {/* ── Mobile dropdown: Contact ── */}
-            <div id="mobile-contact" className="hidden sm:hidden border-t border-[#222] px-6 py-1" style={{background: 'rgba(10,10,10,0.97)'}}>
-              <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#aaaaaa] pt-3 pb-2">Contact</p>
-              {SOCIALS.map(({icon, label, href}) => (
-                <a
-                  key={label}
-                  href={href}
-                  target={href.startsWith('mailto') ? undefined : '_blank'}
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 py-2.5 border-b border-[#1a1a1a] last:border-0">
-                  <div className="w-6 h-6 rounded bg-[#1a1a1a] flex items-center justify-center text-sm shrink-0">
-                    {icon}
-                  </div>
-                  <span className="font-mono text-[15px] text-[#cccccc]">{label}</span>
-                </a>
-              ))}
+              <div className="w-8 sm:w-9" />
             </div>
 
             {/* ── Dot indicator (mobile, halaman utama) ── */}
@@ -230,6 +205,38 @@ export function Layout({children}: {children: React.ReactNode}) {
               </div>
             )}
           </header>
+
+          {/* ── Mobile: pill nav ngambang di bawah layar ── */}
+          <nav className="sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50
+            flex items-center gap-1 rounded-full p-1 border border-[#242424] shadow-2xl shadow-black/50"
+            style={{background: 'rgba(18,18,18,0.9)', backdropFilter: 'blur(16px)'}}>
+            {navItems.map(item => <PillNavItem key={item.key} item={item} />)}
+          </nav>
+
+          {/* ── Social popover: dibuka lewat item "Social" di pill nav, posisinya ngikutin
+              pill-nya sendiri (nempel bawah pill di mobile, nempel bawah header di desktop) ── */}
+          {contactOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setContactOpen(false)} />
+              <div className="fixed z-50 left-1/2 -translate-x-1/2 w-[240px] rounded-2xl
+                border border-[#242424] p-2 bottom-[84px] sm:bottom-auto sm:top-[62px] shadow-2xl shadow-black/50"
+                style={{background: 'rgba(18,18,18,0.97)', backdropFilter: 'blur(16px)'}}>
+                {SOCIALS.map(({icon, label, href}) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target={href.startsWith('mailto') ? undefined : '_blank'}
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-white/5 transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-[#1e1e1e] flex items-center justify-center text-sm shrink-0">
+                      {icon}
+                    </div>
+                    <span className="font-mono text-[14px] text-[#cccccc]">{label}</span>
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* Konten — live drag transform saat swipe */}
           <main
@@ -273,27 +280,76 @@ export default function App() {
   return <Outlet />
 }
 
-function NavLink({href, selected, children}: {href: string; selected: boolean; children: string}) {
-  return (
-    <a
-      href={href}
-      className={`font-mono text-[14px] tracking-[0.04em] pb-0.5 border-b-[1.5px] transition-colors ${
-        selected ? 'text-[#f0f0f0] border-[#4a9eff]' : 'text-[#555] border-transparent hover:text-[#b0b0b0]'
-      }`}>
-      {children}
-    </a>
-  )
+type NavIconName = 'home' | 'blog' | 'gallery' | 'social'
+type NavItemDef = {
+  key: string
+  label: string
+  icon: NavIconName
+  selected: boolean
+  href?: string
+  onClick?: () => void
 }
 
-function MobileNavLink({href, selected, children}: {href: string; selected: boolean; children: string}) {
+function NavIcon({name, className}: {name: NavIconName; className?: string}) {
+  const common = {
+    viewBox: '0 0 24 24',
+    fill: 'none' as const,
+    stroke: 'currentColor',
+    strokeWidth: 1.75,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    className,
+  }
+  switch (name) {
+    case 'home':
+      return (
+        <svg {...common}>
+          <path d="M3 10.5 12 3l9 7.5" />
+          <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" />
+        </svg>
+      )
+    case 'blog':
+      return (
+        <svg {...common}>
+          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
+          <path d="M14 3v6h6" />
+          <path d="M8.5 13h7M8.5 17h4.5" />
+        </svg>
+      )
+    case 'gallery':
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="18" height="18" rx="2.5" />
+          <circle cx="8.5" cy="9" r="1.6" />
+          <path d="M21 16.5l-5.2-5.2a1.5 1.5 0 0 0-2.1 0L5 20" />
+        </svg>
+      )
+    case 'social':
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M16 12v1.6a2.6 2.6 0 0 0 5.2 0V12a9.2 9.2 0 1 0-3.6 7.3" />
+        </svg>
+      )
+  }
+}
+
+function PillNavItem({item}: {item: NavItemDef}) {
+  const inner = (
+    <div className={`flex flex-col items-center gap-0.5 px-3.5 py-1.5 rounded-full transition-colors ${
+      item.selected ? 'bg-white/[0.08] text-[#f0f0f0]' : 'text-[#666] hover:text-[#aaa]'
+    }`}>
+      <NavIcon name={item.icon} className={`w-[19px] h-[19px] ${item.selected ? 'text-[#4a9eff]' : ''}`} />
+      <span className="font-mono text-[10px] tracking-[0.04em] leading-none">{item.label}</span>
+    </div>
+  )
+  if (item.href) {
+    return <a href={item.href} className="shrink-0">{inner}</a>
+  }
   return (
-    <a
-      href={href}
-      className={`font-mono text-[13px] tracking-[0.04em] pb-0.5 border-b-[1.5px] transition-colors ${
-        selected ? 'text-[#f0f0f0] border-[#4a9eff]' : 'text-[#444] border-transparent'
-      }`}>
-      {children}
-    </a>
+    <button type="button" onClick={item.onClick} aria-pressed={item.selected} className="shrink-0">
+      {inner}
+    </button>
   )
 }
 
