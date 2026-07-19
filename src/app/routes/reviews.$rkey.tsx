@@ -1,6 +1,7 @@
-import {json, type LoaderFunctionArgs} from '@remix-run/node'
+import {json, type LoaderFunctionArgs, type MetaFunction} from '@remix-run/node'
 import {useLoaderData} from '@remix-run/react'
 import {getReview} from '../../atproto/getReviews.js'
+import {getDid} from '../../atproto/getDid.js'
 import {Link} from '../components/link.js'
 import {StarRating} from '../components/star-rating'
 import {BskyEmbed} from '../components/bsky-embed'
@@ -10,8 +11,14 @@ export const loader = async ({params}: LoaderFunctionArgs) => {
   if (!rkey) throw new Response('Not Found', {status: 404})
   const review = await getReview(rkey)
   if (!review) throw new Response('Not Found', {status: 404})
-  return json({review})
+  return json({review, did: getDid(), rkey})
 }
+
+export const meta: MetaFunction<typeof loader> = ({data}) => [
+  // Dipakai Juttu buat nemuin/link-in thread Bluesky yang jadi kolom komentar review ini
+  // (independen dari crosspost Popfeed — link-nya dibikin sendiri lewat login di widget).
+  ...(data ? [{tagName: 'link', rel: 'site.standard.document', href: `at://${data.did}/site.standard.document/${data.rkey}`}] : []),
+]
 
 const RATING_LABEL: Record<number, string> = {
   10: 'Masterpiece',
@@ -157,13 +164,22 @@ export default function ReviewPage() {
           </div>
         )}
 
-        {/* Komentar: embed post Bluesky hasil cross-post Popfeed (kalau ketemu) */}
+        {/* Bluesky thread hasil cross-post otomatis Popfeed (kalau ketemu) */}
         {review.bskyPostUri && (
           <div className="mt-10 pt-7 border-t border-[#1e1e1e]">
-            <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-3">Comments</p>
+            <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-3">Popfeed Post</p>
             <BskyEmbed postUri={review.bskyPostUri} />
           </div>
         )}
+
+        {/* Kolom komentar (Juttu, baca thread Bluesky lewat site.standard.document) */}
+        {/* suppressHydrationWarning: Juttu (script eksternal, dimuat via effect di root.tsx)
+            nyuntik konten ke div ini setelah hydration, jadi nggak akan mismatch — tapi tetap
+            dijaga sebagai jaring pengaman kalau ada race di navigasi client-side. */}
+        <div className={review.bskyPostUri ? 'mt-8' : 'mt-10 pt-7 border-t border-[#1e1e1e]'}>
+          <p className="font-mono text-[13px] tracking-[0.12em] uppercase text-[#555] mb-3">Comments</p>
+          <div id="juttu-comments" suppressHydrationWarning />
+        </div>
 
         {/* Comment (link out ke Popfeed, karena komentar review live di sana) */}
         <a
