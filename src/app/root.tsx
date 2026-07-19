@@ -65,7 +65,7 @@ export function Layout({children}: {children: React.ReactNode}) {
 
   const navItems: NavItemDef[] = [
     {key: 'home', label: 'Home', icon: 'home', href: '/', selected: location.pathname === '/'},
-    {key: 'blog', label: 'Blog', icon: 'blog', href: '/blog', selected: isOn('/blog')},
+    {key: 'blog', label: 'Writing', icon: 'blog', href: '/blog', selected: isOn('/blog')},
     {key: 'gallery', label: 'Gallery', icon: 'gallery', href: '/gallery', selected: isOn('/gallery')},
     {key: 'social', label: 'Social', icon: 'social', selected: contactOpen, onClick: () => setContactOpen(o => !o)},
   ]
