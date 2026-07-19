@@ -97,8 +97,8 @@ const SOCIALS = [
 ]
 
 function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initialIndex: number; onClose: () => void}) {
-  // images di sini udah flat lintas semua post (urutan sama kayak grid), jadi next/prev
-  // otomatis nyambung ke post berikutnya/sebelumnya tanpa perlu nutup lightbox dulu.
+  // images di sini cuma foto dari 1 post yang lagi dibuka — geser cuma jalan kalau post-nya
+  // punya lebih dari 1 foto, nggak lompat ke post lain.
   const [index, setIndex] = useState(initialIndex)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const touchStartX = useRef<number | null>(null)
@@ -114,7 +114,8 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
     div.style.cssText = [
       'position:fixed', 'top:0', 'left:0', 'right:0', 'bottom:0',
       'width:100%', 'height:100%', 'z-index:999999',
-      'background:#000',
+      'background:rgba(0,0,0,0.6)',
+      'backdrop-filter:blur(28px)', '-webkit-backdrop-filter:blur(28px)',
       'display:flex', 'align-items:center', 'justify-content:center',
       'touch-action:none', 'overscroll-behavior:none', 'overflow:hidden',
     ].join(';')
@@ -200,16 +201,10 @@ function renderLightboxContent(
       : []
   const hasAlt = !!images[index].alt
   div.innerHTML = `
-    <div style="position:fixed;inset:0;display:flex;flex-direction:column;background:#000;">
+    <div style="position:fixed;inset:0;display:flex;flex-direction:column;">
 
       <div id="lb-imgwrap" style="position:relative;flex:1;min-height:0;
         display:flex;align-items:center;justify-content:center;overflow:hidden;">
-
-        <div id="lb-close" style="position:absolute;top:16px;right:16px;z-index:1000001;
-          background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);
-          border-radius:50%;width:44px;height:44px;color:white;font-size:20px;
-          display:flex;align-items:center;justify-content:center;cursor:pointer;
-          font-family:monospace;-webkit-tap-highlight-color:transparent;">✕</div>
 
         ${images.length > 1 ? `
         <div style="position:absolute;top:18px;left:50%;transform:translateX(-50%);
@@ -229,7 +224,7 @@ function renderLightboxContent(
 
         <img src="${images[index].full}" alt="Photo ${index + 1}"
           style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;
-          -webkit-user-select:none;user-select:none;" />
+          cursor:pointer;-webkit-user-select:none;user-select:none;" />
       </div>
 
       ${dotIndices.length > 0 ? `
@@ -259,7 +254,6 @@ function renderLightboxContent(
   `
 
   // Event listeners
-  div.querySelector('#lb-close')?.addEventListener('click', e => { e.stopPropagation(); onClose() })
   div.querySelector('#lb-prev')?.addEventListener('click', e => { e.stopPropagation(); prev() })
   div.querySelector('#lb-next')?.addEventListener('click', e => { e.stopPropagation(); next() })
   div.querySelectorAll('[data-dot]').forEach(dot => {
@@ -280,15 +274,17 @@ function renderLightboxContent(
 }
 
 function PhotoTile({post, eager, onClick}: {post: PhotoPost; eager?: boolean; onClick: () => void}) {
+  const cover = post.images[0]
   return (
     <div
-      className="relative aspect-square overflow-hidden cursor-zoom-in bg-[#111]"
+      className="relative mb-3 break-inside-avoid overflow-hidden cursor-zoom-in bg-[#111]"
       onClick={e => { e.preventDefault(); onClick() }}>
       <img
-        src={post.images[0].thumb}
+        src={cover.thumb}
         alt=""
         loading={eager ? 'eager' : 'lazy'}
-        className="absolute inset-0 w-full h-full object-cover"
+        style={{aspectRatio: `${cover.width} / ${cover.height}`}}
+        className="block w-full h-auto"
       />
       {post.images.length > 1 && (
         <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 rounded-full px-2 py-0.5">
@@ -301,16 +297,8 @@ function PhotoTile({post, eager, onClick}: {post: PhotoPost; eager?: boolean; on
 
 export default function Gallery() {
   const {posts} = useLoaderData<typeof loader>()
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [lightbox, setLightbox] = useState<{postIndex: number} | null>(null)
   const totalPhotos = posts.reduce((sum: number, p: PhotoPost) => sum + p.images.length, 0)
-
-  // Urutan flat ini harus sama persis kayak urutan tile di grid, biar next/prev di lightbox
-  // "keliatan" kayak jalan lurus ngikutin grid meskipun sebenernya lompat antar post.
-  const flatImages: ImageItem[] = posts.flatMap((p: PhotoPost) => p.images)
-  const postStarts: number[] = (() => {
-    let acc = 0
-    return posts.map((p: PhotoPost) => { const start = acc; acc += p.images.length; return start })
-  })()
 
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
@@ -337,11 +325,11 @@ export default function Gallery() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 px-6 md:px-14 py-8 min-w-0">
-        {lightboxIndex !== null && (
+        {lightbox && (
           <Lightbox
-            images={flatImages}
-            initialIndex={lightboxIndex}
-            onClose={() => setLightboxIndex(null)}
+            images={posts[lightbox.postIndex].images}
+            initialIndex={0}
+            onClose={() => setLightbox(null)}
           />
         )}
 
@@ -353,13 +341,13 @@ export default function Gallery() {
         {posts.length === 0 ? (
           <p className="font-mono text-[19px] text-[#555]">Belum ada foto.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+          <div className="columns-2 sm:columns-3 gap-3">
             {posts.map((post: PhotoPost, index: number) => (
               <PhotoTile
                 key={index}
                 post={post}
                 eager={index < 6}
-                onClick={() => setLightboxIndex(postStarts[index])}
+                onClick={() => setLightbox({postIndex: index})}
               />
             ))}
           </div>
