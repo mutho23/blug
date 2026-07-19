@@ -198,61 +198,64 @@ function renderLightboxContent(
     : images.length > 1
       ? Array.from({length: Math.min(DOT_WINDOW, images.length)}, (_, k) => windowStart + k)
       : []
+  const hasAlt = !!images[index].alt
   div.innerHTML = `
-    <div id="lb-close" style="position:fixed;top:16px;right:16px;z-index:1000001;
-      background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);
-      border-radius:50%;width:44px;height:44px;color:white;font-size:20px;
-      display:flex;align-items:center;justify-content:center;cursor:pointer;
-      font-family:monospace;-webkit-tap-highlight-color:transparent;">✕</div>
+    <div style="position:fixed;inset:0;display:flex;flex-direction:column;background:#000;">
 
-    ${images.length > 1 ? `
-    <div style="position:fixed;top:18px;left:50%;transform:translateX(-50%);
-      z-index:1000001;color:rgba(255,255,255,0.5);font-family:monospace;font-size:13px;
-      background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:99px;">
-      ${index + 1} / ${images.length}
-    </div>
-    <div id="lb-prev" style="position:fixed;left:4px;top:50%;transform:translateY(-50%);
-      z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
-      color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
-      -webkit-tap-highlight-color:transparent;">‹</div>
-    <div id="lb-next" style="position:fixed;right:4px;top:50%;transform:translateY(-50%);
-      z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
-      color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
-      -webkit-tap-highlight-color:transparent;">›</div>
-    ` : ''}
+      <div id="lb-imgwrap" style="position:relative;flex:1;min-height:0;
+        display:flex;align-items:center;justify-content:center;overflow:hidden;">
 
-    <div style="position:fixed;top:0;left:0;right:0;bottom:0;
-      width:100vw;height:100vh;
-      display:flex;align-items:center;justify-content:center;
-      padding:0;margin:0;box-sizing:border-box;pointer-events:none;">
-      <img src="${images[index].full}" alt="Photo ${index + 1}"
-        style="max-width:100vw;max-height:100vh;width:auto;height:auto;object-fit:contain;display:block;
-        pointer-events:auto;-webkit-user-select:none;user-select:none;" />
-    </div>
+        <div id="lb-close" style="position:absolute;top:16px;right:16px;z-index:1000001;
+          background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);
+          border-radius:50%;width:44px;height:44px;color:white;font-size:20px;
+          display:flex;align-items:center;justify-content:center;cursor:pointer;
+          font-family:monospace;-webkit-tap-highlight-color:transparent;">✕</div>
 
-    ${images[index].alt ? `
-    <div style="position:fixed;bottom:0;left:0;right:0;z-index:1000001;
-      background:linear-gradient(transparent, rgba(0,0,0,0.75) 40%);
-      padding:32px 20px ${images.length > 1 ? '48px' : '20px'};
-      pointer-events:none;">
-      <p style="max-width:640px;margin:0 auto;text-align:center;color:rgba(255,255,255,0.85);
-        font-family:monospace;font-size:13px;line-height:1.5;">
-        ${escapeHtml(images[index].alt)}
-      </p>
-    </div>
-    ` : ''}
+        ${images.length > 1 ? `
+        <div style="position:absolute;top:18px;left:50%;transform:translateX(-50%);
+          z-index:1000001;color:rgba(255,255,255,0.5);font-family:monospace;font-size:13px;
+          background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:99px;">
+          ${index + 1} / ${images.length}
+        </div>
+        <div id="lb-prev" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);
+          z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
+          color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
+          -webkit-tap-highlight-color:transparent;">‹</div>
+        <div id="lb-next" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);
+          z-index:1000001;background:rgba(0,0,0,0.4);border:none;border-radius:8px;
+          color:rgba(255,255,255,0.7);font-size:36px;padding:10px 14px;cursor:pointer;
+          -webkit-tap-highlight-color:transparent;">›</div>
+        ` : ''}
 
-    ${dotIndices.length > 0 ? `
-    <div style="position:fixed;bottom:${images[index].alt ? '12px' : '24px'};left:50%;transform:translateX(-50%);
-      z-index:1000001;display:flex;gap:8px;align-items:center;">
-      ${dotIndices.map(i => `
-        <div data-dot="${i}" style="border-radius:999px;cursor:pointer;
-          width:${i === index ? '16px' : '6px'};height:6px;
-          background:${i === index ? 'white' : 'rgba(255,255,255,0.25)'};
-          transition:all 0.2s;"></div>
-      `).join('')}
+        <img src="${images[index].full}" alt="Photo ${index + 1}"
+          style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;
+          -webkit-user-select:none;user-select:none;" />
+      </div>
+
+      ${dotIndices.length > 0 ? `
+      <div style="flex-shrink:0;display:flex;justify-content:center;align-items:center;
+        gap:8px;padding:10px 0;background:#000;">
+        ${dotIndices.map(i => `
+          <div data-dot="${i}" style="border-radius:999px;cursor:pointer;
+            width:${i === index ? '16px' : '6px'};height:6px;
+            background:${i === index ? 'white' : 'rgba(255,255,255,0.25)'};
+            transition:all 0.2s;"></div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      ${hasAlt ? `
+      <div style="flex-shrink:0;background:#000;box-sizing:border-box;
+        max-height:30dvh;overflow-y:auto;
+        padding:2px 20px calc(16px + env(safe-area-inset-bottom));">
+        <p style="max-width:640px;margin:0 auto;text-align:center;color:rgba(255,255,255,0.85);
+          font-family:monospace;font-size:13px;line-height:1.5;">
+          ${escapeHtml(images[index].alt)}
+        </p>
+      </div>
+      ` : ''}
+
     </div>
-    ` : ''}
   `
 
   // Event listeners
