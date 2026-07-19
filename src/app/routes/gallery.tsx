@@ -97,12 +97,15 @@ const SOCIALS = [
 ]
 
 function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initialIndex: number; onClose: () => void}) {
+  // images di sini udah flat lintas semua post (urutan sama kayak grid), jadi next/prev
+  // otomatis nyambung ke post berikutnya/sebelumnya tanpa perlu nutup lightbox dulu.
   const [index, setIndex] = useState(initialIndex)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const touchStartX = useRef<number | null>(null)
   const touchStartY = useRef<number | null>(null)
   const prev = useCallback(() => setIndex(i => (i - 1 + images.length) % images.length), [images.length])
   const next = useCallback(() => setIndex(i => (i + 1) % images.length), [images.length])
+  const goTo = useCallback((i: number) => setIndex(i % images.length), [images.length])
 
   useEffect(() => {
     // Buat container div dan langsung append ke <body> — bypass semua transform parent
@@ -136,7 +139,7 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
   useEffect(() => {
     const div = containerRef.current
     if (!div) return
-    renderLightboxContent(div, images, index, prev, next, onClose,
+    renderLightboxContent(div, images, index, prev, next, goTo, onClose,
       (e: TouchEvent) => {
         touchStartX.current = e.touches[0].clientX
         touchStartY.current = e.touches[0].clientY
@@ -149,7 +152,7 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
         touchStartX.current = null; touchStartY.current = null
       }
     )
-  }, [index, images, prev, next, onClose])
+  }, [index, images, prev, next, goTo, onClose])
 
   // Keyboard
   useEffect(() => {
@@ -180,10 +183,21 @@ function renderLightboxContent(
   index: number,
   prev: () => void,
   next: () => void,
+  goTo: (i: number) => void,
   onClose: () => void,
   onTouchStart: (e: TouchEvent) => void,
   onTouchEnd: (e: TouchEvent) => void,
 ) {
+  // Dots cuma masuk akal buat navigasi cepat kalau jumlahnya dikit — begitu udah lintas
+  // banyak post, tampilin dots buat sebagian kecil di sekitar foto yang lagi dibuka aja.
+  const DOT_WINDOW = 9
+  const showDots = images.length > 1 && images.length <= 40
+  const windowStart = Math.max(0, Math.min(index - Math.floor(DOT_WINDOW / 2), images.length - DOT_WINDOW))
+  const dotIndices = showDots
+    ? images.map((_, i) => i)
+    : images.length > 1
+      ? Array.from({length: Math.min(DOT_WINDOW, images.length)}, (_, k) => windowStart + k)
+      : []
   div.innerHTML = `
     <div id="lb-close" style="position:fixed;top:16px;right:16px;z-index:1000001;
       background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);
@@ -228,10 +242,10 @@ function renderLightboxContent(
     </div>
     ` : ''}
 
-    ${images.length > 1 ? `
+    ${dotIndices.length > 0 ? `
     <div style="position:fixed;bottom:${images[index].alt ? '12px' : '24px'};left:50%;transform:translateX(-50%);
       z-index:1000001;display:flex;gap:8px;align-items:center;">
-      ${images.map((_, i) => `
+      ${dotIndices.map(i => `
         <div data-dot="${i}" style="border-radius:999px;cursor:pointer;
           width:${i === index ? '16px' : '6px'};height:6px;
           background:${i === index ? 'white' : 'rgba(255,255,255,0.25)'};
@@ -248,7 +262,8 @@ function renderLightboxContent(
   div.querySelectorAll('[data-dot]').forEach(dot => {
     dot.addEventListener('click', (e) => {
       e.stopPropagation()
-      // dots navigation handled via index state — trigger click pada index
+      const i = Number((dot as HTMLElement).dataset.dot)
+      if (!Number.isNaN(i)) goTo(i)
     })
   })
 
@@ -283,8 +298,16 @@ function PhotoTile({post, eager, onClick}: {post: PhotoPost; eager?: boolean; on
 
 export default function Gallery() {
   const {posts} = useLoaderData<typeof loader>()
-  const [lightbox, setLightbox] = useState<{postIndex: number} | null>(null)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const totalPhotos = posts.reduce((sum: number, p: PhotoPost) => sum + p.images.length, 0)
+
+  // Urutan flat ini harus sama persis kayak urutan tile di grid, biar next/prev di lightbox
+  // "keliatan" kayak jalan lurus ngikutin grid meskipun sebenernya lompat antar post.
+  const flatImages: ImageItem[] = posts.flatMap((p: PhotoPost) => p.images)
+  const postStarts: number[] = (() => {
+    let acc = 0
+    return posts.map((p: PhotoPost) => { const start = acc; acc += p.images.length; return start })
+  })()
 
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
@@ -311,11 +334,11 @@ export default function Gallery() {
 
       {/* ── Main Content ── */}
       <div className="flex-1 px-6 md:px-14 py-8 min-w-0">
-        {lightbox && (
+        {lightboxIndex !== null && (
           <Lightbox
-            images={posts[lightbox.postIndex].images}
-            initialIndex={0}
-            onClose={() => setLightbox(null)}
+            images={flatImages}
+            initialIndex={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
           />
         )}
 
@@ -333,7 +356,7 @@ export default function Gallery() {
                 key={index}
                 post={post}
                 eager={index < 6}
-                onClick={() => setLightbox({postIndex: index})}
+                onClick={() => setLightboxIndex(postStarts[index])}
               />
             ))}
           </div>
