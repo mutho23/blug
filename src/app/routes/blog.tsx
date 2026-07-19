@@ -161,7 +161,7 @@ export default function Blog() {
           {/* Hero */}
           <section className="mb-10">
             <h1 className="font-display text-[42px] md:text-[46px] text-[#f0f0f0] leading-tight tracking-[-0.02em]">
-              It's Mutho<span className="text-[#4a9eff]">.</span>
+              Writing<span className="text-[#4a9eff]">.</span>
             </h1>
             <p className="font-mono text-[17px] text-[#aaaaaa] mt-2">Just writing random stuff here.</p>
           </section>
