@@ -194,7 +194,7 @@ function renderLightboxContent(
   div.innerHTML = `
     <div style="position:fixed;inset:0;display:flex;flex-direction:column;">
 
-      <div id="lb-imgwrap" style="position:relative;flex:1;min-height:0;
+      <div id="lb-imgwrap" style="position:relative;flex:1;min-height:0;width:100%;max-width:1240px;margin:0 auto;
         display:flex;align-items:center;justify-content:center;overflow:hidden;">
 
         ${images.length > 1 ? `
