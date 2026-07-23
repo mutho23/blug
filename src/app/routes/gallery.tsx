@@ -144,6 +144,9 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
         touchStartX.current = null; touchStartY.current = null
       }
     )
+    const handleResize = () => positionArrows(div, images[index])
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
   }, [index, images, prev, next, goTo, onClose])
 
   // Keyboard
@@ -169,6 +172,32 @@ function escapeHtml(s: string) {
     .replace(/'/g, '&#39;')
 }
 
+// Panah harus nempel di tepi foto ASLI, bukan tepi kotak #lb-imgwrap (yang lebar tetapnya
+// 1240px). Karena foto pakai object-fit:contain, lebar foto yang kebentuk di layar tergantung
+// aspect ratio-nya sendiri (potret vs lanskap) dibanding aspect ratio wrap-nya. Jadi kita hitung
+// manual pakai rumus contain, lalu posisikan panah persis di tepi hasil hitungan itu, digeser
+// dikit (translateX -50%) biar separuh badan panahnya "nangkring" di atas tepi foto.
+function computeEdgeX(wrapW: number, wrapH: number, imgW: number, imgH: number) {
+  const arImg = imgW / imgH
+  const arWrap = wrapW / wrapH
+  const renderedW = arImg > arWrap ? wrapW : wrapH * arImg
+  const leftX = (wrapW - renderedW) / 2
+  const rightX = wrapW - leftX
+  return {leftX, rightX}
+}
+
+function positionArrows(div: HTMLDivElement, meta: {width: number; height: number}) {
+  const wrap = div.querySelector('#lb-imgwrap') as HTMLElement | null
+  const prevBtn = div.querySelector('#lb-prev') as HTMLElement | null
+  const nextBtn = div.querySelector('#lb-next') as HTMLElement | null
+  if (!wrap || !prevBtn || !nextBtn) return
+  const rect = wrap.getBoundingClientRect()
+  if (rect.width === 0 || rect.height === 0) return
+  const {leftX, rightX} = computeEdgeX(rect.width, rect.height, meta.width || 1, meta.height || 1)
+  prevBtn.style.left = `${leftX}px`
+  nextBtn.style.left = `${rightX}px`
+}
+
 function renderLightboxContent(
   div: HTMLDivElement,
   images: ImageItem[],
@@ -180,15 +209,15 @@ function renderLightboxContent(
   onTouchStart: (e: TouchEvent) => void,
   onTouchEnd: (e: TouchEvent) => void,
 ) {
-  // Dots cuma masuk akal buat navigasi cepat kalau jumlahnya dikit — begitu udah lintas
-  // banyak post, tampilin dots buat sebagian kecil di sekitar foto yang lagi dibuka aja.
-  const DOT_WINDOW = 9
-  const showDots = images.length > 1 && images.length <= 40
-  const windowStart = Math.max(0, Math.min(index - Math.floor(DOT_WINDOW / 2), images.length - DOT_WINDOW))
-  const dotIndices = showDots
+  // Thumbnail strip cuma masuk akal buat navigasi cepat kalau jumlahnya dikit — begitu udah
+  // lintas banyak post, tampilin strip buat sebagian kecil di sekitar foto yang lagi dibuka aja.
+  const THUMB_WINDOW = 9
+  const showAllThumbs = images.length > 1 && images.length <= 40
+  const windowStart = Math.max(0, Math.min(index - Math.floor(THUMB_WINDOW / 2), images.length - THUMB_WINDOW))
+  const thumbIndices = showAllThumbs
     ? images.map((_, i) => i)
     : images.length > 1
-      ? Array.from({length: Math.min(DOT_WINDOW, images.length)}, (_, k) => windowStart + k)
+      ? Array.from({length: Math.min(THUMB_WINDOW, images.length)}, (_, k) => windowStart + k)
       : []
   const hasAlt = !!images[index].alt
   div.innerHTML = `
@@ -203,13 +232,15 @@ function renderLightboxContent(
           background:rgba(0,0,0,0.5);padding:4px 10px;border-radius:99px;">
           ${index + 1} / ${images.length}
         </div>
-        <div id="lb-prev" style="position:absolute;left:0;top:50%;transform:translateY(-50%);
-          z-index:1000001;background:rgba(0,0,0,0.35);border:none;border-radius:0 8px 8px 0;
-          color:rgba(255,255,255,0.65);font-size:20px;line-height:1;padding:10px 6px;cursor:pointer;
+        <div id="lb-prev" style="position:absolute;left:20px;top:50%;transform:translate(-50%,-50%);
+          z-index:1000001;background:rgba(0,0,0,0.45);border:none;border-radius:999px;
+          color:rgba(255,255,255,0.8);font-size:18px;line-height:1;width:36px;height:36px;
+          display:flex;align-items:center;justify-content:center;cursor:pointer;
           -webkit-tap-highlight-color:transparent;">‹</div>
-        <div id="lb-next" style="position:absolute;right:0;top:50%;transform:translateY(-50%);
-          z-index:1000001;background:rgba(0,0,0,0.35);border:none;border-radius:8px 0 0 8px;
-          color:rgba(255,255,255,0.65);font-size:20px;line-height:1;padding:10px 6px;cursor:pointer;
+        <div id="lb-next" style="position:absolute;left:calc(100% - 20px);top:50%;transform:translate(-50%,-50%);
+          z-index:1000001;background:rgba(0,0,0,0.45);border:none;border-radius:999px;
+          color:rgba(255,255,255,0.8);font-size:18px;line-height:1;width:36px;height:36px;
+          display:flex;align-items:center;justify-content:center;cursor:pointer;
           -webkit-tap-highlight-color:transparent;">›</div>
         ` : ''}
 
@@ -218,14 +249,17 @@ function renderLightboxContent(
           cursor:pointer;-webkit-user-select:none;user-select:none;" />
       </div>
 
-      ${dotIndices.length > 0 ? `
-      <div style="flex-shrink:0;display:flex;justify-content:center;align-items:center;
-        gap:8px;padding:10px 0;background:#000;">
-        ${dotIndices.map(i => `
-          <div data-dot="${i}" style="border-radius:999px;cursor:pointer;
-            width:${i === index ? '16px' : '6px'};height:6px;
-            background:${i === index ? 'white' : 'rgba(255,255,255,0.25)'};
-            transition:all 0.2s;"></div>
+      ${thumbIndices.length > 0 ? `
+      <div id="lb-thumbstrip" style="flex-shrink:0;display:flex;justify-content:center;align-items:center;
+        gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#000;
+        overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        ${thumbIndices.map(i => `
+          <img data-thumb="${i}" src="${images[i].thumb}" alt=""
+            style="flex-shrink:0;width:52px;height:52px;object-fit:cover;border-radius:6px;cursor:pointer;
+              box-sizing:border-box;
+              border:2px solid ${i === index ? '#fff' : 'transparent'};
+              opacity:${i === index ? '1' : '0.5'};
+              transition:opacity 0.15s, border-color 0.15s;" />
         `).join('')}
       </div>
       ` : ''}
@@ -247,10 +281,10 @@ function renderLightboxContent(
   // Event listeners
   div.querySelector('#lb-prev')?.addEventListener('click', e => { e.stopPropagation(); prev() })
   div.querySelector('#lb-next')?.addEventListener('click', e => { e.stopPropagation(); next() })
-  div.querySelectorAll('[data-dot]').forEach(dot => {
-    dot.addEventListener('click', (e) => {
+  div.querySelectorAll('[data-thumb]').forEach(thumb => {
+    thumb.addEventListener('click', (e) => {
       e.stopPropagation()
-      const i = Number((dot as HTMLElement).dataset.dot)
+      const i = Number((thumb as HTMLElement).dataset.thumb)
       if (!Number.isNaN(i)) goTo(i)
     })
   })
@@ -262,6 +296,14 @@ function renderLightboxContent(
   div.addEventListener('touchstart', (e) => { e.stopPropagation(); onTouchStart(e as TouchEvent) }, {passive: true})
   div.addEventListener('touchmove', (e) => { e.stopPropagation() }, {passive: false})
   div.addEventListener('touchend', (e) => { e.stopPropagation(); onTouchEnd(e as TouchEvent) }, {passive: true})
+
+  // Jaga thumbnail yang lagi aktif tetap keliatan di dalam strip yang bisa di-scroll
+  const activeThumb = div.querySelector(`[data-thumb="${index}"]`) as HTMLElement | null
+  activeThumb?.scrollIntoView({block: 'nearest', inline: 'center'})
+
+  // Posisikan panah di tepi foto asli. Kita punya width/height dari metadata (aspect ratio),
+  // jadi bisa langsung dihitung tanpa nunggu <img> selesai load (nggak ada kedipan posisi).
+  if (images.length > 1) positionArrows(div, images[index])
 }
 
 function PhotoTile({post, eager, onClick}: {post: PhotoPost; eager?: boolean; onClick: () => void}) {
