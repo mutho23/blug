@@ -87,15 +87,6 @@ export const loader = async () => {
   })
 }
 
-const SOCIALS = [
-  {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
-  {icon: '💬', label: 'Discord',  href: 'https://discord.gg/DNcNBQaqgM'},
-  {icon: '📷', label: 'Zeens',    href: 'https://zeens.app/profile/mutho.my.id'},
-  {icon: '🎵', label: 'Spotify',  href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
-  {icon: '🎮', label: 'Steam',    href: 'https://steamcommunity.com/id/moebatsu'},
-  {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
-]
-
 function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initialIndex: number; onClose: () => void}) {
   // images di sini cuma foto dari 1 post yang lagi dibuka — geser cuma jalan kalau post-nya
   // punya lebih dari 1 foto, nggak lompat ke post lain.
@@ -303,25 +294,8 @@ export default function Gallery() {
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Left Sidebar: Contact (sticky) ── */}
-      <aside className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-[#1e1e1e] px-5 py-6 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
-        <p className="font-mono text-[12px] tracking-[0.14em] uppercase text-[#aaaaaa] mb-3">Contact</p>
-        {SOCIALS.map(({icon, label, href}) => (
-          <a
-            key={label}
-            href={href}
-            target={href.startsWith('mailto') ? undefined : '_blank'}
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 py-2.5 border-b border-[#1a1a1a] last:border-0 group">
-            <div className="w-[22px] h-[22px] rounded bg-[#1a1a1a] flex items-center justify-center text-[12px] shrink-0">
-              {icon}
-            </div>
-            <span className="font-mono text-[14px] text-[#cccccc] group-hover:text-white transition-colors truncate">
-              {label}
-            </span>
-          </a>
-        ))}
-      </aside>
+      {/* ── Left Sidebar: dihapus (dulu berisi Contact), spacer dipertahankan biar konten tetap center di desktop ── */}
+      <aside className="hidden lg:block w-[220px] shrink-0" />
 
       {/* ── Main Content ── */}
       <div className="flex-1 px-6 md:px-14 py-8 min-w-0">
