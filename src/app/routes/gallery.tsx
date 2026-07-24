@@ -98,6 +98,8 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
   const next = useCallback(() => setIndex(i => (i + 1) % images.length), [images.length])
   const goTo = useCallback((i: number) => setIndex(i % images.length), [images.length])
 
+  const closedByPopState = useRef(false)
+
   useEffect(() => {
     // Buat container div dan langsung append ke <body> — bypass semua transform parent
     const div = document.createElement('div')
@@ -120,10 +122,25 @@ function Lightbox({images, initialIndex, onClose}: {images: ImageItem[]; initial
     const prevTransition = main?.style.transition ?? ''
     if (main) { main.style.transform = 'none'; main.style.transition = 'none' }
 
+    // Tambahin 1 history entry pas lightbox dibuka. Jadi kalau user pencet tombol back
+    // (browser atau hardware back di HP), yang kejadian cuma nutup foto ini — bukan
+    // pindah/keluar dari halaman gallery-nya.
+    window.history.pushState({lightbox: true}, '')
+    const handlePopState = () => {
+      closedByPopState.current = true
+      onClose()
+    }
+    window.addEventListener('popstate', handlePopState)
+
     return () => {
+      window.removeEventListener('popstate', handlePopState)
       document.body.removeChild(div)
       document.body.style.overflow = ''
       if (main) { main.style.transform = prevTransform; main.style.transition = prevTransition }
+      // Kalau ditutupnya bukan lewat tombol back (misal klik background / tekan Escape),
+      // history entry yang tadi kita tambahin masih nyangkut — bersihin biar tombol back
+      // nggak perlu dipencet dua kali buat baru beneran ninggalin halaman gallery.
+      if (!closedByPopState.current) window.history.back()
     }
   }, [])
 
