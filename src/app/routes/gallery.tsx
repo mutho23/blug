@@ -325,16 +325,26 @@ function renderLightboxContent(
 
 function PhotoTile({post, eager, onClick}: {post: PhotoPost; eager?: boolean; onClick: () => void}) {
   const cover = post.images[0]
+  const [loaded, setLoaded] = useState(false)
   return (
     <div
       className="relative mb-3 break-inside-avoid overflow-hidden cursor-zoom-in bg-[#111]"
       onClick={e => { e.preventDefault(); onClick() }}>
+      {/* Shimmer placeholder shown until the actual thumbnail finishes loading */}
+      {!loaded && (
+        <div
+          className="skeleton-line absolute inset-0"
+          style={{aspectRatio: `${cover.width} / ${cover.height}`}}
+          aria-hidden="true"
+        />
+      )}
       <img
         src={cover.thumb}
         alt=""
         loading={eager ? 'eager' : 'lazy'}
-        style={{aspectRatio: `${cover.width} / ${cover.height}`}}
-        className="block w-full h-auto"
+        onLoad={() => setLoaded(true)}
+        style={{aspectRatio: `${cover.width} / ${cover.height}`, opacity: loaded ? 1 : 0}}
+        className="block w-full h-auto transition-opacity duration-300"
       />
       {post.images.length > 1 && (
         <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 rounded-full px-2 py-0.5">
