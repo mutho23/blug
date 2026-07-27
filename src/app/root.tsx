@@ -232,23 +232,10 @@ export function Layout({children}: {children: React.ReactNode}) {
 
             <div className="mx-auto w-full max-w-[1600px] px-4 h-[52px] flex items-center justify-between">
 
-              {/* ── Kiri: Avatar ── */}
+              {/* ── Kiri: Brand ── */}
               <Link to="/" prefetch="intent" className="flex items-center gap-2 group sm:gap-2.5">
-                {profile?.avatar ? (
-                  <img
-                    className="rounded-full w-8 h-8 ring-1 ring-[#333] group-hover:ring-[#4a9eff] transition-all"
-                    src={profile.avatar}
-                    alt="Mutho's avatar"
-                  />
-                ) : (
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-medium"
-                    style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
-                    M
-                  </div>
-                )}
                 <span className="font-display text-[20px] text-[#f0f0f0] hidden sm:inline tracking-[-0.01em]">
-                  mutho<span className="text-[#4a9eff]">.</span>
+                  mutho<span className="text-[#4a9eff]">.</span>my.id
                 </span>
               </Link>
 
