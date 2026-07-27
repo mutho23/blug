@@ -135,6 +135,7 @@ type LanyardData = {
     username: string
     global_name?: string | null
     avatar: string | null
+    avatar_decoration_data?: { asset: string; sku_id: string } | null
   }
   discord_status: 'online' | 'idle' | 'dnd' | 'offline'
   activities: LanyardActivity[]
@@ -174,29 +175,82 @@ function DiscordPresenceWidget() {
 
   useEffect(() => {
     let cancelled = false
+    let ws: WebSocket | null = null
+    let heartbeat: ReturnType<typeof setInterval> | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let noDataTimer: ReturnType<typeof setTimeout> | null = null
 
-    const fetchPresence = async () => {
-      try {
-        const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`)
-        const json = await res.json()
+    const cleanupSocket = () => {
+      if (heartbeat) clearInterval(heartbeat)
+      heartbeat = null
+      if (ws) {
+        ws.onopen = null
+        ws.onmessage = null
+        ws.onclose = null
+        ws.onerror = null
+        ws.close()
+      }
+      ws = null
+    }
+
+    const connect = () => {
+      if (cancelled) return
+      cleanupSocket()
+      ws = new WebSocket('wss://api.lanyard.rest/socket')
+
+      ws.onopen = () => {
+        ws?.send(JSON.stringify({op: 2, d: {subscribe_to_id: DISCORD_USER_ID}}))
+      }
+
+      ws.onmessage = event => {
         if (cancelled) return
-        if (json.success) {
-          setData(json.data)
-          setStatus('ready')
-        } else {
-          setStatus('error')
+        let msg: {op: number; t?: string; d?: unknown}
+        try {
+          msg = JSON.parse(event.data)
+        } catch {
+          return
         }
-      } catch (err) {
-        console.error('[DiscordPresenceWidget] failed to fetch Lanyard presence:', err)
-        if (!cancelled) setStatus('error')
+
+        if (msg.op === 1) {
+          // Hello: server tells us how often to heartbeat to keep the socket alive
+          const {heartbeat_interval} = msg.d as {heartbeat_interval: number}
+          if (heartbeat) clearInterval(heartbeat)
+          heartbeat = setInterval(() => {
+            if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({op: 3}))
+          }, heartbeat_interval)
+          return
+        }
+
+        if (msg.op === 0 && (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE')) {
+          if (noDataTimer) clearTimeout(noDataTimer)
+          setData(msg.d as LanyardData)
+          setStatus('ready')
+        }
+      }
+
+      ws.onclose = () => {
+        if (heartbeat) clearInterval(heartbeat)
+        heartbeat = null
+        if (!cancelled) reconnectTimer = setTimeout(connect, 2000)
+      }
+
+      ws.onerror = () => {
+        ws?.close()
       }
     }
 
-    fetchPresence()
-    const interval = setInterval(fetchPresence, 20000)
+    connect()
+    // If we never hear back (e.g. socket blocked by CSP/network), fall back to
+    // showing the "unavailable" state instead of leaving the skeleton forever.
+    noDataTimer = setTimeout(() => {
+      if (!cancelled) setStatus(prev => (prev === 'loading' ? 'error' : prev))
+    }, 8000)
+
     return () => {
       cancelled = true
-      clearInterval(interval)
+      if (noDataTimer) clearTimeout(noDataTimer)
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      cleanupSocket()
     }
   }, [])
 
@@ -224,6 +278,9 @@ function DiscordPresenceWidget() {
         data.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'
       }?size=64`
     : null
+  const avatarDecorationUrl = data.discord_user.avatar_decoration_data
+    ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=96`
+    : null
 
   const spotify = data.spotify
   const activityImageUrl = !spotify && activity ? resolveActivityImageUrl(activity) : null
@@ -237,7 +294,7 @@ function DiscordPresenceWidget() {
         target="_blank"
         rel="noopener noreferrer"
         className="group flex items-center gap-4 -mx-2 px-2 py-1.5 rounded-xl transition-colors hover:bg-[#141414]">
-        <div className="relative shrink-0">
+        <div className="relative shrink-0 w-16 h-16">
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
           ) : (
@@ -246,6 +303,13 @@ function DiscordPresenceWidget() {
               style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
               M
             </div>
+          )}
+          {avatarDecorationUrl && (
+            <img
+              src={avatarDecorationUrl}
+              alt=""
+              className="pointer-events-none absolute -inset-2 w-20 h-20 transition-transform group-hover:scale-[1.03]"
+            />
           )}
           <span
             className="absolute bottom-0.5 right-0.5 w-[18px] h-[18px] rounded-full border-2 border-[#0a0a0a]"
