@@ -168,11 +168,11 @@ function DiscordPresenceWidget() {
 
   if (status === 'loading' || !data) {
     return (
-      <div className="flex items-center gap-3 mb-6" aria-hidden="true">
-        <div className="skeleton-line w-11 h-11 rounded-full shrink-0" />
-        <div className="flex-1 max-w-[220px]">
-          <div className="skeleton-line h-3 w-28 mb-2" />
-          <div className="skeleton-line h-3 w-44" />
+      <div className="flex items-center gap-4 mb-8" aria-hidden="true">
+        <div className="skeleton-line w-16 h-16 rounded-full shrink-0" />
+        <div className="flex-1 max-w-[260px]">
+          <div className="skeleton-line h-4 w-32 mb-2.5" />
+          <div className="skeleton-line h-3.5 w-52" />
         </div>
       </div>
     )
@@ -188,28 +188,32 @@ function DiscordPresenceWidget() {
     : null
 
   return (
-    <div className="flex items-center gap-3 mb-6">
+    <a
+      href={`https://discord.com/users/${data.discord_user.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center gap-4 mb-8 -mx-2 px-2 py-1.5 rounded-xl transition-colors hover:bg-[#141414]">
       <div className="relative shrink-0">
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="w-11 h-11 rounded-full border border-[#242424]" />
+          <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
         ) : (
           <div
-            className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-medium"
+            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-medium transition-transform group-hover:scale-[1.03]"
             style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
             M
           </div>
         )}
         <span
-          className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#0a0a0a]"
+          className="absolute bottom-0.5 right-0.5 w-[18px] h-[18px] rounded-full border-2 border-[#0a0a0a]"
           style={{background: statusMeta.color}}
           title={statusMeta.label}
         />
       </div>
       <div className="min-w-0">
-        <div className="font-mono text-sm text-[#f0f0f0] truncate">
+        <div className="font-mono text-base text-[#f0f0f0] truncate group-hover:text-[#4a9eff] transition-colors">
           {data.discord_user.global_name || data.discord_user.username}
         </div>
-        <div className="font-mono text-xs text-[#888] truncate max-w-[320px]">
+        <div className="font-mono text-sm text-[#888] truncate max-w-[320px]">
           {activity ? (
             <>
               {activity.type === 0 ? 'Playing' : activity.type === 2 ? 'Listening to' : activity.type === 3 ? 'Watching' : ''}{' '}
@@ -222,6 +226,6 @@ function DiscordPresenceWidget() {
           )}
         </div>
       </div>
-    </div>
+    </a>
   )
 }
