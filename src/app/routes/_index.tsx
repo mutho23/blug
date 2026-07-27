@@ -1,4 +1,6 @@
 import {MetaFunction} from '@remix-run/node'
+import type {CSSProperties} from 'react'
+import {useEffect, useState} from 'react'
 
 export const meta: MetaFunction = () => [
   {title: 'About | mutho.'},
@@ -9,12 +11,20 @@ export default function About() {
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
 
-      {/* ── Left Sidebar: dihapus (dulu berisi Contact), spacer dipertahankan biar konten tetap center di desktop ── */}
-      <aside className="hidden lg:block w-[220px] shrink-0" />
+      {/* ── Left Sidebar: quick nav to the other pages ── */}
+      <aside className="hidden lg:block w-[220px] shrink-0 px-5 py-10">
+        <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-4">Explore</p>
+        <ul className="flex flex-col gap-2.5 font-mono text-sm">
+          <li><a href="/blog" className="text-[#666] hover:text-[#4a9eff] transition-colors">Writing →</a></li>
+          <li><a href="/gallery" className="text-[#666] hover:text-[#4a9eff] transition-colors">Gallery →</a></li>
+        </ul>
+      </aside>
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
       <div className="w-full max-w-3xl px-8 md:px-14 py-10">
+        <DiscordPresenceWidget />
+
         <section className="mb-10">
           <h1 className="font-display text-[42px] text-[#f0f0f0] tracking-[-0.02em]">
             About Me<span className="text-[#4a9eff]">.</span>
@@ -27,17 +37,31 @@ export default function About() {
         </section>
 
         <Section label="Work">
-          <WorkItem company="Teacher" role="I love to learn & teach" period="2013 — Present" />
+          <WorkItem index={0} company="Teacher" role="I love to learn & teach" period="2013 — Present" />
         </Section>
 
         <Section label="Community">
-          <WorkItem company="KIKEN" href="https://discord.gg/DNcNBQaqgM" role="Discord Server" period="Dec 2026 — Present" />
+          <WorkItem index={1} company="KIKEN" href="https://discord.gg/DNcNBQaqgM" role="Discord Server" period="Dec 2026 — Present" />
         </Section>
       </div>
       </div>
 
-      {/* ── Right Sidebar: kosong (sticky) ── */}
-      <aside className="hidden lg:block w-[220px] shrink-0 border-l border-[#1e1e1e] sticky top-[52px] self-start h-[calc(100vh-52px)]" />
+      {/* ── Right Sidebar: Now Playing (sticky) ── */}
+      <aside className="hidden lg:block w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-10 sticky top-[52px] self-start h-[calc(100vh-52px)]">
+        <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-3">Now playing</p>
+        {/* Static placeholder — see the note in routes/blog.tsx for how to wire this to real Spotify data. */}
+        <div className="flex items-center gap-3 rounded-xl border border-[#1e1e1e] bg-[#111111] p-3">
+          <div
+            className="w-11 h-11 rounded-lg flex items-center justify-center text-base shrink-0"
+            style={{background: 'linear-gradient(135deg, #7c6ff7, #4a9eff)'}}>
+            🎵
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-sm text-[#f0f0f0] truncate">Midnight City</div>
+            <div className="font-mono text-xs text-[#666] mt-0.5 truncate">M83</div>
+          </div>
+        </div>
+      </aside>
 
     </div>
   )
@@ -52,20 +76,267 @@ function Section({label, children}: {label: string; children: React.ReactNode}) 
   )
 }
 
-function WorkItem({company, href, role, period}: {company: string; href?: string; role: string; period: string}) {
+function WorkItem({company, href, role, period, index = 0}: {company: string; href?: string; role: string; period: string; index?: number}) {
   return (
-    <li className="flex items-start justify-between py-3 border-b border-[#1a1a1a] last:border-0">
+    <li
+      className="fade-up-item flex items-start justify-between py-3 border-b border-[#1a1a1a] last:border-0"
+      style={{'--delay': `${index * 0.08}s`} as CSSProperties}>
       <div>
         <a
           href={href}
           target={href ? '_blank' : undefined}
           rel="noopener noreferrer"
-          className={`font-mono text-[19px] text-[#f0f0f0] ${href ? 'hover:text-[#4a9eff] transition-colors' : ''}`}>
+          className={`title-underline font-mono text-[19px] text-[#f0f0f0] ${href ? 'hover:text-[#4a9eff] transition-colors' : ''}`}>
           {company}
         </a>
         <div className="font-mono text-[14px] text-[#aaaaaa] mt-1">{role}</div>
       </div>
       <span className="font-mono text-[17px] text-[#aaaaaa] shrink-0 mt-0.5">{period}</span>
     </li>
+  )
+}
+
+/* ── Live Discord presence, powered by Lanyard (https://github.com/Phineas/lanyard) ──
+   Requires the Discord account below to be a member of Lanyard's Discord server
+   (https://discord.gg/lanyard) — that's what lets api.lanyard.rest track its presence.
+   Polls the REST endpoint every 20s; upgrade to the WebSocket endpoint later
+   (wss://api.lanyard.rest/socket) if you want push updates instead of polling. */
+
+const DISCORD_USER_ID = '1134329616501309540'
+
+type LanyardActivity = {
+  id: string
+  name: string
+  type: number
+  details?: string
+  state?: string
+  application_id?: string
+  timestamps?: { start?: number; end?: number }
+  assets?: {
+    large_image?: string
+    large_text?: string
+    small_image?: string
+    small_text?: string
+  }
+}
+
+type LanyardSpotify = {
+  song: string
+  artist: string
+  album: string
+  album_art_url: string
+  track_id: string
+  timestamps: { start: number; end: number }
+}
+
+type LanyardData = {
+  discord_user: {
+    id: string
+    username: string
+    global_name?: string | null
+    avatar: string | null
+  }
+  discord_status: 'online' | 'idle' | 'dnd' | 'offline'
+  activities: LanyardActivity[]
+  spotify: LanyardSpotify | null
+}
+
+// Resolves Discord's asset-key shorthand (app assets, external media proxy
+// links, or Spotify album art keys) into an actual loadable image URL.
+function resolveActivityImageUrl(activity: LanyardActivity): string | null {
+  const key = activity.assets?.large_image
+  if (!key) return null
+  if (key.startsWith('mp:external/')) {
+    return `https://media.discordapp.net/external/${key.slice('mp:external/'.length)}`
+  }
+  if (key.startsWith('spotify:')) {
+    return `https://i.scdn.co/image/${key.slice('spotify:'.length)}`
+  }
+  if (key.startsWith('mp:')) {
+    return `https://media.discordapp.net/${key.slice('mp:'.length)}`
+  }
+  if (activity.application_id) {
+    return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${key}.png`
+  }
+  return null
+}
+
+const DISCORD_STATUS_META: Record<LanyardData['discord_status'], {color: string; label: string}> = {
+  online: {color: '#3ba55d', label: 'Online'},
+  idle: {color: '#faa61a', label: 'Idle'},
+  dnd: {color: '#ed4245', label: 'Do Not Disturb'},
+  offline: {color: '#747f8d', label: 'Offline'},
+}
+
+function DiscordPresenceWidget() {
+  const [data, setData] = useState<LanyardData | null>(null)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchPresence = async () => {
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`)
+        const json = await res.json()
+        if (cancelled) return
+        if (json.success) {
+          setData(json.data)
+          setStatus('ready')
+        } else {
+          setStatus('error')
+        }
+      } catch (err) {
+        console.error('[DiscordPresenceWidget] failed to fetch Lanyard presence:', err)
+        if (!cancelled) setStatus('error')
+      }
+    }
+
+    fetchPresence()
+    const interval = setInterval(fetchPresence, 20000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [])
+
+  // Fail quietly on the live site (e.g. Lanyard down, or the account isn't in
+  // Lanyard's Discord server yet) instead of showing a broken-looking widget.
+  if (status === 'error') return null
+
+  if (status === 'loading' || !data) {
+    return (
+      <div className="flex items-center gap-4 mb-8" aria-hidden="true">
+        <div className="skeleton-line w-16 h-16 rounded-full shrink-0" />
+        <div className="flex-1 max-w-[260px]">
+          <div className="skeleton-line h-4 w-32 mb-2.5" />
+          <div className="skeleton-line h-3.5 w-52" />
+        </div>
+      </div>
+    )
+  }
+
+  const statusMeta = DISCORD_STATUS_META[data.discord_status] ?? DISCORD_STATUS_META.offline
+  const activity = data.activities.find(a => a.type !== 4) // type 4 = custom status, handled separately below
+  const customStatus = data.activities.find(a => a.type === 4)
+  const avatarUrl = data.discord_user.avatar
+    ? `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.${
+        data.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'
+      }?size=64`
+    : null
+
+  const spotify = data.spotify
+  const activityImageUrl = !spotify && activity ? resolveActivityImageUrl(activity) : null
+  const actionLabel =
+    activity?.type === 0 ? 'Playing' : activity?.type === 2 ? 'Listening to' : activity?.type === 3 ? 'Watching' : activity?.type === 5 ? 'Competing in' : ''
+
+  return (
+    <div className="mb-8">
+      <a
+        href={`https://discord.com/users/${data.discord_user.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-center gap-4 -mx-2 px-2 py-1.5 rounded-xl transition-colors hover:bg-[#141414]">
+        <div className="relative shrink-0">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
+          ) : (
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-medium transition-transform group-hover:scale-[1.03]"
+              style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
+              M
+            </div>
+          )}
+          <span
+            className="absolute bottom-0.5 right-0.5 w-[18px] h-[18px] rounded-full border-2 border-[#0a0a0a]"
+            style={{background: statusMeta.color}}
+            title={statusMeta.label}
+          />
+        </div>
+        <div className="min-w-0">
+          <div className="font-mono text-base text-[#f0f0f0] truncate group-hover:text-[#4a9eff] transition-colors">
+            {data.discord_user.global_name || data.discord_user.username}
+          </div>
+          <div className="font-mono text-sm text-[#888] truncate max-w-[320px]">
+            {spotify ? (
+              <>
+                Listening to <span className="text-[#aaa]">Spotify</span>
+              </>
+            ) : activity ? (
+              <>
+                {actionLabel} <span className="text-[#aaa]">{activity.name}</span>
+              </>
+            ) : customStatus?.state ? (
+              customStatus.state
+            ) : (
+              statusMeta.label
+            )}
+          </div>
+        </div>
+      </a>
+
+      {spotify && <SpotifyCard spotify={spotify} />}
+
+      {!spotify && activity && (activity.details || activity.state || activityImageUrl) && (
+        <a
+          href={`https://discord.com/users/${data.discord_user.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 flex items-center gap-3 rounded-xl border border-[#1c1c1c] bg-[#111] p-3 transition-colors hover:bg-[#161616]">
+          {activityImageUrl ? (
+            <img src={activityImageUrl} alt="" className="w-14 h-14 rounded-lg shrink-0 object-cover" />
+          ) : (
+            <div className="w-14 h-14 rounded-lg shrink-0 bg-[#1c1c1c] flex items-center justify-center text-[#4a9eff]">
+              ▶
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="font-mono text-sm text-[#f0f0f0] truncate">{activity.name}</div>
+            {activity.details && <div className="font-mono text-xs text-[#999] truncate">{activity.details}</div>}
+            {activity.state && <div className="font-mono text-xs text-[#777] truncate">{activity.state}</div>}
+          </div>
+        </a>
+      )}
+    </div>
+  )
+}
+
+function SpotifyCard({spotify}: {spotify: LanyardSpotify}) {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const {start, end} = spotify.timestamps
+  const total = Math.max(end - start, 1)
+  const elapsed = Math.min(Math.max(now - start, 0), total)
+  const progress = (elapsed / total) * 100
+  const format = (ms: number) => {
+    const s = Math.floor(ms / 1000)
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  }
+
+  return (
+    <a
+      href={`https://open.spotify.com/track/${spotify.track_id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-2 flex items-center gap-3 rounded-xl border border-[#1c1c1c] bg-[#111] p-3 transition-colors hover:bg-[#161616]">
+      <img src={spotify.album_art_url} alt="" className="w-14 h-14 rounded-lg shrink-0 object-cover" />
+      <div className="min-w-0 flex-1">
+        <div className="font-mono text-sm text-[#1ed760] truncate">{spotify.song}</div>
+        <div className="font-mono text-xs text-[#999] truncate">by {spotify.artist}</div>
+        <div className="font-mono text-xs text-[#666] truncate mb-1.5">on {spotify.album}</div>
+        <div className="h-1 rounded-full bg-[#242424] overflow-hidden">
+          <div className="h-full bg-[#1ed760] transition-[width]" style={{width: `${progress}%`}} />
+        </div>
+        <div className="flex justify-between font-mono text-[10px] text-[#666] mt-1">
+          <span>{format(elapsed)}</span>
+          <span>{format(total)}</span>
+        </div>
+      </div>
+    </a>
   )
 }
