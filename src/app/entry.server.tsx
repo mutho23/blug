@@ -23,7 +23,7 @@ function setSecurityHeaders(responseHeaders: Headers) {
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app https://embed.bsky.app https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://giscus.app https://fonts.googleapis.com",
       "frame-src https://giscus.app",
-      "connect-src 'self' https://giscus.app https://api.github.com https://public.api.bsky.app https://api.juttu.app https://bsky.social https://plc.directory https://*.host.bsky.network",
+      "connect-src 'self' https://giscus.app https://api.github.com https://public.api.bsky.app https://api.juttu.app https://bsky.social https://plc.directory https://*.host.bsky.network https://api.lanyard.rest",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data: https://fonts.gstatic.com",
     ].join("; ")
