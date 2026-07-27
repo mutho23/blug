@@ -1,5 +1,6 @@
 import {MetaFunction} from '@remix-run/node'
 import type {CSSProperties} from 'react'
+import {useEffect, useState} from 'react'
 
 export const meta: MetaFunction = () => [
   {title: 'About | mutho.'},
@@ -22,6 +23,8 @@ export default function About() {
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
       <div className="w-full max-w-3xl px-8 md:px-14 py-10">
+        <DiscordPresenceWidget />
+
         <section className="mb-10">
           <h1 className="font-display text-[42px] text-[#f0f0f0] tracking-[-0.02em]">
             About Me<span className="text-[#4a9eff]">.</span>
@@ -90,5 +93,135 @@ function WorkItem({company, href, role, period, index = 0}: {company: string; hr
       </div>
       <span className="font-mono text-[17px] text-[#aaaaaa] shrink-0 mt-0.5">{period}</span>
     </li>
+  )
+}
+
+/* ── Live Discord presence, powered by Lanyard (https://github.com/Phineas/lanyard) ──
+   Requires the Discord account below to be a member of Lanyard's Discord server
+   (https://discord.gg/lanyard) — that's what lets api.lanyard.rest track its presence.
+   Polls the REST endpoint every 20s; upgrade to the WebSocket endpoint later
+   (wss://api.lanyard.rest/socket) if you want push updates instead of polling. */
+
+const DISCORD_USER_ID = '1134329616501309540'
+
+type LanyardActivity = {
+  id: string
+  name: string
+  type: number
+  details?: string
+  state?: string
+}
+
+type LanyardData = {
+  discord_user: {
+    id: string
+    username: string
+    global_name?: string | null
+    avatar: string | null
+  }
+  discord_status: 'online' | 'idle' | 'dnd' | 'offline'
+  activities: LanyardActivity[]
+}
+
+const DISCORD_STATUS_META: Record<LanyardData['discord_status'], {color: string; label: string}> = {
+  online: {color: '#3ba55d', label: 'Online'},
+  idle: {color: '#faa61a', label: 'Idle'},
+  dnd: {color: '#ed4245', label: 'Do Not Disturb'},
+  offline: {color: '#747f8d', label: 'Offline'},
+}
+
+function DiscordPresenceWidget() {
+  const [data, setData] = useState<LanyardData | null>(null)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchPresence = async () => {
+      try {
+        const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`)
+        const json = await res.json()
+        if (cancelled) return
+        if (json.success) {
+          setData(json.data)
+          setStatus('ready')
+        } else {
+          setStatus('error')
+        }
+      } catch (err) {
+        console.error('[DiscordPresenceWidget] failed to fetch Lanyard presence:', err)
+        if (!cancelled) setStatus('error')
+      }
+    }
+
+    fetchPresence()
+    const interval = setInterval(fetchPresence, 20000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [])
+
+  // Fail quietly on the live site (e.g. Lanyard down, or the account isn't in
+  // Lanyard's Discord server yet) instead of showing a broken-looking widget.
+  if (status === 'error') return null
+
+  if (status === 'loading' || !data) {
+    return (
+      <div className="flex items-center gap-3 mb-6" aria-hidden="true">
+        <div className="skeleton-line w-11 h-11 rounded-full shrink-0" />
+        <div className="flex-1 max-w-[220px]">
+          <div className="skeleton-line h-3 w-28 mb-2" />
+          <div className="skeleton-line h-3 w-44" />
+        </div>
+      </div>
+    )
+  }
+
+  const statusMeta = DISCORD_STATUS_META[data.discord_status] ?? DISCORD_STATUS_META.offline
+  const activity = data.activities.find(a => a.type !== 4) // type 4 = custom status, handled separately below
+  const customStatus = data.activities.find(a => a.type === 4)
+  const avatarUrl = data.discord_user.avatar
+    ? `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.${
+        data.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'
+      }?size=64`
+    : null
+
+  return (
+    <div className="flex items-center gap-3 mb-6">
+      <div className="relative shrink-0">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="w-11 h-11 rounded-full border border-[#242424]" />
+        ) : (
+          <div
+            className="w-11 h-11 rounded-full flex items-center justify-center text-white text-sm font-medium"
+            style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
+            M
+          </div>
+        )}
+        <span
+          className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#0a0a0a]"
+          style={{background: statusMeta.color}}
+          title={statusMeta.label}
+        />
+      </div>
+      <div className="min-w-0">
+        <div className="font-mono text-sm text-[#f0f0f0] truncate">
+          {data.discord_user.global_name || data.discord_user.username}
+        </div>
+        <div className="font-mono text-xs text-[#888] truncate max-w-[320px]">
+          {activity ? (
+            <>
+              {activity.type === 0 ? 'Playing' : activity.type === 2 ? 'Listening to' : activity.type === 3 ? 'Watching' : ''}{' '}
+              <span className="text-[#aaa]">{activity.name}</span>
+            </>
+          ) : customStatus?.state ? (
+            customStatus.state
+          ) : (
+            statusMeta.label
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
