@@ -241,31 +241,23 @@ function DiscordPresenceWidget() {
 
   if (status === 'loading' || !data) {
     return (
-      <div className="flex items-center gap-4 mb-8" aria-hidden="true">
-        <div className="skeleton-line w-16 h-16 rounded-full shrink-0" />
-        <div className="flex-1 max-w-[260px]">
-          <div className="skeleton-line h-4 w-32 mb-2.5" />
-          <div className="skeleton-line h-3.5 w-52" />
-        </div>
+      <div className="mb-8" aria-hidden="true">
+        <div className="skeleton-line w-[140px] h-[140px] rounded-full" />
       </div>
     )
   }
 
   const statusMeta = DISCORD_STATUS_META[data.discord_status] ?? DISCORD_STATUS_META.offline
-  const activity = data.activities.find(a => a.type !== 4) // type 4 = custom status, handled separately below
-  const customStatus = data.activities.find(a => a.type === 4)
   const avatarUrl = data.discord_user.avatar
     ? `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.${
         data.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'
-      }?size=256`
+      }?size=320`
     : null
   const avatarDecorationUrl = data.discord_user.avatar_decoration_data
-    ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=160`
+    ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=320`
     : null
 
   const spotify = data.spotify
-  const actionLabel =
-    activity?.type === 0 ? 'Playing' : activity?.type === 2 ? 'Listening to' : activity?.type === 3 ? 'Watching' : activity?.type === 5 ? 'Competing in' : ''
 
   return (
     <div className="mb-8">
@@ -273,48 +265,27 @@ function DiscordPresenceWidget() {
         href={`https://discord.com/users/${data.discord_user.id}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex items-center gap-4 -mx-2 px-2 py-1.5 rounded-xl transition-colors hover:bg-[#141414]">
-        <div className="relative shrink-0 w-16 h-16">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
-          ) : (
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-medium transition-transform group-hover:scale-[1.03]"
-              style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
-              M
-            </div>
-          )}
-          {avatarDecorationUrl && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-transform group-hover:scale-[1.03]">
-              <img src={avatarDecorationUrl} alt="" className="w-[118%] h-[118%] max-w-none" />
-            </div>
-          )}
-          <span
-            className="absolute bottom-0.5 right-0.5 w-[18px] h-[18px] rounded-full border-2 border-[#0a0a0a]"
-            style={{background: statusMeta.color}}
-            title={statusMeta.label}
-          />
-        </div>
-        <div className="min-w-0">
-          <div className="font-mono text-base text-[#f0f0f0] truncate group-hover:text-[#4a9eff] transition-colors">
-            {data.discord_user.global_name || data.discord_user.username}
+        title={data.discord_user.global_name || data.discord_user.username}
+        className="group relative inline-block w-[140px] h-[140px]">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="w-[140px] h-[140px] rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
+        ) : (
+          <div
+            className="w-[140px] h-[140px] rounded-full flex items-center justify-center text-white text-4xl font-medium transition-transform group-hover:scale-[1.03]"
+            style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
+            M
           </div>
-          <div className="font-mono text-sm text-[#888] truncate max-w-[320px]">
-            {spotify ? (
-              <>
-                Listening to <span className="text-[#aaa]">Spotify</span>
-              </>
-            ) : activity ? (
-              <>
-                {actionLabel} <span className="text-[#aaa]">{activity.name}</span>
-              </>
-            ) : customStatus?.state ? (
-              customStatus.state
-            ) : (
-              statusMeta.label
-            )}
+        )}
+        {avatarDecorationUrl && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-transform group-hover:scale-[1.03]">
+            <img src={avatarDecorationUrl} alt="" className="w-[118%] h-[118%] max-w-none" />
           </div>
-        </div>
+        )}
+        <span
+          className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full border-[3px] border-[#0a0a0a]"
+          style={{background: statusMeta.color}}
+          title={statusMeta.label}
+        />
       </a>
 
       {spotify && <SpotifyCard spotify={spotify} />}
