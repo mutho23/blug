@@ -153,6 +153,10 @@ const DISCORD_STATUS_META: Record<LanyardData['discord_status'], {color: string;
 function DiscordPresenceWidget() {
   const [data, setData] = useState<LanyardData | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  // Kept separate from `data.spotify` so a brief gap in Lanyard's presence
+  // updates (e.g. Discord clearing the activity for a split second between
+  // songs) doesn't make the card flash away and reappear.
+  const [displaySpotify, setDisplaySpotify] = useState<LanyardSpotify | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -235,6 +239,17 @@ function DiscordPresenceWidget() {
     }
   }, [])
 
+  useEffect(() => {
+    if (data?.spotify) {
+      setDisplaySpotify(data.spotify)
+      return
+    }
+    // data.spotify is missing right now — wait a bit before hiding the card,
+    // in case it comes back (track-change gap) rather than actually stopping.
+    const clearTimer = setTimeout(() => setDisplaySpotify(null), 6000)
+    return () => clearTimeout(clearTimer)
+  }, [data?.spotify])
+
   // Fail quietly on the live site (e.g. Lanyard down, or the account isn't in
   // Lanyard's Discord server yet) instead of showing a broken-looking widget.
   if (status === 'error') return null
@@ -256,8 +271,6 @@ function DiscordPresenceWidget() {
   const avatarDecorationUrl = data.discord_user.avatar_decoration_data
     ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=320`
     : null
-
-  const spotify = data.spotify
 
   return (
     <div className="mb-8">
@@ -288,7 +301,7 @@ function DiscordPresenceWidget() {
         />
       </a>
 
-      {spotify && <SpotifyCard spotify={spotify} />}
+      {displaySpotify && <SpotifyCard spotify={displaySpotify} />}
     </div>
   )
 }
