@@ -142,25 +142,6 @@ type LanyardData = {
   spotify: LanyardSpotify | null
 }
 
-// Resolves Discord's asset-key shorthand (app assets, external media proxy
-// links, or Spotify album art keys) into an actual loadable image URL.
-function resolveActivityImageUrl(activity: LanyardActivity): string | null {
-  const key = activity.assets?.large_image
-  if (!key) return null
-  if (key.startsWith('mp:external/')) {
-    return `https://media.discordapp.net/external/${key.slice('mp:external/'.length)}`
-  }
-  if (key.startsWith('spotify:')) {
-    return `https://i.scdn.co/image/${key.slice('spotify:'.length)}`
-  }
-  if (key.startsWith('mp:')) {
-    return `https://media.discordapp.net/${key.slice('mp:'.length)}`
-  }
-  if (activity.application_id) {
-    return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${key}.png`
-  }
-  return null
-}
 
 const DISCORD_STATUS_META: Record<LanyardData['discord_status'], {color: string; label: string}> = {
   online: {color: '#3ba55d', label: 'Online'},
@@ -276,14 +257,13 @@ function DiscordPresenceWidget() {
   const avatarUrl = data.discord_user.avatar
     ? `https://cdn.discordapp.com/avatars/${data.discord_user.id}/${data.discord_user.avatar}.${
         data.discord_user.avatar.startsWith('a_') ? 'gif' : 'png'
-      }?size=64`
+      }?size=256`
     : null
   const avatarDecorationUrl = data.discord_user.avatar_decoration_data
-    ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=96`
+    ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=160`
     : null
 
   const spotify = data.spotify
-  const activityImageUrl = !spotify && activity ? resolveActivityImageUrl(activity) : null
   const actionLabel =
     activity?.type === 0 ? 'Playing' : activity?.type === 2 ? 'Listening to' : activity?.type === 3 ? 'Watching' : activity?.type === 5 ? 'Competing in' : ''
 
@@ -305,11 +285,9 @@ function DiscordPresenceWidget() {
             </div>
           )}
           {avatarDecorationUrl && (
-            <img
-              src={avatarDecorationUrl}
-              alt=""
-              className="pointer-events-none absolute -inset-2 w-20 h-20 transition-transform group-hover:scale-[1.03]"
-            />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-transform group-hover:scale-[1.03]">
+              <img src={avatarDecorationUrl} alt="" className="w-[118%] h-[118%] max-w-none" />
+            </div>
           )}
           <span
             className="absolute bottom-0.5 right-0.5 w-[18px] h-[18px] rounded-full border-2 border-[#0a0a0a]"
@@ -340,27 +318,6 @@ function DiscordPresenceWidget() {
       </a>
 
       {spotify && <SpotifyCard spotify={spotify} />}
-
-      {!spotify && activity && (activity.details || activity.state || activityImageUrl) && (
-        <a
-          href={`https://discord.com/users/${data.discord_user.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 flex items-center gap-3 rounded-xl border border-[#1c1c1c] bg-[#111] p-3 transition-colors hover:bg-[#161616]">
-          {activityImageUrl ? (
-            <img src={activityImageUrl} alt="" className="w-14 h-14 rounded-lg shrink-0 object-cover" />
-          ) : (
-            <div className="w-14 h-14 rounded-lg shrink-0 bg-[#1c1c1c] flex items-center justify-center text-[#4a9eff]">
-              ▶
-            </div>
-          )}
-          <div className="min-w-0">
-            <div className="font-mono text-sm text-[#f0f0f0] truncate">{activity.name}</div>
-            {activity.details && <div className="font-mono text-xs text-[#999] truncate">{activity.details}</div>}
-            {activity.state && <div className="font-mono text-xs text-[#777] truncate">{activity.state}</div>}
-          </div>
-        </a>
-      )}
     </div>
   )
 }
