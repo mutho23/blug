@@ -14,6 +14,7 @@ export type LanyardActivity = {
   details?: string
   state?: string
   application_id?: string
+  emoji?: {name: string; id?: string; animated?: boolean}
   timestamps?: {start?: number; end?: number}
   assets?: {
     large_image?: string
