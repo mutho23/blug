@@ -7,6 +7,7 @@ import {useMemo, useState, useEffect} from 'react'
 import type {CSSProperties} from 'react'
 import {LeafletDocument, LeafletBlock} from 'src/types'
 import {StarRating} from '../components/star-rating'
+import {NowPlayingWidget, NowPlayingMobileBar} from '../components/now-playing-widget.js'
 
 // Walks a Leaflet document's blocks (including nested list children) and
 // sums up the plaintext so we can estimate reading time — same content the
@@ -159,23 +160,14 @@ export default function Blog() {
     review: entries.filter(e => e.kind === 'review').length,
   }), [entries])
 
-  // Latest Popfeed entry per category, straight from real review data (not
-  // hardcoded) — powers the sidebar widget below. Movie/TV Show/Book/Game are
-  // the four Popfeed tracks; a category just renders an empty state until you
-  // log something in it (e.g. game, which is empty until you start using it).
-  const POPFEED_CATEGORIES: {key: string; label: string; match: (t: string) => boolean}[] = [
-    {key: 'movie', label: 'Movie', match: t => t === 'movie'},
-    {key: 'tv', label: 'TV Show', match: t => t === 'tv' || t === 'tv_show'},
-    {key: 'book', label: 'Book', match: t => t === 'book'},
-    {key: 'game', label: 'Game', match: t => t === 'game'},
-  ]
-  const latestByCategory = useMemo(() => {
-    return POPFEED_CATEGORIES.map(cat => {
-      const items = reviews
-        .filter(r => cat.match(r.creativeWorkType))
-        .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
-      return {...cat, latest: items[0] ?? null}
-    })
+  // Most recent Popfeed entries across every category (movie, TV, book, game,
+  // music, ...), straight from real review data — powers the "Recent
+  // Reviewed" sidebar widget below. Not filtered by type, so a freshly-logged
+  // game review shows up right alongside movies/books with no extra wiring.
+  const recentReviewed = useMemo(() => {
+    return [...reviews]
+      .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
+      .slice(0, 6)
   }, [reviews])
 
   return (
@@ -267,95 +259,61 @@ export default function Blog() {
         </div>
       </div>
 
-      {/* ── Right Sidebar: Now Playing + latest Popfeed entries ── */}
+      {/* ── Right Sidebar: Now Playing (real Spotify data) + Recent Reviewed ── */}
       <aside className="hidden lg:block w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-10 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
-        <NowPlayingWidget />
-        <PopfeedWidget categories={latestByCategory} />
+        <NowPlayingWidget className="mb-8" />
+        <RecentReviewedWidget reviews={recentReviewed} />
       </aside>
 
+      {/* ── Mobile: currently-playing track shown as a bottom bar since the sidebar is hidden below lg ── */}
+      <NowPlayingMobileBar />
+
     </div>
   )
 }
 
-// NOTE ON DATA:
-//  - Now Playing is still a static placeholder. Wiring it up means calling
-//    Spotify's `/me/player/currently-playing` endpoint server-side in this
-//    route's `loader` (needs a refresh-token stored in an env var), then
-//    passing the track down like `posts`/`reviews` already are.
-//  - The Popfeed widget below is already live — it reads straight from the
-//    `reviews` data this route already loads via `getReviews()`, grouped by
-//    creativeWorkType. Log something as "game" on Popfeed and it'll show up
-//    here automatically, no code change needed.
-
-const NOW_PLAYING = {title: 'Midnight City', artist: 'M83'}
-
-function NowPlayingWidget() {
-  return (
-    <div className="mb-8">
-      <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-3">Now playing</p>
-      <div className="flex items-center gap-3 rounded-xl border border-[#1e1e1e] bg-[#111111] p-3">
-        <div
-          className="w-11 h-11 rounded-lg flex items-center justify-center text-base shrink-0"
-          style={{background: 'linear-gradient(135deg, #7c6ff7, #4a9eff)'}}>
-          🎵
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="font-mono text-sm text-[#f0f0f0] truncate">{NOW_PLAYING.title}</div>
-          <div className="font-mono text-xs text-[#666] mt-0.5 truncate">{NOW_PLAYING.artist}</div>
-        </div>
-        <div className="flex items-end gap-[2px] h-3.5 shrink-0" aria-hidden="true">
-          {[0, 1, 2].map(i => (
-            <span
-              key={i}
-              className="w-[2px] bg-[#4a9eff] rounded-full"
-              style={{animation: `eq 1s ease-in-out infinite`, animationDelay: `${-0.4 + i * 0.2}s`}}
-            />
-          ))}
-        </div>
-      </div>
-      <style>{`@keyframes eq { 0%, 100% { height: 3px; } 50% { height: 14px; } }`}</style>
-    </div>
-  )
-}
-
-function PopfeedWidget({
-  categories,
-}: {
-  categories: {key: string; label: string; latest: PopfeedReview | null}[]
-}) {
+function RecentReviewedWidget({reviews}: {reviews: PopfeedReview[]}) {
   return (
     <div>
-      <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-3">From Popfeed</p>
-      <ul className="flex flex-col">
-        {categories.map(cat => (
-          <li key={cat.key} className="flex gap-2.5 py-2.5 border-b border-[#1a1a1a] last:border-0">
-            {cat.latest?.posterUrl ? (
-              <img
-                src={cat.latest.posterUrl}
-                alt=""
-                className="w-7 h-9 rounded-[3px] object-cover shrink-0 bg-[#141414] border border-[#222]"
-              />
-            ) : (
-              <div className="w-7 h-9 rounded-[3px] bg-[#141414] border border-[#222] shrink-0" aria-hidden="true" />
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-[#4a9eff]">{cat.label}</div>
-              {cat.latest ? (
-                <>
-                  <div className="font-mono text-sm text-[#f0f0f0] truncate mt-0.5">{cat.latest.title}</div>
-                  {cat.latest.rating != null && (
-                    <div className="mt-1">
-                      <StarRating rating={cat.latest.rating} size={10} filledClassName="text-[#4a9eff]" emptyClassName="text-[#333]" />
-                    </div>
+      <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-3">Recent Reviewed</p>
+      {reviews.length === 0 ? (
+        <div className="font-mono text-xs text-[#555]">Belum ada</div>
+      ) : (
+        <ul className="flex flex-col">
+          {reviews.map(review => {
+            const categoryLabel = CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType
+            return (
+              <li key={review.rkey} className="border-b border-[#1a1a1a] last:border-0">
+                <Link
+                  to={`/reviews/${review.rkey}`}
+                  prefetch="intent"
+                  className="group flex gap-2.5 py-2.5 -mx-1 px-1 rounded-md transition-colors hover:bg-[#141414]">
+                  {review.posterUrl ? (
+                    <img
+                      src={review.posterUrl}
+                      alt=""
+                      className="w-7 h-9 rounded-[3px] object-cover shrink-0 bg-[#141414] border border-[#222]"
+                    />
+                  ) : (
+                    <div className="w-7 h-9 rounded-[3px] bg-[#141414] border border-[#222] shrink-0" aria-hidden="true" />
                   )}
-                </>
-              ) : (
-                <div className="font-mono text-xs text-[#555] mt-0.5">Belum ada</div>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-[#4a9eff]">{categoryLabel}</div>
+                    <div className="font-mono text-sm text-[#f0f0f0] truncate mt-0.5 group-hover:text-[#4a9eff] transition-colors">
+                      {review.title}
+                    </div>
+                    {review.rating != null && (
+                      <div className="mt-1">
+                        <StarRating rating={review.rating} size={10} filledClassName="text-[#4a9eff]" emptyClassName="text-[#333]" />
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </div>
   )
 }
