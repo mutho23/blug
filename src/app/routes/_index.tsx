@@ -2,8 +2,8 @@ import {MetaFunction} from '@remix-run/node'
 import type {CSSProperties} from 'react'
 import {useLanyard, DISCORD_STATUS_META} from '../hooks/use-lanyard.js'
 import {useSpotifyNowPlaying} from '../hooks/use-spotify-now-playing.js'
-import {SpotifyCard} from '../components/spotify-card.js'
-import {NowPlayingWidget, NowPlayingMobileBar} from '../components/now-playing-widget.js'
+import {SpotifyCard, SpotifyIdleCard} from '../components/spotify-card.js'
+import {NowPlayingWidget} from '../components/now-playing-widget.js'
 
 export const meta: MetaFunction = () => [
   {title: 'About | mutho.'},
@@ -54,9 +54,6 @@ export default function About() {
         <NowPlayingWidget />
       </aside>
 
-      {/* ── Mobile: same "now playing" info, shown as a bottom bar since the sidebar is hidden below lg ── */}
-      <NowPlayingMobileBar />
-
     </div>
   )
 }
@@ -97,9 +94,16 @@ function WorkItem({company, href, role, period, index = 0}: {company: string; hr
    are sourced straight from the real Spotify Web API (see hooks/use-spotify-now-playing.ts
    and src/spotify/spotify.server.ts) — not from Discord. */
 
+/* ── Live Discord presence, powered by Lanyard (https://github.com/Phineas/lanyard) ──
+   Used for online/idle/dnd status and current activities (games, apps, custom
+   status) — requires the Discord account below to be a member of Lanyard's
+   Discord server (https://discord.gg/lanyard). The Spotify card is sourced
+   straight from the real Spotify Web API instead (see hooks/use-spotify-now-playing.ts
+   and src/spotify/spotify.server.ts), not from Discord. */
+
 function DiscordPresenceWidget() {
   const {data, status} = useLanyard()
-  const {track: displaySpotify} = useSpotifyNowPlaying()
+  const {track: spotify} = useSpotifyNowPlaying()
 
   // Fail quietly on the live site (e.g. Lanyard down, or the account isn't in
   // Lanyard's Discord server yet) instead of showing a broken-looking widget.
@@ -107,8 +111,9 @@ function DiscordPresenceWidget() {
 
   if (status === 'loading' || !data) {
     return (
-      <div className="mb-8" aria-hidden="true">
-        <div className="skeleton-line w-[140px] h-[140px] rounded-full" />
+      <div className="mb-10 flex flex-wrap items-start gap-5 sm:gap-6" aria-hidden="true">
+        <div className="skeleton-line w-24 h-24 sm:w-[140px] sm:h-[140px] rounded-full shrink-0" />
+        <div className="skeleton-line flex-1 min-w-[220px] h-[92px] rounded-xl" />
       </div>
     )
   }
@@ -123,19 +128,28 @@ function DiscordPresenceWidget() {
     ? `https://cdn.discordapp.com/avatar-decoration-presets/${data.discord_user.avatar_decoration_data.asset}.png?size=320`
     : null
 
+  // Discord's "custom status" (the little text+emoji under someone's name) is
+  // activity type 4. Everything else (games, other apps) we show as a plain
+  // activity line. Spotify is excluded here since it already gets its own
+  // richer card sourced from the real Spotify API above.
+  const customStatus = data.activities.find(a => a.type === 4)
+  const otherActivities = data.activities.filter(a => a.type !== 4 && a.name !== 'Spotify')
+
+  const hasExtras = Boolean(customStatus || otherActivities.length > 0)
+
   return (
-    <div className="mb-8">
+    <div className="mb-10 flex flex-wrap items-start gap-5 sm:gap-6">
       <a
         href={`https://discord.com/users/${data.discord_user.id}`}
         target="_blank"
         rel="noopener noreferrer"
         title={data.discord_user.global_name || data.discord_user.username}
-        className="group relative inline-block w-[140px] h-[140px]">
+        className="group relative inline-block w-24 h-24 sm:w-[140px] sm:h-[140px] shrink-0">
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="w-[140px] h-[140px] rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
+          <img src={avatarUrl} alt="" className="w-full h-full rounded-full border border-[#242424] transition-transform group-hover:scale-[1.03]" />
         ) : (
           <div
-            className="w-[140px] h-[140px] rounded-full flex items-center justify-center text-white text-4xl font-medium transition-transform group-hover:scale-[1.03]"
+            className="w-full h-full rounded-full flex items-center justify-center text-white text-4xl font-medium transition-transform group-hover:scale-[1.03]"
             style={{background: 'linear-gradient(135deg, #4a9eff, #7c6ff7)'}}>
             M
           </div>
@@ -146,13 +160,60 @@ function DiscordPresenceWidget() {
           </div>
         )}
         <span
-          className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full border-[3px] border-[#0a0a0a]"
+          className="absolute bottom-1 right-1 w-6 h-6 sm:w-8 sm:h-8 rounded-full border-[3px] border-[#0a0a0a]"
           style={{background: statusMeta.color}}
           title={statusMeta.label}
         />
       </a>
 
-      {displaySpotify && <SpotifyCard spotify={displaySpotify} className="mt-2" />}
+      {/* ── Beside the photo: Spotify now-listening + Discord status/activities ── */}
+      <div className="flex-1 min-w-[240px] flex flex-col gap-2.5">
+        <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666]">mutho's now listening</p>
+
+        {spotify ? <SpotifyCard spotify={spotify} /> : <SpotifyIdleCard />}
+
+        {hasExtras && (
+          <div className="rounded-xl border border-[#1e1e1e] bg-[#111111] p-3 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{background: statusMeta.color}} />
+              <span className="font-mono text-xs text-[#999]">{statusMeta.label} on Discord</span>
+            </div>
+
+            {customStatus && (customStatus.state || customStatus.emoji) && (
+              <div className="font-mono text-sm text-[#f0f0f0] flex items-center gap-1.5">
+                {customStatus.emoji && !customStatus.emoji.id && <span>{customStatus.emoji.name}</span>}
+                {customStatus.state && <span className="truncate">{customStatus.state}</span>}
+              </div>
+            )}
+
+            {otherActivities.map(activity => (
+              <div key={activity.id} className="font-mono text-sm text-[#ccc] truncate">
+                <span className="text-[#666]">{activityVerb(activity.type)} </span>
+                {activity.name}
+                {activity.details && <span className="text-[#888]"> — {activity.details}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
+}
+
+/** Discord activity `type` → the verb Discord's own client uses for it. */
+function activityVerb(type: number): string {
+  switch (type) {
+    case 0:
+      return 'Playing'
+    case 1:
+      return 'Streaming'
+    case 2:
+      return 'Listening to'
+    case 3:
+      return 'Watching'
+    case 5:
+      return 'Competing in'
+    default:
+      return 'Using'
+  }
 }
