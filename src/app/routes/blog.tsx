@@ -7,7 +7,7 @@ import {useMemo, useState, useEffect} from 'react'
 import type {CSSProperties} from 'react'
 import {LeafletDocument, LeafletBlock} from 'src/types'
 import {StarRating} from '../components/star-rating'
-import {NowPlayingWidget, NowPlayingMobileBar} from '../components/now-playing-widget.js'
+import {NowPlayingWidget} from '../components/now-playing-widget.js'
 
 // Walks a Leaflet document's blocks (including nested list children) and
 // sums up the plaintext so we can estimate reading time — same content the
@@ -264,9 +264,6 @@ export default function Blog() {
         <NowPlayingWidget className="mb-8" />
         <RecentReviewedWidget reviews={recentReviewed} />
       </aside>
-
-      {/* ── Mobile: currently-playing track shown as a bottom bar since the sidebar is hidden below lg ── */}
-      <NowPlayingMobileBar />
 
     </div>
   )
