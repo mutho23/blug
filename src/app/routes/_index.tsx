@@ -2,7 +2,7 @@ import {MetaFunction} from '@remix-run/node'
 import type {CSSProperties} from 'react'
 import {useLanyard, DISCORD_STATUS_META} from '../hooks/use-lanyard.js'
 import {useSpotifyNowPlaying} from '../hooks/use-spotify-now-playing.js'
-import {SpotifyCard, SpotifyIdleCard} from '../components/spotify-card.js'
+import {SpotifyCard} from '../components/spotify-card.js'
 import {NowPlayingWidget} from '../components/now-playing-widget.js'
 
 export const meta: MetaFunction = () => [
@@ -167,35 +167,40 @@ function DiscordPresenceWidget() {
       </a>
 
       {/* ── Beside the photo: Spotify now-listening + Discord status/activities ── */}
-      <div className="flex-1 min-w-[240px] flex flex-col gap-2.5">
-        <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666]">mutho's now listening</p>
+      {(spotify || hasExtras) && (
+        <div className="flex-1 min-w-[240px] flex flex-col gap-2.5">
+          {spotify && (
+            <>
+              <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666]">mutho's now listening</p>
+              <SpotifyCard spotify={spotify} />
+            </>
+          )}
 
-        {spotify ? <SpotifyCard spotify={spotify} /> : <SpotifyIdleCard />}
+          {hasExtras && (
+            <div className="rounded-xl border border-[#1e1e1e] bg-[#111111] p-3 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{background: statusMeta.color}} />
+                <span className="font-mono text-xs text-[#999]">{statusMeta.label} on Discord</span>
+              </div>
 
-        {hasExtras && (
-          <div className="rounded-xl border border-[#1e1e1e] bg-[#111111] p-3 flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{background: statusMeta.color}} />
-              <span className="font-mono text-xs text-[#999]">{statusMeta.label} on Discord</span>
+              {customStatus && (customStatus.state || customStatus.emoji) && (
+                <div className="font-mono text-sm text-[#f0f0f0] flex items-center gap-1.5">
+                  {customStatus.emoji && !customStatus.emoji.id && <span>{customStatus.emoji.name}</span>}
+                  {customStatus.state && <span className="truncate">{customStatus.state}</span>}
+                </div>
+              )}
+
+              {otherActivities.map(activity => (
+                <div key={activity.id} className="font-mono text-sm text-[#ccc] truncate">
+                  <span className="text-[#666]">{activityVerb(activity.type)} </span>
+                  {activity.name}
+                  {activity.details && <span className="text-[#888]"> — {activity.details}</span>}
+                </div>
+              ))}
             </div>
-
-            {customStatus && (customStatus.state || customStatus.emoji) && (
-              <div className="font-mono text-sm text-[#f0f0f0] flex items-center gap-1.5">
-                {customStatus.emoji && !customStatus.emoji.id && <span>{customStatus.emoji.name}</span>}
-                {customStatus.state && <span className="truncate">{customStatus.state}</span>}
-              </div>
-            )}
-
-            {otherActivities.map(activity => (
-              <div key={activity.id} className="font-mono text-sm text-[#ccc] truncate">
-                <span className="text-[#666]">{activityVerb(activity.type)} </span>
-                {activity.name}
-                {activity.details && <span className="text-[#888]"> — {activity.details}</span>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
