@@ -1,12 +1,10 @@
 import {json, MetaFunction} from '@remix-run/node'
 import {getPosts} from '../../atproto/index.js'
-import {getReviews, PopfeedReview} from '../../atproto/getReviews.js'
 import {getDid} from '../../atproto/getDid.js'
 import {Link, useLoaderData, useNavigation} from '@remix-run/react'
 import {useMemo, useState, useEffect} from 'react'
 import type {CSSProperties} from 'react'
 import {LeafletDocument, LeafletBlock} from 'src/types'
-import {StarRating} from '../components/star-rating'
 import {NowPlayingWidget} from '../components/now-playing-widget.js'
 
 // Walks a Leaflet document's blocks (including nested list children) and
@@ -43,18 +41,15 @@ function estimateReadingMinutes(doc: Pick<LeafletDocument, 'content'>): number {
 
 export const loader = async () => {
   try {
-    const [rawPosts, reviews] = await Promise.all([
-      getPosts(undefined),
-      getReviews(),
-    ])
+    const rawPosts = await getPosts(undefined)
     const posts = rawPosts.map(p => ({
       ...p,
       description: p.description?.slice(0, 180),
     }))
-    return json({posts, did: getDid(), reviews})
+    return json({posts, did: getDid()})
   } catch (err) {
     console.error('Blog loader error:', err)
-    return json({posts: [], did: getDid(), reviews: []})
+    return json({posts: [], did: getDid()})
   }
 }
 
@@ -63,82 +58,48 @@ export const meta: MetaFunction = () => [
   {name: 'description', content: 'thoughts and vibes from mutho'},
 ]
 
-const CATEGORY_LABELS: Record<string, string> = {
-  movie: 'Movie', tv: 'TV Show', tv_show: 'TV Show', book: 'Book', game: 'Game', music: 'Music',
-}
-
-type Kind = 'post' | 'review'
 type FeedEntry = {
   key: string
-  kind: Kind
   href: string
   title: string
   date: Date
   meta: string
   tags: string[]
   excerpt?: string
-  rating?: number
   readingMinutes?: number
 }
 
-const TABS: {id: 'all' | Kind; label: string}[] = [
-  {id: 'all', label: 'All'},
-  {id: 'post', label: 'Blogs'},
-  {id: 'review', label: 'Reviews'},
-]
-
 export default function Blog() {
-  const {posts, reviews} = useLoaderData<{posts: LeafletDocument[]; did: string; reviews: PopfeedReview[]}>()
-  const [activeTab, setActiveTab] = useState<'all' | Kind>('all')
+  const {posts} = useLoaderData<{posts: LeafletDocument[]; did: string}>()
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const navigation = useNavigation()
   const isLoadingRoute = navigation.state === 'loading'
 
   const entries: FeedEntry[] = useMemo(() => {
-    const postEntries: FeedEntry[] = posts.map(p => ({
-      key: `post-${p.rkey}`,
-      kind: 'post',
-      href: `/posts/${p.rkey}`,
-      title: p.title,
-      date: new Date(p.publishedAt),
-      meta: p.tags?.[0] ? p.tags[0] : 'Blog',
-      tags: p.tags ?? [],
-      excerpt: p.description,
-      readingMinutes: estimateReadingMinutes(p),
-    }))
-    const reviewEntries: FeedEntry[] = reviews.map(r => {
-      const categoryLabel = CATEGORY_LABELS[r.creativeWorkType] ?? r.creativeWorkType
-      return {
-        key: `review-${r.rkey}`,
-        kind: 'review',
-        href: `/reviews/${r.rkey}`,
-        title: r.title,
-        date: new Date(r.addedAt),
-        meta: categoryLabel ?? 'Review',
-        // Hanya pakai kategori resmi Popfeed (Book/Movie/TV Show/Game/Music) sebagai tag,
-        // bukan tag bebas dari review.tags (biar nggak muncul tag liar kayak "netflix").
-        tags: categoryLabel ? [categoryLabel] : [],
-        rating: r.rating,
-      }
-    })
-    return [...postEntries, ...reviewEntries].sort((a, b) => b.date.getTime() - a.date.getTime())
-  }, [posts, reviews])
-
-  const tagSourceEntries = useMemo(
-    () => (activeTab === 'all' ? entries : entries.filter(e => e.kind === activeTab)),
-    [entries, activeTab],
-  )
+    return posts
+      .map(p => ({
+        key: `post-${p.rkey}`,
+        href: `/posts/${p.rkey}`,
+        title: p.title,
+        date: new Date(p.publishedAt),
+        meta: p.tags?.[0] ? p.tags[0] : 'Blog',
+        tags: p.tags ?? [],
+        excerpt: p.description,
+        readingMinutes: estimateReadingMinutes(p),
+      }))
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+  }, [posts])
 
   const allTags = useMemo(() => {
     const seen = new Map<string, string>() // lowercase -> display label
-    tagSourceEntries.forEach(e => e.tags.forEach(t => {
+    entries.forEach(e => e.tags.forEach(t => {
       const key = t.toLowerCase()
       if (!seen.has(key)) seen.set(key, t)
     }))
     return Array.from(seen.values()).sort((a, b) => a.localeCompare(b))
-  }, [tagSourceEntries])
+  }, [entries])
 
-  // Kalau ganti tab dan tag yang lagi aktif nggak relevan lagi di tab baru, lepas filternya.
+  // Kalau tag yang lagi aktif nggak relevan lagi (mis. daftar entri berubah), lepas filternya.
   useEffect(() => {
     if (activeTag && !allTags.some(t => t.toLowerCase() === activeTag.toLowerCase())) {
       setActiveTag(null)
@@ -146,50 +107,13 @@ export default function Blog() {
   }, [allTags, activeTag])
 
   const filtered = useMemo(() => {
-    let result = activeTab === 'all' ? entries : entries.filter(e => e.kind === activeTab)
-    if (activeTag) {
-      const key = activeTag.toLowerCase()
-      result = result.filter(e => e.tags.some(t => t.toLowerCase() === key))
-    }
-    return result
-  }, [entries, activeTab, activeTag])
-
-  const counts = useMemo(() => ({
-    all: entries.length,
-    post: entries.filter(e => e.kind === 'post').length,
-    review: entries.filter(e => e.kind === 'review').length,
-  }), [entries])
-
-  // Most recent Popfeed entries across every category (movie, TV, book, game,
-  // music, ...), straight from real review data — powers the "Recent
-  // Reviewed" sidebar widget below. Not filtered by type, so a freshly-logged
-  // game review shows up right alongside movies/books with no extra wiring.
-  const recentReviewed = useMemo(() => {
-    return [...reviews]
-      .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
-      .slice(0, 6)
-  }, [reviews])
+    if (!activeTag) return entries
+    const key = activeTag.toLowerCase()
+    return entries.filter(e => e.tags.some(t => t.toLowerCase() === key))
+  }, [entries, activeTag])
 
   return (
     <div className="flex" style={{minHeight: 'calc(100vh - 52px - 48px)'}}>
-
-      {/* ── Left Sidebar: quick jump to each tab ── */}
-      <aside className="hidden lg:block w-[220px] shrink-0 px-5 py-10">
-        <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-4">On this page</p>
-        <ul className="flex flex-col gap-2.5">
-          {TABS.map(tab => (
-            <li key={tab.id}>
-              <button
-                onClick={() => setActiveTab(tab.id)}
-                className={`font-mono text-sm transition-colors ${
-                  activeTab === tab.id ? 'text-[#4a9eff]' : 'text-[#666] hover:text-[#aaaaaa]'
-                }`}>
-                {tab.label} <span className="text-[#444]">({counts[tab.id]})</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
 
       {/* ── Main Content ── */}
       <div className="flex-1 min-w-0 flex justify-center">
@@ -202,22 +126,6 @@ export default function Blog() {
             </h1>
             <p className="font-mono text-[17px] text-[#aaaaaa] mt-2">Just writing random stuff here.</p>
           </section>
-
-          {/* Tab switcher */}
-          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#141414] border border-[#222] mb-5">
-            {TABS.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`font-mono text-[13px] tracking-[0.03em] px-3.5 py-1.5 rounded-md transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-[#232323] text-[#f0f0f0]'
-                    : 'text-[#666] hover:text-[#aaaaaa]'
-                }`}>
-                {tab.label} <span className="text-[#555]">{counts[tab.id]}</span>
-              </button>
-            ))}
-          </div>
 
           {/* Tag filter */}
           {allTags.length > 0 && (
@@ -243,9 +151,9 @@ export default function Blog() {
           ) : filtered.length === 0 ? (
             <div className="py-4">
               <p className="font-mono text-[17px] text-[#444]">Nothing here yet.</p>
-              {(activeTag || activeTab !== 'all') && (
+              {activeTag && (
                 <button
-                  onClick={() => { setActiveTag(null); setActiveTab('all') }}
+                  onClick={() => setActiveTag(null)}
                   className="font-mono text-[13px] text-[#4a9eff] hover:text-[#7c6ff7] transition-colors mt-2">
                   Clear filters
                 </button>
@@ -259,58 +167,11 @@ export default function Blog() {
         </div>
       </div>
 
-      {/* ── Right Sidebar: Now Playing (real Spotify data) + Recent Reviewed ── */}
+      {/* ── Right Sidebar: Now Playing (real Spotify data) ── */}
       <aside className="hidden lg:block w-[220px] shrink-0 border-l border-[#1e1e1e] px-5 py-10 sticky top-[52px] self-start h-[calc(100vh-52px)] overflow-y-auto">
         <NowPlayingWidget className="mb-8" />
-        <RecentReviewedWidget reviews={recentReviewed} />
       </aside>
 
-    </div>
-  )
-}
-
-function RecentReviewedWidget({reviews}: {reviews: PopfeedReview[]}) {
-  return (
-    <div>
-      <p className="font-mono text-xs tracking-[0.14em] uppercase text-[#666] mb-3">Recent Reviewed</p>
-      {reviews.length === 0 ? (
-        <div className="font-mono text-xs text-[#555]">Belum ada</div>
-      ) : (
-        <ul className="flex flex-col">
-          {reviews.map(review => {
-            const categoryLabel = CATEGORY_LABELS[review.creativeWorkType] ?? review.creativeWorkType
-            return (
-              <li key={review.rkey} className="border-b border-[#1a1a1a] last:border-0">
-                <Link
-                  to={`/reviews/${review.rkey}`}
-                  prefetch="intent"
-                  className="group flex gap-2.5 py-2.5 -mx-1 px-1 rounded-md transition-colors hover:bg-[#141414]">
-                  {review.posterUrl ? (
-                    <img
-                      src={review.posterUrl}
-                      alt=""
-                      className="w-7 h-9 rounded-[3px] object-cover shrink-0 bg-[#141414] border border-[#222]"
-                    />
-                  ) : (
-                    <div className="w-7 h-9 rounded-[3px] bg-[#141414] border border-[#222] shrink-0" aria-hidden="true" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-[#4a9eff]">{categoryLabel}</div>
-                    <div className="font-mono text-sm text-[#f0f0f0] truncate mt-0.5 group-hover:text-[#4a9eff] transition-colors">
-                      {review.title}
-                    </div>
-                    {review.rating != null && (
-                      <div className="mt-1">
-                        <StarRating rating={review.rating} size={10} filledClassName="text-[#4a9eff]" emptyClassName="text-[#333]" />
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      )}
     </div>
   )
 }
@@ -332,19 +193,9 @@ function FeedItem({entry, index}: {entry: FeedEntry; index: number}) {
           </time>
         </div>
         <div className="flex items-center gap-2 font-mono text-[13px] text-[#666] mt-1.5">
-          {entry.kind === 'post' ? (
-            <span className="uppercase tracking-[0.06em] text-[11px] text-[#555]">
-              {entry.tags.length > 0 ? entry.tags.join(' · ') : 'Blog'}
-            </span>
-          ) : (
-            <span className="uppercase tracking-[0.06em] text-[11px] text-[#555]">{entry.meta}</span>
-          )}
-          {entry.rating != null && (
-            <>
-              <span className="text-[#333]">·</span>
-              <StarRating rating={entry.rating} size={12} filledClassName="text-[#4a9eff]" emptyClassName="text-[#333]" />
-            </>
-          )}
+          <span className="uppercase tracking-[0.06em] text-[11px] text-[#555]">
+            {entry.tags.length > 0 ? entry.tags.join(' · ') : 'Blog'}
+          </span>
           {entry.readingMinutes != null && (
             <>
               <span className="text-[#333]">·</span>
