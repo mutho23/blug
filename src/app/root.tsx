@@ -37,11 +37,12 @@ export const loader = async () => {
 }
 
 const SOCIALS = [
-  {icon: '🦋', label: 'Bluesky',  href: 'https://bsky.app/profile/mutho.my.id'},
-  {icon: '💬', label: 'Discord',  href: 'https://discord.gg/DNcNBQaqgM'},
-  {icon: '🎵', label: 'Spotify',  href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
-  {icon: '🎮', label: 'Steam',    href: 'https://steamcommunity.com/id/moebatsu'},
-  {icon: '✉️', label: 'Email',    href: 'mailto:amuthohhari@gmail.com'},
+  {icon: '🧵', label: 'Threads',   href: 'https://www.threads.com/@mthrbrqh'},
+  {icon: '📷', label: 'Instagram', href: 'https://www.instagram.com/amthr.baraqbah/'},
+  {icon: '💬', label: 'Discord',   href: 'https://discord.gg/DNcNBQaqgM'},
+  {icon: '🎵', label: 'Spotify',   href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
+  {icon: '🎮', label: 'Steam',     href: 'https://steamcommunity.com/id/moebatsu'},
+  {icon: '✉️', label: 'Email',     href: 'mailto:amuthohhari@gmail.com'},
 ]
 
 const PAGE_ORDER = ['/', '/blog', '/gallery']
@@ -66,8 +67,6 @@ export function Layout({children}: {children: React.ReactNode}) {
   const dragging = React.useRef(false)
   const [dragOffset, setDragOffset] = React.useState(0)
   const [contactOpen, setContactOpen] = React.useState(false)
-  const [cursorOff, setCursorOff] = React.useState(false)
-  const cursorBodyRef = React.useRef<HTMLBodyElement>(null)
 
   const navItems: NavItemDef[] = [
     {key: 'home', label: 'Home', icon: 'home', href: '/', selected: location.pathname === '/'},
@@ -83,45 +82,6 @@ export function Layout({children}: {children: React.ReactNode}) {
   React.useEffect(() => {
     setContactOpen(false)
   }, [location.pathname])
-
-  // Custom cursor: only enable after mount (avoids SSR flash / matchMedia
-  // mismatch), skip entirely on touch/coarse-pointer devices, and clean up
-  // its own listeners whenever the toggle is switched off.
-  React.useEffect(() => {
-    const body = cursorBodyRef.current
-    if (!body) return
-    const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches
-    if (isCoarsePointer) return
-
-    body.classList.add('cursor-ready')
-    body.classList.toggle('cursor-off', cursorOff)
-    if (cursorOff) return
-
-    const dot = document.getElementById('cursor-dot')
-    if (!dot) return
-
-    const onMove = (e: MouseEvent) => {
-      dot.style.left = `${e.clientX}px`
-      dot.style.top = `${e.clientY}px`
-    }
-    const onOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('a, button')) dot.classList.add('hovering')
-    }
-    const onOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('a, button')) dot.classList.remove('hovering')
-    }
-
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseover', onOver)
-    document.addEventListener('mouseout', onOut)
-    return () => {
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseover', onOver)
-      document.removeEventListener('mouseout', onOut)
-    }
-  }, [cursorOff])
 
   React.useEffect(() => {
     const SRC = 'https://cdn.jsdelivr.net/npm/juttu@latest/juttu-embed.js'
@@ -206,19 +166,9 @@ export function Layout({children}: {children: React.ReactNode}) {
         <script async src="https://embed.bsky.app/static/embed.js" />
       </head>
       <body
-        ref={cursorBodyRef}
         className="flex flex-col min-h-screen bg-[#0a0a0a] text-[#f0f0f0] antialiased font-sans pb-24 sm:pb-0">
         {/* Ambient gradient mesh, sits below the existing film-grain layer (tailwind.css body::before) */}
         <div className="bg-mesh" aria-hidden="true" />
-
-        {/* Custom cursor dot — desktop only, toggleable, off entirely until JS confirms pointer support */}
-        <div id="cursor-dot" className="cursor-dot" aria-hidden="true" />
-        <button
-          type="button"
-          onClick={() => setCursorOff(v => !v)}
-          className="hidden sm:block fixed bottom-4 right-4 z-[300] font-mono text-[11px] tracking-[0.06em] uppercase text-[#666] hover:text-[#f0f0f0] bg-[rgba(18,18,18,0.9)] border border-[#242424] rounded-full px-3 py-1.5 backdrop-blur-md transition-colors">
-          Cursor: {cursorOff ? 'off' : 'on'}
-        </button>
 
         {/* Scroll progress bar */}
         <div id="scroll-progress" className="fixed top-0 left-0 h-[2px] bg-[#4a9eff] z-[200] w-0 transition-[width] duration-100" />
