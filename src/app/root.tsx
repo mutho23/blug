@@ -37,8 +37,7 @@ export const loader = async () => {
 }
 
 const SOCIALS = [
-  {icon: '🧵', label: 'Threads',   href: 'https://www.threads.com/@mthrbrqh'},
-  {icon: '📷', label: 'Instagram', href: 'https://www.instagram.com/amthr.baraqbah/'},
+  {icon: '🦋', label: 'Bluesky',   href: 'https://bsky.app/profile/mutho.my.id'},
   {icon: '💬', label: 'Discord',   href: 'https://discord.gg/DNcNBQaqgM'},
   {icon: '🎵', label: 'Spotify',   href: 'https://open.spotify.com/user/zq8df1jprwpxyiu9mkn691ai8'},
   {icon: '🎮', label: 'Steam',     href: 'https://steamcommunity.com/id/moebatsu'},
